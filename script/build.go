@@ -49,8 +49,8 @@ var tasks = map[string]func(string) error{
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Version=%s %s", version(), ldflags)
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Date=%s %s", date(), ldflags)
 		if oauthSecret := os.Getenv("INSTILL_OAUTH_CLIENT_SECRET"); oauthSecret != "" {
-			ldflags = fmt.Sprintf("-X github.com/instill-ai/internal/authflow.oauthClientSecret=%s %s", oauthSecret, ldflags)
-			ldflags = fmt.Sprintf("-X github.com/instill-ai/internal/authflow.oauthClientID=%s %s", os.Getenv("INSTILL_OAUTH_CLIENT_ID"), ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/internal/oauth2.oauthClientSecret=%s %s", oauthSecret, ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/internal/oauth2.oauthClientID=%s %s", os.Getenv("INSTILL_OAUTH_CLIENT_ID"), ldflags)
 		}
 
 		return run("go", "build", "-trimpath", "-ldflags", ldflags, "-o", exe, "./cmd/instill")
