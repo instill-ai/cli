@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -43,7 +44,14 @@ func httpRequest(client *http.Client, hostname string, method string, p string, 
 			bodyIsJSON = true
 		}
 	case io.Reader:
-		body = pp
+		if data, err := ioutil.ReadAll(pp); err == nil {
+			// Check if body data is JSON
+			if json.Valid(data) {
+				bodyIsJSON = true
+			}
+			body = bytes.NewBuffer(data)
+		}
+
 	case nil:
 		body = nil
 	default:
@@ -71,6 +79,7 @@ func httpRequest(client *http.Client, hostname string, method string, p string, 
 			req.Header.Add(name, value)
 		}
 	}
+
 	if bodyIsJSON && req.Header.Get("Content-Type") == "" {
 		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
