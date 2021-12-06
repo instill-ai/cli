@@ -410,7 +410,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 			name:          "stdin",
 			inputFile:     "-",
 			inputContents: []byte("I WORK OUT"),
-			contentLength: 0,
+			contentLength: 10,
 		},
 		{
 			name:          "from file",

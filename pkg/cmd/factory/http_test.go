@@ -17,7 +17,7 @@ import (
 
 func TestNewHTTPClient(t *testing.T) {
 	type args struct {
-		config     configGetter
+		config     configHTTPClient
 		appVersion string
 		setAccept  bool
 	}
@@ -142,6 +142,14 @@ type tinyConfig map[string]string
 
 func (c tinyConfig) Get(host, key string) (string, error) {
 	return c[fmt.Sprintf("%s:%s", host, key)], nil
+}
+
+func (c tinyConfig) Set(host, key, value string) error {
+	return nil
+}
+
+func (c tinyConfig) Write() error {
+	return nil
 }
 
 var requestAtRE = regexp.MustCompile(`(?m)^\* Request at .+`)

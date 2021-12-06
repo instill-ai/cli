@@ -79,7 +79,7 @@ func statusRun(opts *StatusOptions) error {
 		}
 		isHostnameFound = true
 
-		accessTokenExpire, accessTokenSource, _ := cfg.GetWithSource(hostname, "expire_at")
+		accessTokenExpire, accessTokenSource, _ := cfg.GetWithSource(hostname, "expiry")
 		// accessTokenIsWriteable := cfg.CheckWriteable(hostname, "access_token") == nil
 
 		statusInfo[hostname] = []string{}

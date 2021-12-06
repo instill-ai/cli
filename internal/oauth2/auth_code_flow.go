@@ -29,6 +29,7 @@ var (
 )
 
 type iconfig interface {
+	Get(string, string) (string, error)
 	Set(string, string, string) error
 	Write() error
 }
@@ -57,7 +58,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 	maxAge := 0
 
 	authCodeURL, state := generateAuthCodeURL(conf, audience, prompt, maxAge)
-	fmt.Fprintf(IO.ErrOut, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", authCodeURL)
+	fmt.Fprintf(IO.Out, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", authCodeURL)
 	f.Browser.Browse(authCodeURL)
 
 	tokenChen := make(chan *oauth2.Token)
@@ -68,7 +69,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 		fmt.Fprintf(IO.Out, "[DEBUG] Token Type:\n\t%s\n", token.Type())
 		fmt.Fprintf(IO.Out, "[DEBUG] Access Token:\n\t%s\n", token.AccessToken)
 		fmt.Fprintf(IO.Out, "[DEBUG] Expires at:\n\t%s\n", token.Expiry.Format(time.RFC1123))
-		fmt.Fprintf(IO.Out, "[DEBUG] Refresh Token:\n\t%s\n", token.Extra("refresh_token"))
+		fmt.Fprintf(IO.Out, "[DEBUG] Refresh Token:\n\t%s\n", token.RefreshToken)
 		fmt.Fprintf(IO.Out, "[DEBUG] ID Token:\n\t%s\n\n", token.Extra("id_token"))
 	}
 
@@ -80,11 +81,11 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 		return err
 	}
 
-	if err := cfg.Set(hostname, "expire_at", token.Expiry.Format(time.RFC1123)); err != nil {
+	if err := cfg.Set(hostname, "expiry", token.Expiry.Format(time.RFC1123)); err != nil {
 		return err
 	}
 
-	if err := cfg.Set(hostname, "refresh_token", token.Extra("refresh_token").(string)); err != nil {
+	if err := cfg.Set(hostname, "refresh_token", token.RefreshToken); err != nil {
 		return err
 	}
 
@@ -147,7 +148,8 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 	r.GET("/callback", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		if len(r.URL.Query().Get("error")) > 0 {
 			fmt.Fprintf(IO.ErrOut, "Got error: %s\n", r.URL.Query().Get("error_description"))
-			w.WriteHeader(http.StatusInternalServerError)
+			tokenChan <- token
+			close(tokenChan)
 			cancel()
 			return
 		}
@@ -155,6 +157,8 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 		if r.URL.Query().Get("state") != string(state) {
 			fmt.Fprintf(IO.ErrOut, "States do not match. Expected %s, got %s\n", string(state), r.URL.Query().Get("state"))
 			w.WriteHeader(http.StatusInternalServerError)
+			tokenChan <- token
+			close(tokenChan)
 			cancel()
 			return
 		}
@@ -168,6 +172,9 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 		token, err = conf.Exchange(ctx, code)
 		if err != nil {
 			fmt.Fprintf(IO.ErrOut, "Unable to exchange code for token: %s\n", err)
+			tokenChan <- token
+			close(tokenChan)
+			cancel()
 			return
 		}
 
@@ -182,14 +189,14 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			if err != http.ErrServerClosed {
-				fmt.Fprintf(IO.ErrOut, "local auth server error: %s", err)
+				fmt.Fprintf(IO.ErrOut, "Local auth server error: %s\n", err)
 			}
 		}
 	}()
 
-	select {
-	case <-ctx.Done():
-		_ = server.Shutdown(ctx)
+	<-ctx.Done()
+	if err := server.Shutdown(ctx); err != nil && err != context.Canceled {
+		fmt.Fprintf(IO.ErrOut, "local auth server error: %s\n", err)
 	}
 }
 

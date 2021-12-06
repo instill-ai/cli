@@ -10,6 +10,7 @@ import (
 	"github.com/instill-ai/cli/api"
 	"github.com/instill-ai/cli/internal/httpunix"
 	"github.com/instill-ai/cli/internal/instance"
+	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
@@ -53,12 +54,14 @@ var timezoneNames = map[int]string{
 	50400:  "Pacific/Kiritimati",
 }
 
-type configGetter interface {
+type configHTTPClient interface {
 	Get(string, string) (string, error)
+	Set(string, string, string) error
+	Write() error
 }
 
 // NewHTTPClient is a generic authenticated HTTP client for commands
-func NewHTTPClient(io *iostreams.IOStreams, cfg configGetter, appVersion string, setAccept bool) (*http.Client, error) {
+func NewHTTPClient(io *iostreams.IOStreams, cfg configHTTPClient, appVersion string, setAccept bool) (*http.Client, error) {
 	var opts []api.ClientOption
 
 	// We need to check and potentially add the unix socket roundtripper option
@@ -92,9 +95,14 @@ func NewHTTPClient(io *iostreams.IOStreams, cfg configGetter, appVersion string,
 		api.AddHeader("User-Agent", fmt.Sprintf("Instill CLI %s", appVersion)),
 		api.AddHeaderFunc("Authorization", func(req *http.Request) (string, error) {
 			hostname := instance.ExtractHostname(getHost(req))
-			if token, err := cfg.Get(hostname, "access_token"); err == nil && token != "" {
-				return fmt.Sprintf("bearer %s", token), nil
+			if accessToken, err := cfg.Get(hostname, "access_token"); err == nil && accessToken != "" {
+				// Refresh access token everytime
+				if err := oauth2.RefreshToken(cfg, hostname); err != nil {
+					return "", err
+				}
+				return fmt.Sprintf("bearer %s", accessToken), nil
 			}
+
 			return "", nil
 		}),
 		api.AddHeaderFunc("Time-Zone", func(req *http.Request) (string, error) {
