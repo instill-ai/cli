@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func RefreshToken(cfg iconfig, hostname string) error {
+func RefreshToken(cfg iconfig, hostname string) (string, error) {
 
 	var (
 		accessToken  string
@@ -19,12 +19,12 @@ func RefreshToken(cfg iconfig, hostname string) error {
 
 	accessToken, err = cfg.Get(hostname, "access_token")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	refreshToken, err = cfg.Get(hostname, "refresh_token")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	expiry, err = func() (time.Time, error) {
@@ -38,7 +38,7 @@ func RefreshToken(cfg iconfig, hostname string) error {
 	}()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	conf := &oauth2.Config{
@@ -59,31 +59,31 @@ func RefreshToken(cfg iconfig, hostname string) error {
 		}).Token()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if accessToken != token.AccessToken {
 		if err := cfg.Set(hostname, "access_token", token.AccessToken); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	if refreshToken != token.RefreshToken {
 		if err := cfg.Set(hostname, "refresh_token", token.RefreshToken); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	if expiry != token.Expiry {
 		if err := cfg.Set(hostname, "expiry", token.Expiry.Format(time.RFC1123)); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	if err := cfg.Write(); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return token.AccessToken, nil
 
 }

@@ -97,13 +97,11 @@ func NewHTTPClient(io *iostreams.IOStreams, cfg configHTTPClient, appVersion str
 			hostname := instance.ExtractHostname(getHost(req))
 			if accessToken, err := cfg.Get(hostname, "access_token"); err == nil && accessToken != "" {
 				// Refresh access token everytime
-				if err := oauth2.RefreshToken(cfg, hostname); err != nil {
-					return "", err
+				if accessToken, err = oauth2.RefreshToken(cfg, hostname); err == nil && accessToken != "" {
+					return fmt.Sprintf("bearer %s", accessToken), nil
 				}
-				return fmt.Sprintf("bearer %s", accessToken), nil
 			}
-
-			return "", nil
+			return "", err
 		}),
 		api.AddHeaderFunc("Time-Zone", func(req *http.Request) (string, error) {
 			if req.Method != "GET" && req.Method != "HEAD" {
