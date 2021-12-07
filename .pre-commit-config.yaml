@@ -5,6 +5,10 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: |
+          (?x)(
+            ^pkg/export/filter_test.go
+          )
   - repo: git://github.com/dnephin/pre-commit-golang
     rev: v0.4.0
     hooks:

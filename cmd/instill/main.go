@@ -21,8 +21,6 @@ import (
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
-var updaterEnabled = ""
-
 type exitCode int
 
 const (

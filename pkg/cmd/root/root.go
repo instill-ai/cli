@@ -2,7 +2,6 @@ package root
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -91,29 +90,4 @@ func bareHTTPClient(f *cmdutil.Factory, version string) func() (*http.Client, er
 		}
 		return factory.NewHTTPClient(f.IOStreams, cfg, version, false)
 	}
-}
-
-type lazyLoadedHTTPClient struct {
-	factory *cmdutil.Factory
-
-	httpClientMu sync.RWMutex // guards httpClient
-	httpClient   *http.Client
-}
-
-func (l *lazyLoadedHTTPClient) Do(req *http.Request) (*http.Response, error) {
-	l.httpClientMu.RLock()
-	httpClient := l.httpClient
-	l.httpClientMu.RUnlock()
-
-	if httpClient == nil {
-		var err error
-		l.httpClientMu.Lock()
-		l.httpClient, err = l.factory.HTTPClient()
-		l.httpClientMu.Unlock()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return l.httpClient.Do(req)
 }

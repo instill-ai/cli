@@ -59,7 +59,10 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 
 	authCodeURL, state := generateAuthCodeURL(conf, audience, prompt, maxAge)
 	fmt.Fprintf(IO.Out, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", authCodeURL)
-	f.Browser.Browse(authCodeURL)
+
+	if err := f.Browser.Browse(authCodeURL); err != nil {
+		return err
+	}
 
 	tokenChen := make(chan *oauth2.Token)
 	go setLocalAuthServer("localhost", 8085, conf, state, IO, tokenChen)
@@ -195,8 +198,8 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 	}()
 
 	<-ctx.Done()
-	if err := server.Shutdown(ctx); err != nil && err != context.Canceled {
-		fmt.Fprintf(IO.ErrOut, "local auth server error: %s\n", err)
+	if err := server.Shutdown(ctx); err != nil {
+		fmt.Fprintf(IO.ErrOut, "local auth server error: %s", err)
 	}
 }
 
