@@ -199,7 +199,9 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 
 	<-ctx.Done()
 	if err := server.Shutdown(ctx); err != nil {
-		fmt.Fprintf(IO.ErrOut, "local auth server error: %s", err)
+		if err.Error() != context.Canceled.Error() {
+			fmt.Fprintf(IO.ErrOut, "Local auth server error: %s", err)
+		}
 	}
 }
 
