@@ -15,8 +15,9 @@ import (
 )
 
 func httpRequest(client *http.Client, hostname string, method string, p string, params interface{}, headers []string) (*http.Response, error) {
+
 	var requestURL string
-	if strings.Contains(p, "://") {
+	if strings.HasPrefix(p, "https://") {
 		requestURL = p
 	} else {
 		requestURL = instance.RESTPrefix(hostname) + strings.TrimPrefix(p, "/")
