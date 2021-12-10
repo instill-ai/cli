@@ -93,6 +93,18 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 
 			# list models
 			$ instill api models
+
+			# add parameters to a GET request
+			$ instill api models?visibility=public
+
+			# add parameters to a POST request
+			$ instill api -X POST oauth2/token?audience=...&grant_type=...
+
+			# add nested JSON body to a POST request
+			$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
+
+			# set a custom HTTP header
+  			$ instill api -H 'Authorization: Basic ...'
 		`),
 		Annotations: map[string]string{
 			"help:environment": heredoc.Doc(`
