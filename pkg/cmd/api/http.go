@@ -31,18 +31,23 @@ func httpRequest(client *http.Client, hostname string, method string, p string, 
 		if strings.EqualFold(method, "GET") {
 			requestURL = addQuery(requestURL, pp)
 		} else {
-			for key, value := range pp {
-				switch vv := value.(type) {
-				case []byte:
-					pp[key] = string(vv)
+			if len(pp) == 0 {
+				body = nil
+				bodyIsJSON = true
+			} else {
+				for key, value := range pp {
+					switch vv := value.(type) {
+					case []byte:
+						pp[key] = string(vv)
+					}
 				}
+				b, err := json.Marshal(pp)
+				if err != nil {
+					return nil, fmt.Errorf("error serializing parameters: %w", err)
+				}
+				body = bytes.NewBuffer(b)
+				bodyIsJSON = true
 			}
-			b, err := json.Marshal(pp)
-			if err != nil {
-				return nil, fmt.Errorf("error serializing parameters: %w", err)
-			}
-			body = bytes.NewBuffer(b)
-			bodyIsJSON = true
 		}
 	case io.Reader:
 		if data, err := ioutil.ReadAll(pp); err == nil {
