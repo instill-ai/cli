@@ -21,7 +21,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instill <command> <subcommand> [flags]",
 		Short: "Instill CLI",
-		Long:  `Use Instill Pipeline from the command line.`,
+		Long:  `Access Instill services from the command line.`,
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
