@@ -181,8 +181,7 @@ func setLocalAuthServer(serverHost string, serverPort int, conf *oauth2.Config, 
 			return
 		}
 
-		// TODO: Replace the endpoint with auth success page
-		http.Redirect(w, r, "https://instill.tech", 302)
+		fmt.Fprint(w, oauthSuccessPage)
 
 		tokenChan <- token
 		close(tokenChan)
