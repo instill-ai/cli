@@ -1,0 +1,66 @@
+project_name: instill
+
+release:
+  prerelease: auto
+  draft: true
+  name_template: "Instill CLI {{.Version}}"
+
+env:
+  - GO111MODULE=on
+
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+
+builds:
+  - <<: &build_defaults
+      binary: bin/instill
+      main: ./cmd/instill
+      ldflags:
+        - -s -w
+        - -X github.com/instill-ai/cli/internal/build.Version={{ .Version }}
+        - -X github.com/instill-ai/cli/internal/build.Date={{ time "2006-01-02" }}
+        - -X github.com/instill-ai/cli/internal/oauth2.oauthClientID={{ .Env.INSTILL_OAUTH_CLIENT_ID }}
+        - -X github.com/instill-ai/cli/internal/oauth2.oauthClientSecret={{ .Env.INSTILL_OAUTH_CLIENT_SECRET }}
+    id: macos
+    goos: [darwin]
+    goarch: [amd64]
+
+  - <<: *build_defaults
+    id: linux
+    goos: [linux]
+    goarch: [386, arm, amd64, arm64]
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: nix
+    builds: [macos, linux]
+    <<: &archive_defaults
+      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    wrap_in_directory: true
+    replacements:
+      darwin: macOS
+    format: tar.gz
+    files:
+      - LICENSE
+
+checksum:
+  name_template: 'checksums_v{{ .Version }}_sha256.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: Others
+      order: 999
