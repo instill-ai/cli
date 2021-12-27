@@ -180,9 +180,9 @@ func Test_ConfigDir(t *testing.T) {
 		{
 			name: "INSTILL_CONFIG_DIR specified",
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
 			},
-			output: filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+			output: filepath.Join(tempDir, "instill_config_dir"),
 		},
 		{
 			name: "XDG_CONFIG_HOME specified",
@@ -194,10 +194,10 @@ func Test_ConfigDir(t *testing.T) {
 		{
 			name: "INSTILL_CONFIG_DIR and XDG_CONFIG_HOME specified",
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
 				"XDG_CONFIG_HOME":    tempDir,
 			},
-			output: filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+			output: filepath.Join(tempDir, "instill_config_dir"),
 		},
 		{
 			name:        "AppData specified",
@@ -205,16 +205,16 @@ func Test_ConfigDir(t *testing.T) {
 			env: map[string]string{
 				"AppData": tempDir,
 			},
-			output: filepath.Join(tempDir, "INSTILL CLI"),
+			output: filepath.Join(tempDir, "Instill CLI"),
 		},
 		{
 			name:        "INSTILL_CONFIG_DIR and AppData specified",
 			onlyWindows: true,
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
 				"AppData":            tempDir,
 			},
-			output: filepath.Join(tempDir, "INSTILL_CONFIG_DIR"),
+			output: filepath.Join(tempDir, "instill_config_dir"),
 		},
 		{
 			name:        "XDG_CONFIG_HOME and AppData specified",
