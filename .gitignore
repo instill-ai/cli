@@ -1,0 +1,27 @@
+/bin
+/share/man/man1
+.envrc
+/dist
+/site
+.github/**/node_modules
+/CHANGELOG.md
+/script/build
+/tmp
+
+# VS Code
+.vscode
+
+# IntelliJ
+.idea
+
+# macOS
+.DS_Store
+
+# vim
+*.swp
+
+vendor/
+
+# air configuration file: https://github.com/cosmtrek/air
+.air.toml
+dist/
