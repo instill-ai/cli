@@ -30,14 +30,14 @@ builds:
   - <<: *build_defaults
     id: linux
     goos: [linux]
-    goarch: [386, arm, amd64, arm64]
+    goarch: [arm, arm64, amd64]
     env:
       - CGO_ENABLED=0
 
   - <<: *build_defaults
     id: windows
     goos: [windows]
-    goarch: [386, amd64]
+    goarch: [amd64]
 
 archives:
   - id: nix
@@ -76,3 +76,21 @@ changelog:
       order: 1
     - title: Others
       order: 999
+
+brews:
+  - tap:
+      owner: instill-ai
+      name: homebrew-tap
+    description: Instill AI's official command-line tool
+    homepage: https://github.com/instill-ai/cli
+    license: "Apache-2.0"
+    commit_author:
+      name: droplet-bot
+      email: 70758845+droplet-bot@users.noreply.github.com
+    install: |
+      bin.install "bin/instill"
+      (bash_completion/"instill").write `#{bin}/instill completion -s bash`
+      (fish_completion/"instill.fish").write `#{bin}/instill completion -s fish`
+      (zsh_completion/"_instill").write `#{bin}/instill completion -s zsh`
+    test: |
+      assert_match "instill version #{version}", shell_output("#{bin}/instill --version")
