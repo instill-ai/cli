@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,7 +45,6 @@ func TestFindEntry(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
-			fmt.Println(out)
 			assert.Equal(t, tt.output, out.ValueNode.Value)
 		})
 	}
