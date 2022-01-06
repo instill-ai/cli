@@ -23,6 +23,7 @@ builds:
         - -X github.com/instill-ai/cli/internal/build.Date={{ time "2006-01-02" }}
         - -X github.com/instill-ai/cli/internal/oauth2.oauthClientID={{ .Env.INSTILL_OAUTH_CLIENT_ID }}
         - -X github.com/instill-ai/cli/internal/oauth2.oauthClientSecret={{ .Env.INSTILL_OAUTH_CLIENT_SECRET }}
+        - -X main.updaterEnabled=instill-ai/cli
     id: macos
     goos: [darwin]
     goarch: [amd64]
