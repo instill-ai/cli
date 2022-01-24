@@ -23,7 +23,7 @@ require (
 	github.com/muesli/reflow v0.2.1-0.20210502190812-c80126ec2ad5
 	github.com/muesli/termenv v0.9.0
 	github.com/ory/graceful v0.1.1
-	github.com/ory/x v0.0.334
+	github.com/ory/x v0.0.337
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
