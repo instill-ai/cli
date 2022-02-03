@@ -16,13 +16,18 @@
 
 <h4 align="center">
     <p>
+        <a href="https://www.instill.tech">User Manual</a> |
+        <a href="https://discord.gg/sevxWsqpGh">API Reference</a>
+    <p>
+</h4>
+
+<h4 align="center">
+    <p>
         <a href="https://www.instill.tech/get-access"><strong>Get Early Access</strong></a>
     <p>
 </h4>
 
 ---
-
-<br>
 
 [![Tests](https://github.com/instill-ai/cli/actions/workflows/go.yml/badge.svg?branch=main&event=push)](https://github.com/instill-ai/cli/actions/workflows/go.yml)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/release/instill-ai/cli.svg?include_prereleases&label=Release&color=lightblue)](https://github.com/instill-ai/cli/releases/latest)
@@ -30,14 +35,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-lightblue.svg)](.github/code_of_conduct.md)
 
 `instill` is the command line interface for **Instill Cloud**.
-
-<a href="https://openapi.instill.tech" title="OpenAPI docs">
-    <img src="https://dabuttonfactory.com/button.png?t=OpenAPI+docs&f=Open+Sans-Bold&ts=78&tc=000&hp=90&vp=80&c=round&bgt=unicolored&bgc=a0cfba" align="right" height="30">
-</a>
-
-<a href="https://docs.instill.tech" title="User manual">
-    <img src="https://dabuttonfactory.com/button.png?t=User+manual&f=Open+Sans-Bold&ts=78&tc=000&hp=90&vp=80&c=round&bgt=unicolored&bgc=a0cfba" align="right" height="30">
-</a>
 
 ## Table of contents <!-- omit in toc -->
 - [What is Instill Cloud?](#what-is-instill-cloud)
