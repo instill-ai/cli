@@ -1,4 +1,28 @@
-# Instill CLI <!-- omit in toc -->
+<p align="center">
+  <img src="https://raw.githubusercontent.com/instill-ai/.github/main/img/cli.png" alt="Instill AI - Where Visual Data Preparation Made for All" />
+</p>
+
+<h2 align="center">
+    <p>Instill CLI</p>
+</h2>
+
+<h4 align="center">
+    <p>
+        <a href="https://www.instill.tech">Website</a> |
+        <a href="https://discord.gg/sevxWsqpGh">Community</a> |
+        <a href="https://blog.instill.tech">Blog</a>
+    <p>
+</h4>
+
+<h4 align="center">
+    <p>
+        <a href="https://www.instill.tech/get-access"><strong>Get Early Access</strong></a>
+    <p>
+</h4>
+
+---
+
+<br>
 
 [![Tests](https://github.com/instill-ai/cli/actions/workflows/go.yml/badge.svg?branch=main&event=push)](https://github.com/instill-ai/cli/actions/workflows/go.yml)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/release/instill-ai/cli.svg?include_prereleases&label=Release&color=lightblue)](https://github.com/instill-ai/cli/releases/latest)
