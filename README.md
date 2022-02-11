@@ -1,14 +1,14 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/instill-ai/.github/main/img/cli.png" alt="Instill AI - Where Visual Data Preparation Made for All" />
+  <img src="https://raw.githubusercontent.com/instill-ai/.github/main/img/cli.png" alt="Instill AI - Visual Data Preparation Made for All" />
 </h1>
 
 <h4 align="center">
-    <a href="https://www.instill.tech">Website</a> |
+    <a href="https://www.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Website</a> |
     <a href="https://discord.gg/sevxWsqpGh">Community</a> |
-    <a href="https://blog.instill.tech">Blog</a><br/><br/>
-    <a href="https://www.instill.tech">User Manual</a> |
+    <a href="https://blog.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Blog</a><br/><br/>
+    <a href="https://docs.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">User Manual</a> |
     <a href="https://discord.gg/sevxWsqpGh">API Reference</a><br/><br/>
-    <a href="https://www.instill.tech/get-access"><strong>Get Early Access</strong></a>
+    <a href="https://www.instill.tech/get-access/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme"><strong>Get Early Access</strong></a>
 </h4>
 
 ---
