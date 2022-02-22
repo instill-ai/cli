@@ -26,7 +26,7 @@ clean: script/build
 # just a convenience task around `go test`
 .PHONY: test
 test:
-	go test ./...
+	go test -race ./...
 
 ## Install/uninstall tasks are here for use on *nix platform. On Windows, there is no equivalent.
 DESTDIR :=
