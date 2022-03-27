@@ -26,7 +26,7 @@ require (
 	github.com/ory/x v0.0.345
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
