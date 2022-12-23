@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/instill-ai/.github/main/img/cli.png" alt="Instill AI - Visual Data Preparation Made for All" />
+  <img src="https://raw.githubusercontent.com/instill-ai/.github/main/img/cli.png" alt="Instill AI - Unstructured Data ETL Made for All" />
 </h1>
 
 <h4 align="center">
@@ -27,9 +27,9 @@
 
 ## What is Instill Cloud?
 
-Instill AI is on a mission to make Vision AI accessible to everyone. With **Instill Cloud**, one can easily build up a data pipeline to transform unstructured visual data to structured data, starting to tap on the value of visual data.
+Instill AI is on a mission to make AI accessible to everyone. With **Instill Cloud**, one can easily build up a data pipeline to transform unstructured data to meaningful data representations, starting to tap on the value of unstructured data.
 
-**Instill Cloud** provides a **Pipeline** consisting of **Data Connector**, **Visual Data Operator** and **Logic Operator** components, to process unstructured visual data to their structured representation.
+**Instill Cloud** provides a **Pipeline** consisting of **Source Connector**, **Model**, **Logic Operator** and **Destination Connector** components, to process unstructured data to their meaningful data representations.
 
 ## Installation
 
