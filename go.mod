@@ -10,7 +10,7 @@ require (
 	github.com/cli/browser v1.1.0
 	github.com/cli/safeexec v1.0.0
 	github.com/creack/pty v1.1.18
-	github.com/google/go-cmp v0.5.7
+	github.com/google/go-cmp v0.5.9
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hashicorp/go-version v1.3.0
 	github.com/henvic/httpretty v0.0.6
