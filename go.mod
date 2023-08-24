@@ -1,6 +1,6 @@
 module github.com/instill-ai/cli
 
-go 1.17
+go 1.20
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/browser v1.1.0
 	github.com/cli/safeexec v1.0.0
+	github.com/coreos/go-oidc/v3 v3.6.0
 	github.com/creack/pty v1.1.18
 	github.com/google/go-cmp v0.5.9
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
@@ -27,9 +28,9 @@ require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+	golang.org/x/oauth2 v0.6.0
+	golang.org/x/sys v0.6.0
+	golang.org/x/term v0.6.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -40,6 +41,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.2.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-logr/logr v1.2.1 // indirect
 	github.com/go-logr/stdr v1.2.0 // indirect
 	github.com/gobuffalo/pop/v6 v6.0.1 // indirect
@@ -62,10 +64,11 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.25.0 // indirect
 	go.opentelemetry.io/otel v1.3.0 // indirect
 	go.opentelemetry.io/otel/trace v1.3.0 // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 )
