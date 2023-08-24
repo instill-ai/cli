@@ -1,4 +1,4 @@
-name: Go Releaser
+name: GoReleaser
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go 1.20
         uses: actions/setup-go@v4
         with:
-          go-version: "1.20"
+          go-version: '1.20'
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
