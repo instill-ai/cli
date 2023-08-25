@@ -65,8 +65,6 @@ var tasks = map[string]func(string) error{
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Version=%s %s", version(), ldflags)
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Date=%s %s", date(), ldflags)
 		oauthSecret := os.Getenv(oauthFields[0][0])
-		log.Println(oauthFields[0][0])
-		log.Println(oauthSecret)
 		if oauthSecret != "" {
 			for _, v := range oauthFields {
 				nameEnv, nameVar := v[0], v[1]
