@@ -101,6 +101,9 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 	tokenChan := make(chan *oauth2.Token)
 	go handleCallback(auth, callbackHost, callbackPort, state, IO, tokenChan)
 	token := <-tokenChan
+	if token == nil {
+		return errors.New("error receiving the token")
+	}
 
 	if verbose := os.Getenv("DEBUG"); strings.Contains(verbose, "oauth") {
 		fmt.Fprintf(IO.Out, "[DEBUG] Token Type:\n\t%s\n", token.Type())
