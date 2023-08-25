@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/instill-ai/cli/internal/build"
 	"io"
 	"net/http"
 	"os"
@@ -25,9 +26,13 @@ import (
 
 var (
 	// The "Instill CLI" OAuth app
-	oauthClientID = ""
-	// This value i	s safe to be embedded in version control
-	oauthClientSecret = ""
+	clientID     string
+	clientSecret string
+	issuer       string
+	audience     string
+	hostname     string
+	callbackHost string
+	callbackPort string
 )
 
 type iconfig interface {
@@ -43,15 +48,15 @@ type Authenticator struct {
 }
 
 // NewAuthenticator instantiates the *Authenticator.
-func NewAuthenticator(hostname, callbackHost string, callbackPort int) (*Authenticator, error) {
-	provider, err := oidc.NewProvider(context.Background(), "https://auth."+hostname+"/")
+func NewAuthenticator(issuer, clientID, clientSecret, callbackHost string, callbackPort int) (*Authenticator, error) {
+	provider, err := oidc.NewProvider(context.Background(), issuer)
 	if err != nil {
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     oauthClientID,
-		ClientSecret: oauthClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
 		RedirectURL:  fmt.Sprintf("http://%s:%d/%s", callbackHost, callbackPort, "callback"),
 		Scopes:       []string{"offline", "openid", "email", "profile"},
@@ -78,18 +83,33 @@ func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) 
 }
 
 // AuthCodeFlowWithConfig authorizes a user via Authorization Code Flow
-func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStreams, hostname string) error {
-	callbackHost := "localhost"
-	callbackPort := 8085
-	auth, err := NewAuthenticator(hostname, callbackHost, callbackPort)
+func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStreams, customHostname string) error {
+	if customHostname != "" {
+		return errors.New("TODO handle a custom Core instance")
+	}
+	// use env vars in dev mode
+	if build.Version == "" {
+		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
+		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
+		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
+		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
+		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
+		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
+		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
+	}
+	cp, err := strconv.Atoi(callbackPort)
+	if err != nil {
+		return err
+	}
+	port := cp
+	auth, err := NewAuthenticator(issuer, clientID, clientSecret, callbackHost, port)
 	if err != nil {
 		return err
 	}
 
-	audience := []string{fmt.Sprintf("https://api.%s", hostname)}
 	prompt := []string{""}
 	maxAge := 0
-	loginURL, state := auth.LoginURL(audience, prompt, maxAge)
+	loginURL, state := auth.LoginURL([]string{audience}, prompt, maxAge)
 
 	fmt.Fprintf(IO.Out, "Login to %s. Press ctrl + c to end the process.\n\n", hostname)
 	fmt.Fprintf(IO.Out, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", loginURL)
@@ -99,7 +119,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 	}
 
 	tokenChan := make(chan *oauth2.Token)
-	go handleCallback(auth, callbackHost, callbackPort, state, IO, tokenChan)
+	go handleCallback(auth, callbackHost, port, state, IO, tokenChan)
 	token := <-tokenChan
 	if token == nil {
 		return errors.New("error receiving the token")

@@ -29,3 +29,8 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{steps.changelog.outputs.tag-name}}
           INSTILL_OAUTH_CLIENT_ID: ${{ secrets.oauth2ClientId }}
           INSTILL_OAUTH_CLIENT_SECRET: ${{ secrets.oauth2ClientSecret }}
+          INSTILL_OAUTH_ISSUER: ${{ secrets.oauth2Issuer }}
+          INSTILL_OAUTH_HOSTNAME: ${{ secrets.oauth2Hostname }}
+          INSTILL_OAUTH_AUDIENCE: ${{ secrets.oauth2Audience }}
+          INSTILL_OAUTH_CALLBACK_HOST: ${{ secrets.oauth2CallbackHost }}
+          INSTILL_OAUTH_CALLBACK_PORT: ${{ secrets.oauth2CallbackPort }}

@@ -42,8 +42,8 @@ func RefreshToken(cfg iconfig, hostname string) (string, error) {
 	}
 
 	conf := &oauth2.Config{
-		ClientID:     oauthClientID,
-		ClientSecret: oauthClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("https://auth.%s/oauth2/auth", hostname),
 			TokenURL: fmt.Sprintf("https://auth.%s/oauth2/token", hostname),

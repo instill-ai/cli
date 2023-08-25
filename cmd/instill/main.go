@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -16,6 +17,7 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/mattn/go-colorable"
 
+	"github.com/dotenv-org/godotenvvault"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
@@ -46,6 +48,13 @@ func main() {
 }
 
 func mainRun() exitCode {
+	// load .env in dev mode
+	if build.Version == "" {
+		err := godotenvvault.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
 
 	buildDate := build.Date
 	buildVersion := build.Version

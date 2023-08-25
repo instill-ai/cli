@@ -81,9 +81,6 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 	}
 
 	hostname := opts.Hostname
-	if hostname == "" {
-		hostname = instance.Default()
-	}
 
 	if err := cfg.CheckWriteable(hostname, ""); err != nil {
 		return err
@@ -109,7 +106,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 	return shared.Login(f, &shared.LoginOptions{
 		IO:          opts.IO,
 		Config:      cfg,
-		Hostname:    hostname,
+		Hostname:    opts.Hostname,
 		Interactive: opts.Interactive,
 		Executable:  opts.MainExecutable,
 	})
