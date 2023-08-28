@@ -32,7 +32,7 @@ import (
 	"fmt"
 	"github.com/cli/safeexec"
 	"github.com/dotenv-org/godotenvvault"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -236,7 +236,7 @@ func cmdOutput(args ...string) (string, error) {
 		return "", err
 	}
 	cmd := exec.Command(exe, args[1:]...)
-	cmd.Stderr = ioutil.Discard
+	cmd.Stderr = io.Discard
 	out, err := cmd.Output()
 	return strings.TrimSuffix(string(out), "\n"), err
 }
