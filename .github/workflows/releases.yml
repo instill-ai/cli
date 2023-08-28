@@ -14,10 +14,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go 1.17
+      - name: Set up Go 1.20
         uses: actions/setup-go@v3
         with:
-          go-version: 1.17
+          go-version: 1.20
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -25,12 +25,15 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
+          # release
           GITHUB_TOKEN: ${{ secrets.botGitHubToken }}
-          GORELEASER_CURRENT_TAG: ${{steps.changelog.outputs.tag-name}}
+          GORELEASER_CURRENT_TAG: ${{ steps.changelog.outputs.tag-name }}
+          # secrets
           INSTILL_OAUTH_CLIENT_ID: ${{ secrets.oauth2ClientId }}
           INSTILL_OAUTH_CLIENT_SECRET: ${{ secrets.oauth2ClientSecret }}
-          INSTILL_OAUTH_ISSUER: ${{ secrets.oauth2Issuer }}
-          INSTILL_OAUTH_HOSTNAME: ${{ secrets.oauth2Hostname }}
-          INSTILL_OAUTH_AUDIENCE: ${{ secrets.oauth2Audience }}
-          INSTILL_OAUTH_CALLBACK_HOST: ${{ secrets.oauth2CallbackHost }}
-          INSTILL_OAUTH_CALLBACK_PORT: ${{ secrets.oauth2CallbackPort }}
+          # config
+          INSTILL_OAUTH_ISSUER: ${{ vars.oauth2Issuer }}
+          INSTILL_OAUTH_HOSTNAME: ${{ vars.oauth2Hostname }}
+          INSTILL_OAUTH_AUDIENCE: ${{ vars.oauth2Audience }}
+          INSTILL_OAUTH_CALLBACK_HOST: ${{ vars.oauth2CallbackHost }}
+          INSTILL_OAUTH_CALLBACK_PORT: ${{ vars.oauth2CallbackPort }}
