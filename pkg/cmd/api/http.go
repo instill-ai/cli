@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -50,7 +49,7 @@ func httpRequest(client *http.Client, hostname string, method string, p string, 
 			}
 		}
 	case io.Reader:
-		if data, err := ioutil.ReadAll(pp); err == nil {
+		if data, err := io.ReadAll(pp); err == nil {
 			// Check if body data is JSON
 			if json.Valid(data) {
 				bodyIsJSON = true

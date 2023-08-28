@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -190,7 +189,7 @@ func apiRun(opts *ApiOptions) error {
 
 	headersOutputStream := opts.IO.Out
 	if opts.Silent {
-		opts.IO.Out = ioutil.Discard
+		opts.IO.Out = io.Discard
 	} else {
 		err := opts.IO.StartPager()
 		if err != nil {
@@ -382,7 +381,7 @@ func openUserFile(fn string, stdin io.ReadCloser) (io.ReadCloser, int64, error) 
 
 func parseErrorResponse(r io.Reader, statusCode int) (io.Reader, string, error) {
 	bodyCopy := &bytes.Buffer{}
-	b, err := ioutil.ReadAll(io.TeeReader(r, bodyCopy))
+	b, err := io.ReadAll(io.TeeReader(r, bodyCopy))
 	if err != nil {
 		return r, "", err
 	}
