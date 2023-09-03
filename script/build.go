@@ -10,6 +10,11 @@
 //     - INSTILL_VERSION: determined from source by default
 //     - INSTILL_OAUTH_CLIENT_ID
 //     - INSTILL_OAUTH_CLIENT_SECRET
+//     - INSTILL_OAUTH_HOSTNAME
+//     - INSTILL_OAUTH_AUDIENCE
+//     - INSTILL_OAUTH_ISSUER
+//     - INSTILL_OAUTH_CALLBACK_HOST
+//     - INSTILL_OAUTH_CALLBACK_PORT
 //     - SOURCE_DATE_EPOCH: enables reproducible builds
 //     - GO_LDFLAGS
 //
@@ -25,7 +30,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"github.com/cli/safeexec"
+	"github.com/dotenv-org/godotenvvault"
+	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,9 +41,17 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/cli/safeexec"
 )
+
+var oauthFields = [][]string{
+	{"INSTILL_OAUTH_CLIENT_SECRET", "clientSecret"},
+	{"INSTILL_OAUTH_CLIENT_ID", "clientID"},
+	{"INSTILL_OAUTH_ISSUER", "issuer"},
+	{"INSTILL_OAUTH_HOSTNAME", "hostname"},
+	{"INSTILL_OAUTH_AUDIENCE", "audience"},
+	{"INSTILL_OAUTH_CALLBACK_HOST", "callbackHost"},
+	{"INSTILL_OAUTH_CALLBACK_PORT", "callbackPort"},
+}
 
 var tasks = map[string]func(string) error{
 	"bin/instill": func(exe string) error {
@@ -48,9 +64,13 @@ var tasks = map[string]func(string) error{
 		ldflags := os.Getenv("GO_LDFLAGS")
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Version=%s %s", version(), ldflags)
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Date=%s %s", date(), ldflags)
-		if oauthSecret := os.Getenv("INSTILL_OAUTH_CLIENT_SECRET"); oauthSecret != "" {
-			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.oauthClientSecret=%s %s", oauthSecret, ldflags)
-			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.oauthClientID=%s %s", os.Getenv("INSTILL_OAUTH_CLIENT_ID"), ldflags)
+		oauthSecret := os.Getenv(oauthFields[0][0])
+		if oauthSecret != "" {
+			for _, v := range oauthFields {
+				nameEnv, nameVar := v[0], v[1]
+				ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.%s=%s %s",
+					nameVar, os.Getenv(nameEnv), ldflags)
+			}
 		}
 
 		return run("go", "build", "-trimpath", "-ldflags", ldflags, "-o", exe, "./cmd/instill")
@@ -63,6 +83,10 @@ var tasks = map[string]func(string) error{
 var self string
 
 func main() {
+	err := godotenvvault.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	args := os.Args[:1]
 	for _, arg := range os.Args[1:] {
 		if idx := strings.IndexRune(arg, '='); idx >= 0 {
@@ -212,7 +236,7 @@ func cmdOutput(args ...string) (string, error) {
 		return "", err
 	}
 	cmd := exec.Command(exe, args[1:]...)
-	cmd.Stderr = ioutil.Discard
+	cmd.Stderr = io.Discard
 	out, err := cmd.Output()
 	return strings.TrimSuffix(string(out), "\n"), err
 }
