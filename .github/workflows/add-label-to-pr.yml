@@ -4,11 +4,10 @@ on:
   pull_request_target:
     types:
       - opened
+      - synchronize
 
 jobs:
-  track_pr:
-    uses: instill-ai/.github/.github/workflows/add-to-prj.yml@main
-    with:
-      project_number: 5
+  triage:
+    uses: instill-ai/.github/.github/workflows/add-label-to-pr.yml@main
     secrets:
       botGitHubToken: ${{ secrets.botGitHubToken }}
