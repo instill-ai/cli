@@ -3,7 +3,7 @@ module github.com/instill-ai/cli
 go 1.20
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.2
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/briandowns/spinner v1.18.1
 	github.com/charmbracelet/glamour v0.3.0
@@ -61,14 +61,14 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/seatgeek/logrus-gelf-formatter v0.0.0-20210414080842-5b05eb8ff761 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-	github.com/yuin/goldmark v1.4.0 // indirect
+	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.25.0 // indirect
 	go.opentelemetry.io/otel v1.3.0 // indirect
 	go.opentelemetry.io/otel/trace v1.3.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
