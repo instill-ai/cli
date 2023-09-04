@@ -12,6 +12,7 @@ const defaultHostname = "instill.tech"
 const localhost = "instill.localhost"
 
 // Default returns the host name of the default Instill instance
+// TODO update with instances
 func Default() string {
 	return defaultHostname
 }
