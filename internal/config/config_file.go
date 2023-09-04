@@ -285,6 +285,7 @@ func parseConfig(filename string) (Config, error) {
 		}
 	}
 
+	// merge hosts.yml under the "hosts" key
 	if isLegacy(root) {
 		err = migrateConfig(filename)
 		if err != nil {
