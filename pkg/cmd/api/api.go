@@ -107,7 +107,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		`),
 		Annotations: map[string]string{
 			"help:environment": heredoc.Doc(`
-				INSTILL_HOSTNAME: make the request to an Instill host other than instill.tech.
+				INSTILL_INSTANCE: make the request to an Instill instance other than the currently selected one.
 			`),
 		},
 		Args: cobra.ExactArgs(1),
@@ -115,9 +115,10 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			opts.RequestPath = args[0]
 			opts.RequestMethodPassed = c.Flags().Changed("method")
 
-			if c.Flags().Changed("hostname") {
+			if c.Flags().Changed("instance") {
+				// TODO look for the instance in the config
 				if err := instance.HostnameValidator(opts.Hostname); err != nil {
-					return cmdutil.FlagErrorf("error parsing `--hostname`: %w", err)
+					return cmdutil.FlagErrorf("error parsing `--instance`: %w", err)
 				}
 			}
 
@@ -137,7 +138,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.Hostname, "hostname", "", "The Instill hostname for the request (default \"instill.tech\")")
+	cmd.Flags().StringVar(&opts.Hostname, "instance", "", "Override currently selected instance")
 	cmd.Flags().StringVarP(&opts.RequestMethod, "method", "X", "GET", "The HTTP method for the request")
 	cmd.Flags().StringArrayVarP(&opts.MagicFields, "field", "F", nil, "Add a typed parameter in `key=value` format")
 	cmd.Flags().StringArrayVarP(&opts.RawFields, "raw-field", "f", nil, "Add a string parameter in `key=value` format")

@@ -1,9 +1,8 @@
-package auth
+package instances
 
 import (
 	"github.com/spf13/cobra"
 
-	listInsCmd "github.com/instill-ai/cli/pkg/cmd/instances/list"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
@@ -11,12 +10,13 @@ func New(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instances <command>",
 		Short: "Instances management",
-		Long:  `Manage instill's instances.`,
+		Long:  `Manage instances of Instill AI, both Cloud and Core.`,
 	}
 
 	cmdutil.DisableAuthCheck(cmd)
 
-	cmd.AddCommand(listInsCmd.New(f, nil))
+	cmd.AddCommand(NewAddCmd(f, nil))
+	cmd.AddCommand(NewListCmd(f, nil))
 
 	return cmd
 }

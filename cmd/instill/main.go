@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -48,12 +47,9 @@ func main() {
 }
 
 func mainRun() exitCode {
-	// load .env in dev mode
+	// optionally load .env in dev mode
 	if build.Version == "" {
-		err := godotenvvault.Load()
-		if err != nil {
-			log.Fatal("Error loading .env file")
-		}
+		_ = godotenvvault.Load()
 	}
 
 	buildDate := build.Date
