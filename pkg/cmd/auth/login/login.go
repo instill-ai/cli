@@ -32,9 +32,9 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 	cmd := &cobra.Command{
 		Use:   "login",
 		Args:  cobra.ExactArgs(0),
-		Short: "Authenticate with a Instill host",
+		Short: "Authenticate with an Instill host",
 		Long: heredoc.Docf(`
-			Authenticate with a Instill host.
+			Authenticate with am Instill host.
 
 			The default authentication mode is an authorization code flow.
 		`),

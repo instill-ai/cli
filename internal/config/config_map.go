@@ -35,6 +35,17 @@ func (cm *ConfigMap) GetStringValue(key string) (string, error) {
 	return entry.ValueNode.Value, nil
 }
 
+func (cm *ConfigMap) GetOptionalStringValue(key string) (string, error) {
+	entry, err := cm.FindEntry(key)
+	if _, ok := err.(*NotFoundError); ok {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return entry.ValueNode.Value, nil
+}
+
 func (cm *ConfigMap) SetStringValue(key, value string) error {
 	entry, err := cm.FindEntry(key)
 

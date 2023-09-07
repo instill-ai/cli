@@ -13,6 +13,7 @@ type Config interface {
 	Set(string, string, string) error
 	UnsetHost(string)
 	Hosts() ([]string, error)
+	HostsTyped() ([]HostConfigTyped, error)
 	DefaultHost() (string, error)
 	DefaultHostWithSource() (string, string, error)
 	CheckWriteable(string, string) error

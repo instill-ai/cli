@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
+// TODO remove
 const defaultHostname = "instill.tech"
 
+// TODO remove
 // localhost is the domain name of a local Instill instance
 const localhost = "instill.localhost"
 

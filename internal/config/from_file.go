@@ -23,6 +23,30 @@ type HostConfig struct {
 	Host string
 }
 
+// HostConfigTyped is a type safe representation of an instance config.
+// TODO keep in sync with `hostConfigToTyped`
+// TODO bind directly to yaml via struct tags
+// TODO validation
+type HostConfigTyped struct {
+	// ## instance info
+	ID          string
+	APIHostname string
+	IsDefault   bool
+	// ## oauth config
+	// oauth2 hostname, eg auth.instill.tech
+	Oauth2 string
+	// oauth2 audience, eg https://instill.tech
+	Audience string
+	// oauth2 issuer, eg https://auth.instill.tech
+	Issuer string
+	// ## oauth token
+	TokenType    string
+	AccessToken  string
+	Expiry       string
+	RefreshToken string
+	IDToken      string
+}
+
 func (c *fileConfig) Root() *yaml.Node {
 	return c.ConfigMap.Root
 }
@@ -179,9 +203,101 @@ func (c *fileConfig) Hosts() ([]string, error) {
 		hostnames = append(hostnames, entry.Host)
 	}
 
+	// TODO default
 	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == instance.Default() })
 
 	return hostnames, nil
+}
+
+// HostsTyped returns an array of typesafe host configs.
+// Every call re-reads the config file.
+func (c *fileConfig) HostsTyped() ([]HostConfigTyped, error) {
+	var ret []HostConfigTyped
+	hosts, err := c.hostEntries()
+	if err != nil {
+		return nil, err
+	}
+	hasDefault := false
+	for _, h := range hosts {
+		ht, err := hostConfigToTyped(h)
+		if err != nil {
+			return nil, err
+		}
+		// max 1 default host
+		if ht.IsDefault && hasDefault {
+			ht.IsDefault = false
+		} else if ht.IsDefault {
+			hasDefault = true
+		}
+
+		ret = append(ret, *ht)
+	}
+	// at least 1 default
+	if len(ret) == 1 {
+		ret[0].IsDefault = true
+	}
+	// default goes first
+	sort.SliceStable(ret, func(i, _ int) bool {
+		return ret[i].IsDefault
+	})
+	return ret, nil
+}
+
+func hostConfigToTyped(h *HostConfig) (*HostConfigTyped, error) {
+	ht := &HostConfigTyped{
+		APIHostname: h.Host,
+	}
+	v, err := h.GetOptionalStringValue("token_type")
+	if err != nil {
+		return nil, err
+	}
+	ht.TokenType = v
+	v, err = h.GetOptionalStringValue("access_token")
+	if err != nil {
+		return nil, err
+	}
+	ht.AccessToken = v
+	v, err = h.GetOptionalStringValue("expiry")
+	if err != nil {
+		return nil, err
+	}
+	ht.Expiry = v
+	v, err = h.GetOptionalStringValue("refresh_token")
+	if err != nil {
+		return nil, err
+	}
+	ht.RefreshToken = v
+	v, err = h.GetOptionalStringValue("id_token")
+	if err != nil {
+		return nil, err
+	}
+	ht.IDToken = v
+	v, err = h.GetOptionalStringValue("audience")
+	if err != nil {
+		return nil, err
+	}
+	ht.Audience = v
+	v, err = h.GetOptionalStringValue("issuer")
+	if err != nil {
+		return nil, err
+	}
+	ht.Issuer = v
+	v, err = h.GetOptionalStringValue("oauth2_hostname")
+	if err != nil {
+		return nil, err
+	}
+	ht.Oauth2 = v
+	v, err = h.GetOptionalStringValue("id")
+	if err != nil {
+		return nil, err
+	}
+	ht.ID = v
+	v, err = h.GetOptionalStringValue("is_default")
+	if err != nil {
+		return nil, err
+	}
+	ht.IsDefault = strings.ToLower(v) == "true"
+	return ht, nil
 }
 
 func (c *fileConfig) DefaultHost() (string, error) {
@@ -195,6 +311,7 @@ func (c *fileConfig) DefaultHostWithSource() (string, string, error) {
 		return hosts[0], HostsConfigFile(), nil
 	}
 
+	// TODO default
 	return instance.Default(), "", nil
 }
 
