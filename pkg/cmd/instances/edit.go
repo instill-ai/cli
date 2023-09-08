@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type AddOptions struct {
+type EditOptions struct {
 	IO             *iostreams.IOStreams
 	Config         func() (config.Config, error)
 	MainExecutable string
@@ -18,35 +18,33 @@ type AddOptions struct {
 	InstanceOptions
 }
 
-func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command {
-	opts := &AddOptions{
+func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Command {
+	opts := &EditOptions{
 		IO:     f.IOStreams,
 		Config: f.Config,
 	}
 
 	cmd := &cobra.Command{
-		Use: "add",
+		Use: "edit",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				return fmt.Errorf("Error: specify an API hostname\n$ inst instances add API_HOSTNAME")
+				return fmt.Errorf("Error: specify an API hostname\n$ inst instances edit API_HOSTNAME")
 			}
 			if err := instance.HostnameValidator(args[0]); err != nil {
 				return fmt.Errorf("error parsing API hostname %w", err)
 			}
 			return nil
 		},
-		Short: "Add a new instance",
+		Short: "Edit an existing instance",
 		Long: heredoc.Docf(`
-			Add a new Instill AI instance, either Cloud or Core.
+			Edit an existing Instill AI instance, either Cloud or Core.
 		`),
 		Example: heredoc.Doc(`
-			# add a local instance as the default one
-			$ inst instances add instill.localhost --default
+			# make instill.localhost the default instance
+			$ inst instances edit instill.localhost --default
 
-			# add a cloud instance
-			$ inst instances add api.instill.tech \
-				--oauth2 auth.instill.tech \
-				--audience https://instill.tech \
+			# update the issuer for api.instill.tech
+			$ inst instances edit api.instill.tech \
 				--issuer https://auth.instill.tech/
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +65,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 				return runF(opts)
 			}
 
-			return runAdd(opts)
+			return runEdit(opts)
 		},
 	}
 
@@ -76,7 +74,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 	return cmd
 }
 
-func runAdd(opts *AddOptions) error {
+func runEdit(opts *EditOptions) error {
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -88,26 +86,28 @@ func runAdd(opts *AddOptions) error {
 	}
 
 	apiHost := opts.APIHostname
+	var host *config.HostConfigTyped
 	for _, h := range hosts {
 		if h.APIHostname == apiHost {
-			return fmt.Errorf("apiHost '%s' already exists", apiHost)
+			host = &h
 		}
 	}
-
-	host := &config.HostConfigTyped{
-		APIHostname: opts.APIHostname,
-		IsDefault:   opts.Default,
-		Oauth2:      opts.Oauth2,
-		Audience:    opts.Audience,
-		Issuer:      opts.Issuer,
+	if host == nil {
+		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
+
+	host.APIHostname = opts.APIHostname
+	host.IsDefault = opts.Default
+	host.Oauth2 = opts.Oauth2
+	host.Audience = opts.Audience
+	host.Issuer = opts.Issuer
 
 	err = cfg.SaveTyped(host)
 	if err != nil {
-		return err
+		return fmt.Errorf("ERROR: failed to edit instance %s: %w", opts.APIHostname, err)
 	}
 
-	p("Instance '%s' has been added", host.APIHostname)
+	p("Instance '%s' has been saved", host.APIHostname)
 
 	return nil
 }

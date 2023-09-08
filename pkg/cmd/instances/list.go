@@ -67,9 +67,10 @@ func runListCmd(opts *ListOptions) error {
 	}
 	cols := []string{"Default", "API Hostname", "Oauth2 Hostname", "Oauth2 Audience", "Oauth2 Issuer"}
 	var data [][]string
+	defHostname := cfg.DefaultHostname()
 	for _, h := range hosts {
 		def := ""
-		if h.IsDefault {
+		if h.APIHostname == defHostname {
 			def = "*"
 		}
 		row := []string{def, h.APIHostname, h.Oauth2, h.Audience, h.Issuer}
@@ -79,13 +80,13 @@ func runListCmd(opts *ListOptions) error {
 	md := genTable(cols, data)
 	err = printMarkdown(md)
 	if err != nil {
-		return err
+		return fmt.Errorf("ERROR: failed to list instances: %w", err)
 	}
 
 	return nil
 }
 
-// TODO move to shared
+// TODO move to utils
 func printMarkdown(md string) error {
 	tr, _ := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
@@ -100,7 +101,7 @@ func printMarkdown(md string) error {
 }
 
 // genTable generates a markdown table as a string.
-// TODO move to shared
+// TODO move to utils
 func genTable(columns []string, data [][]string) string {
 	var buf bytes.Buffer
 	writer := io.Writer(&buf)
