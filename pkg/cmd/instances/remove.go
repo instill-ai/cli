@@ -10,44 +10,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type AddOptions struct {
+type RemoveOptions struct {
 	IO             *iostreams.IOStreams
 	Config         func() (config.Config, error)
 	MainExecutable string
 	Interactive    bool
-	InstanceOptions
+	APIHostname    string
 }
 
-func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command {
-	opts := &AddOptions{
+func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Command {
+	opts := &RemoveOptions{
 		IO:     f.IOStreams,
 		Config: f.Config,
 	}
 
 	cmd := &cobra.Command{
-		Use: "add",
+		Use: "remove",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				return fmt.Errorf("Error: specify an API hostname\n$ inst instances add API_HOSTNAME")
+				return fmt.Errorf("Error: specify an API hostname\n$ inst instances remove API_HOSTNAME")
 			}
 			if err := instance.HostnameValidator(args[0]); err != nil {
 				return fmt.Errorf("error parsing API hostname %w", err)
 			}
 			return nil
 		},
-		Short: "Add a new instance",
+		Short: "Remove an existing instance",
 		Long: heredoc.Docf(`
-			Add a new Instill AI instance, either Cloud or Core.
+			Remove an existing Instill AI instance, either Cloud or Core.
 		`),
 		Example: heredoc.Doc(`
-			# add a local instance as the default one
-			$ inst instances add instill.localhost --default
-
-			# add a cloud instance
-			$ inst instances add api.instill.tech \
-				--oauth2 auth.instill.tech \
-				--audience https://instill.tech \
-				--issuer https://auth.instill.tech/
+			# remove the local instance instance
+			$ inst instances remove instill.localhost
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -55,28 +49,19 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 				opts.Interactive = true
 			}
 			opts.APIHostname = args[0]
-
-			if cmd.Flags().Changed("oauth") {
-				if err := instance.HostnameValidator(opts.Oauth2); err != nil {
-					return cmdutil.FlagErrorf("error parsing OAuth2 hostname: %w", err)
-				}
-			}
-
 			opts.MainExecutable = f.Executable()
 			if runF != nil {
 				return runF(opts)
 			}
 
-			return runAdd(opts)
+			return runRemove(opts)
 		},
 	}
-
-	AddInstanceFlags(cmd, &opts.InstanceOptions)
 
 	return cmd
 }
 
-func runAdd(opts *AddOptions) error {
+func runRemove(opts *RemoveOptions) error {
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -87,27 +72,25 @@ func runAdd(opts *AddOptions) error {
 		return err
 	}
 
+	// TODO use cfg.HostnameExists()
 	apiHost := opts.APIHostname
+	var host *config.HostConfigTyped
 	for _, h := range hosts {
 		if h.APIHostname == apiHost {
-			return fmt.Errorf("apiHost '%s' already exists", apiHost)
+			host = &h
 		}
 	}
-
-	host := &config.HostConfigTyped{
-		APIHostname: opts.APIHostname,
-		IsDefault:   opts.Default,
-		Oauth2:      opts.Oauth2,
-		Audience:    opts.Audience,
-		Issuer:      opts.Issuer,
+	if host == nil {
+		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
 
-	err = cfg.SaveTyped(host)
+	cfg.UnsetHost(opts.APIHostname)
+	err = cfg.Write()
 	if err != nil {
-		return err
+		return fmt.Errorf("error removing hostname '%s' - %w", opts.APIHostname, err)
 	}
 
-	p("Instance '%s' has been added", host.APIHostname)
+	p("Instance '%s' has been removed", opts.APIHostname)
 
 	return nil
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/pkg/cmd/auth/shared"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
@@ -48,18 +47,6 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 				opts.Interactive = true
 			}
 
-			if cmd.Flags().Changed("hostname") {
-				if err := instance.HostnameValidator(opts.Hostname); err != nil {
-					return cmdutil.FlagErrorf("error parsing --hostname: %w", err)
-				}
-			}
-
-			if !opts.Interactive {
-				if opts.Hostname == "" {
-					opts.Hostname = instance.Default()
-				}
-			}
-
 			opts.MainExecutable = f.Executable()
 			if runF != nil {
 				return runF(opts)
@@ -68,8 +55,6 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 			return loginRun(f, opts)
 		},
 	}
-
-	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", "", "The hostname of the Instill instance to authenticate with")
 
 	return cmd
 }

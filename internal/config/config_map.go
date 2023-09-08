@@ -37,7 +37,8 @@ func (cm *ConfigMap) GetStringValue(key string) (string, error) {
 
 func (cm *ConfigMap) GetOptionalStringValue(key string) (string, error) {
 	entry, err := cm.FindEntry(key)
-	if _, ok := err.(*NotFoundError); ok {
+	var notFoundError *NotFoundError
+	if errors.As(err, &notFoundError) {
 		return "", nil
 	}
 	if err != nil {
