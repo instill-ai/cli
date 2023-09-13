@@ -47,7 +47,9 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 			$ inst instances add api.instill.tech \
 				--oauth2 auth.instill.tech \
 				--audience https://instill.tech \
-				--issuer https://auth.instill.tech/
+				--issuer https://auth.instill.tech/ \
+				--secret YOUR_SECRET \
+				--client-id CLIENT_ID
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -94,20 +96,29 @@ func runAdd(opts *AddOptions) error {
 		}
 	}
 
+	if opts.Oauth2 != "" && (opts.Secret == "" || opts.ClientID == "") {
+		return fmt.Errorf(
+			"ERROR: failed to add instance '%s':\n--secret and --client-id required when --oauth2 specified",
+			opts.APIHostname)
+	}
+
 	host := &config.HostConfigTyped{
-		APIHostname: opts.APIHostname,
-		IsDefault:   opts.Default,
-		Oauth2:      opts.Oauth2,
-		Audience:    opts.Audience,
-		Issuer:      opts.Issuer,
+		APIHostname:    opts.APIHostname,
+		IsDefault:      opts.Default,
+		Oauth2Hostname: opts.Oauth2,
+		Oauth2Audience: opts.Audience,
+		Oauth2Issuer:   opts.Issuer,
+		Oauth2ClientID: opts.ClientID,
+		Oauth2Secret:   opts.Secret,
+		APIVersion:     opts.APIVersion,
 	}
 
 	err = cfg.SaveTyped(host)
 	if err != nil {
-		return err
+		return fmt.Errorf("ERROR: failed to add instance '%s': %w", opts.APIHostname, err)
 	}
 
-	p("Instance '%s' has been added", host.APIHostname)
+	cmdutil.P("Instance '%s' has been added", host.APIHostname)
 
 	return nil
 }

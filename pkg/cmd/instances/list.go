@@ -1,16 +1,12 @@
 package instances
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/MakeNowJust/heredoc"
-	"github.com/charmbracelet/glamour"
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"io"
 )
 
 type ListOptions struct {
@@ -65,7 +61,7 @@ func runListCmd(opts *ListOptions) error {
 	if err != nil {
 		return err
 	}
-	cols := []string{"Default", "API Hostname", "Oauth2 Hostname", "Oauth2 Audience", "Oauth2 Issuer"}
+	cols := []string{"Default", "API Hostname", "Oauth2 Hostname", "Oauth2 Audience", "Oauth2 Issuer", "API Version"}
 	var data [][]string
 	defHostname := cfg.DefaultHostname()
 	for _, h := range hosts {
@@ -73,43 +69,15 @@ func runListCmd(opts *ListOptions) error {
 		if h.APIHostname == defHostname {
 			def = "*"
 		}
-		row := []string{def, h.APIHostname, h.Oauth2, h.Audience, h.Issuer}
+		row := []string{def, h.APIHostname, h.Oauth2Hostname, h.Oauth2Audience, h.Oauth2Issuer, h.APIVersion}
 		data = append(data, row)
 	}
 
-	md := genTable(cols, data)
-	err = printMarkdown(md)
+	md := cmdutil.GenTable(cols, data)
+	err = cmdutil.PrintMarkdown(md)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to list instances: %w", err)
 	}
 
 	return nil
-}
-
-// TODO move to utils
-func printMarkdown(md string) error {
-	tr, _ := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
-		glamour.WithWordWrap(0),
-	)
-	out, err := tr.Render(md)
-	if err != nil {
-		return err
-	}
-	fmt.Print(out)
-	return nil
-}
-
-// genTable generates a markdown table as a string.
-// TODO move to utils
-func genTable(columns []string, data [][]string) string {
-	var buf bytes.Buffer
-	writer := io.Writer(&buf)
-	table := tablewriter.NewWriter(writer)
-	table.SetHeader(columns)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
-	table.AppendBulk(data)
-	table.Render()
-	return buf.String()
 }
