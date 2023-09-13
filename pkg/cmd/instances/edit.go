@@ -96,18 +96,27 @@ func runEdit(opts *EditOptions) error {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
 
+	if opts.Oauth2 != "" && (opts.Secret == "" || opts.ClientID == "") {
+		return fmt.Errorf(
+			"ERROR: failed to edit instance %s:\n--secret and --client-id required when --oauth2 specified",
+			opts.APIHostname)
+	}
+
 	host.APIHostname = opts.APIHostname
 	host.IsDefault = opts.Default
-	host.Oauth2 = opts.Oauth2
-	host.Audience = opts.Audience
-	host.Issuer = opts.Issuer
+	host.Oauth2Hostname = opts.Oauth2
+	host.Oauth2Audience = opts.Audience
+	host.Oauth2Issuer = opts.Issuer
+	host.Oauth2Secret = opts.Secret
+	host.Oauth2ClientID = opts.ClientID
+	host.APIVersion = opts.APIVersion
 
 	err = cfg.SaveTyped(host)
 	if err != nil {
-		return fmt.Errorf("ERROR: failed to edit instance %s: %w", opts.APIHostname, err)
+		return fmt.Errorf("ERROR: failed to edit instance '%s': %w", opts.APIHostname, err)
 	}
 
-	p("Instance '%s' has been saved", host.APIHostname)
+	cmdutil.P("Instance '%s' has been saved", host.APIHostname)
 
 	return nil
 }

@@ -90,7 +90,7 @@ func runRemove(opts *RemoveOptions) error {
 		return fmt.Errorf("error removing hostname '%s' - %w", opts.APIHostname, err)
 	}
 
-	p("Instance '%s' has been removed", opts.APIHostname)
+	cmdutil.P("Instance '%s' has been removed", opts.APIHostname)
 
 	return nil
 }

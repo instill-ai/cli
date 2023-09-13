@@ -304,22 +304,32 @@ func (c *fileConfig) SaveTyped(host *HostConfigTyped) error {
 // TODO bind directly to yaml via struct tags
 // TODO validation
 type HostConfigTyped struct {
-	// ## instance info
-	APIHostname string
+	// instance info
+	APIHostname string `example:"api.instill.tech"`
 	IsDefault   bool
-	// ## oauth config
-	// oauth2 hostname, eg auth.instill.tech
-	Oauth2 string
-	// oauth2 audience, eg https://instill.tech
-	Audience string
-	// oauth2 issuer, eg https://auth.instill.tech
-	Issuer string
-	// ## oauth token
+	APIVersion  string `example:"v1alpha"`
+
+	// oauth config
+	Oauth2Hostname string `example:"auth.instill.tech"`
+	Oauth2Audience string `example:"https://instill.tech"`
+	Oauth2Issuer   string `example:"https://auth.instill.tech/"`
+	Oauth2Secret   string
+	Oauth2ClientID string
+
+	// oauth token
 	TokenType    string
 	AccessToken  string
 	Expiry       string
 	RefreshToken string
 	IDToken      string
+}
+
+// DefaultHostConfig returns default values for an instance config, as a single "source of truth" for other packages.
+func DefaultHostConfig() HostConfigTyped {
+	return HostConfigTyped{
+		APIVersion: "v1alpha",
+		IsDefault:  false,
+	}
 }
 
 // hostConfigToTyped reads an untyped config into a `HostConfigTyped` struct.
@@ -356,17 +366,32 @@ func hostConfigToTyped(conf *HostConfig) (*HostConfigTyped, error) {
 	if err != nil {
 		return nil, err
 	}
-	ht.Audience = v
+	ht.Oauth2Audience = v
 	v, err = conf.GetOptionalStringValue("issuer")
 	if err != nil {
 		return nil, err
 	}
-	ht.Issuer = v
+	ht.Oauth2Issuer = v
 	v, err = conf.GetOptionalStringValue("oauth2_hostname")
 	if err != nil {
 		return nil, err
 	}
-	ht.Oauth2 = v
+	ht.Oauth2Hostname = v
+	v, err = conf.GetOptionalStringValue("oauth2_secret")
+	if err != nil {
+		return nil, err
+	}
+	ht.Oauth2Secret = v
+	v, err = conf.GetOptionalStringValue("oauth2_client_id")
+	if err != nil {
+		return nil, err
+	}
+	ht.Oauth2ClientID = v
+	v, err = conf.GetOptionalStringValue("api_version")
+	if err != nil {
+		return nil, err
+	}
+	ht.APIVersion = v
 	v, err = conf.GetOptionalStringValue("is_default")
 	if err != nil {
 		return nil, err
@@ -410,6 +435,18 @@ func hostTypedToConfig(host *HostConfigTyped, conf *HostConfig) error {
 		return err
 	}
 	err = conf.SetStringValue("id", host.TokenType)
+	if err != nil {
+		return err
+	}
+	err = conf.SetStringValue("oauth2_client_id", host.Oauth2ClientID)
+	if err != nil {
+		return err
+	}
+	err = conf.SetStringValue("oauth2_secret", host.Oauth2Secret)
+	if err != nil {
+		return err
+	}
+	err = conf.SetStringValue("api_version", host.APIVersion)
 	if err != nil {
 		return err
 	}

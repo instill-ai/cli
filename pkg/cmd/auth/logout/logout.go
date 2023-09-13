@@ -28,7 +28,7 @@ func NewCmdLogout(f *cmdutil.Factory, runF func(*LogoutOptions) error) *cobra.Co
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Args:  cobra.ExactArgs(0),
-		Short: "Log out of a Instill host",
+		Short: "Log out of an Instill instance",
 		Long: heredoc.Doc(`Remove authentication for a Instill host.
 
 			This command removes the authentication configuration for a host either specified
@@ -123,6 +123,7 @@ func logoutRun(opts *LogoutOptions) error {
 
 	cfg.UnsetHost(hostname)
 	err = cfg.Write()
+	// TODO invalidate token
 	if err != nil {
 		return fmt.Errorf("failed to write config, authentication configuration not updated: %w", err)
 	}

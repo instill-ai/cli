@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/instill-ai/cli/internal/build"
+	"github.com/instill-ai/cli/internal/config"
 	"io"
 	"net/http"
 	"os"
@@ -36,15 +37,39 @@ var (
 )
 
 type iconfig interface {
-	Get(string, string) (string, error)
-	Set(string, string, string) error
-	Write() error
+	SaveTyped(*config.HostConfigTyped) error
 }
 
 // Authenticator is used to authenticate our users.
 type Authenticator struct {
 	*oidc.Provider
 	oauth2.Config
+}
+
+func init() {
+	// use env vars in dev mode
+	if build.Version == "" {
+		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
+		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
+		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
+		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
+		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
+		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
+		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
+	}
+}
+
+// HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
+func HostConfigInstillCloud() *config.HostConfigTyped {
+	host := config.DefaultHostConfig()
+	host.APIHostname = "api.instill.tech"
+	host.IsDefault = true
+	host.Oauth2Hostname = hostname
+	host.Oauth2Audience = audience
+	host.Oauth2Issuer = issuer
+	host.Oauth2ClientID = clientID
+	host.Oauth2Secret = clientSecret
+	return &host
 }
 
 // NewAuthenticator instantiates the *Authenticator.
@@ -83,26 +108,21 @@ func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) 
 }
 
 // AuthCodeFlowWithConfig authorizes a user via Authorization Code Flow
-func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStreams, customHostname string) error {
-	if customHostname != "" {
-		return errors.New("TODO handle a custom Core instance")
-	}
-	// use env vars in dev mode
-	if build.Version == "" {
-		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
-		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
-		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
-		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
-		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
-		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
-		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
-	}
+func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cfg iconfig, IO *iostreams.IOStreams) error {
 	cp, err := strconv.Atoi(callbackPort)
 	if err != nil {
 		return err
 	}
 	port := cp
-	auth, err := NewAuthenticator(issuer, clientID, clientSecret, callbackHost, port)
+	issuer := host.APIHostname
+	if host.Oauth2Issuer != "" {
+		issuer = host.Oauth2Issuer
+	}
+	audience := host.APIHostname
+	if host.Oauth2Audience != "" {
+		audience = host.Oauth2Audience
+	}
+	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2Secret, callbackHost, port)
 	if err != nil {
 		return err
 	}
@@ -133,27 +153,12 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 		fmt.Fprintf(IO.Out, "[DEBUG] ID Token:\n\t%s\n\n", token.Extra("id_token"))
 	}
 
-	if err := cfg.Set(hostname, "token_type", token.Type()); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "access_token", token.AccessToken); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "expiry", token.Expiry.Format(time.RFC1123)); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "refresh_token", token.RefreshToken); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "id_token", token.Extra("id_token").(string)); err != nil {
-		return err
-	}
-
-	if err := cfg.Write(); err != nil {
+	// TODO use HostConfigTyped
+	host.TokenType = token.Type()
+	host.AccessToken = token.AccessToken
+	host.Expiry = token.Expiry.Format(time.RFC1123)
+	host.IDToken = token.Extra("id_token").(string)
+	if err := cfg.SaveTyped(host); err != nil {
 		return err
 	}
 

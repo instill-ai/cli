@@ -1,8 +1,7 @@
 package instances
 
 import (
-	"fmt"
-	"github.com/MakeNowJust/heredoc"
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/pkg/cmdutil"
@@ -13,7 +12,10 @@ type InstanceOptions = struct {
 	Oauth2      string
 	Issuer      string
 	Audience    string
+	ClientID    string
+	Secret      string
 	Default     bool
+	APIVersion  string
 }
 
 func New(f *cmdutil.Factory) *cobra.Command {
@@ -35,13 +37,14 @@ func New(f *cmdutil.Factory) *cobra.Command {
 
 // AddInstanceFlags adds common instances parameters, shared between commands.
 func AddInstanceFlags(cmd *cobra.Command, opts *InstanceOptions) {
-	cmd.Flags().StringVarP(&opts.Oauth2, "oauth2", "o", "", "OAuth2 hostname (optional)")
-	cmd.Flags().StringVarP(&opts.Audience, "audience", "a", "", "OAuth2 audience (optional)")
-	cmd.Flags().StringVarP(&opts.Issuer, "issuer", "i", "", "OAuth2 issuer (optional)")
-	cmd.Flags().BoolVar(&opts.Default, "default", false, "Make this the default instance")
-}
-
-// TODO move to utils
-func p(txt string, args ...interface{}) {
-	fmt.Print(heredoc.Docf(txt, args...))
+	defs := config.DefaultHostConfig()
+	cmd.Flags().StringVarP(&opts.APIVersion, "api-version", "a", defs.APIVersion, "API version")
+	cmd.Flags().BoolVar(&opts.Default, "default", defs.IsDefault, "Make this the default instance")
+	// oauth2 stuff
+	cmd.Flags().StringVarP(&opts.Oauth2, "oauth2", "", "", "OAuth2 hostname (optional)")
+	cmd.Flags().StringVarP(&opts.Audience, "audience", "", "", "OAuth2 audience (optional)")
+	cmd.Flags().StringVarP(&opts.Issuer, "issuer", "", "", "OAuth2 issuer (optional)")
+	// TODO get these via a prompt to avoid the shell history?
+	cmd.Flags().StringVarP(&opts.ClientID, "client-id", "", "", "OAuth2 client ID (optional)")
+	cmd.Flags().StringVarP(&opts.Secret, "secret", "", "", "OAuth2 client secret (optional)")
 }

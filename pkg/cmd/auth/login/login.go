@@ -2,13 +2,13 @@ package login
 
 import (
 	"fmt"
+	"github.com/instill-ai/cli/internal/oauth2"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/pkg/cmd/auth/shared"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
@@ -56,6 +56,11 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 		},
 	}
 
+	// TODO handle err
+	cfg, _ := opts.Config()
+
+	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", cfg.DefaultHostname(), "Hostname of an already added Instill AI instance")
+
 	return cmd
 }
 
@@ -67,12 +72,22 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 
 	hostname := opts.Hostname
 
-	if err := cfg.CheckWriteable(hostname, ""); err != nil {
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
 		return err
 	}
 
-	existingRefreshToken, _ := cfg.Get(hostname, "refresh_token")
-	if existingRefreshToken != "" && opts.Interactive {
+	var host *config.HostConfigTyped
+	for _, h := range hosts {
+		if h.APIHostname == hostname {
+			host = &h
+		}
+	}
+	if host == nil {
+		return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+	}
+
+	if host.RefreshToken != "" && opts.Interactive {
 		var keepGoing bool
 		err = prompt.SurveyAskOne(&survey.Confirm{
 			Message: fmt.Sprintf(
@@ -88,11 +103,5 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		}
 	}
 
-	return shared.Login(f, &shared.LoginOptions{
-		IO:          opts.IO,
-		Config:      cfg,
-		Hostname:    opts.Hostname,
-		Interactive: opts.Interactive,
-		Executable:  opts.MainExecutable,
-	})
+	return oauth2.AuthCodeFlowWithConfig(f, host, cfg, opts.IO)
 }
