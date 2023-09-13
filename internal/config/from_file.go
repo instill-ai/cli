@@ -27,6 +27,7 @@ func (c *fileConfig) Root() *yaml.Node {
 	return c.ConfigMap.Root
 }
 
+// Get gets a string value of `key`, from optional `hostname` or from root in case of no `hostname`.
 func (c *fileConfig) Get(hostname, key string) (string, error) {
 	val, _, err := c.GetWithSource(hostname, key)
 	return val, err
@@ -193,24 +194,37 @@ func (c *fileConfig) HostsTyped() ([]HostConfigTyped, error) {
 	if err != nil {
 		return nil, err
 	}
-	hasDefault := false
+	defaultHost, err := c.Get("", "default_hostname")
+	if err != nil {
+		return nil, err
+	}
+	defaultMatched := false
 	for _, h := range hosts {
 		ht, err := hostConfigToTyped(h)
 		if err != nil {
 			return nil, err
 		}
 		// max 1 default host
-		if ht.IsDefault && hasDefault {
-			ht.IsDefault = false
-		} else if ht.IsDefault {
-			hasDefault = true
+		if defaultHost == ht.APIHostname {
+			ht.IsDefault = true
+			defaultMatched = true
 		}
 
 		ret = append(ret, *ht)
 	}
 	// at least 1 default
-	if len(ret) == 1 {
+	if len(ret) > 0 && !defaultMatched {
 		ret[0].IsDefault = true
+		defaultHost = ret[0].APIHostname
+		// update the default hostname
+		err = c.Set("", "default_hostname", defaultHost)
+		if err != nil {
+			return nil, err
+		}
+		err = c.Write()
+		if err != nil {
+			return nil, err
+		}
 	}
 	// default goes first
 	sort.SliceStable(ret, func(i, _ int) bool {
@@ -295,6 +309,12 @@ func (c *fileConfig) SaveTyped(host *HostConfigTyped) error {
 	err = hostTypedToConfig(host, conf)
 	if err != nil {
 		return err
+	}
+	if host.IsDefault {
+		err = c.Set("", "default_hostname", host.APIHostname)
+		if err != nil {
+			return err
+		}
 	}
 	return c.Write()
 }
@@ -392,11 +412,6 @@ func hostConfigToTyped(conf *HostConfig) (*HostConfigTyped, error) {
 		return nil, err
 	}
 	ht.APIVersion = v
-	v, err = conf.GetOptionalStringValue("is_default")
-	if err != nil {
-		return nil, err
-	}
-	ht.IsDefault = strings.ToLower(v) == "true"
 	return ht, nil
 }
 
@@ -434,10 +449,6 @@ func hostTypedToConfig(host *HostConfigTyped, conf *HostConfig) error {
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("id", host.TokenType)
-	if err != nil {
-		return err
-	}
 	err = conf.SetStringValue("oauth2_client_id", host.Oauth2ClientID)
 	if err != nil {
 		return err
@@ -447,14 +458,6 @@ func hostTypedToConfig(host *HostConfigTyped, conf *HostConfig) error {
 		return err
 	}
 	err = conf.SetStringValue("api_version", host.APIVersion)
-	if err != nil {
-		return err
-	}
-	def := "false"
-	if host.IsDefault {
-		def = "true"
-	}
-	err = conf.SetStringValue("is_default", def)
 	if err != nil {
 		return err
 	}
