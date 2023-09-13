@@ -2,6 +2,7 @@ package factory
 
 import (
 	"fmt"
+	"github.com/instill-ai/cli/internal/config"
 	"net/http"
 	"os"
 	"strings"
@@ -54,10 +55,12 @@ var timezoneNames = map[int]string{
 	50400:  "Pacific/Kiritimati",
 }
 
+// TODO wrong name
 type configHTTPClient interface {
 	Get(string, string) (string, error)
 	Set(string, string, string) error
 	Write() error
+	SaveTyped(*config.HostConfigTyped) error
 }
 
 // NewHTTPClient is a generic authenticated HTTP client for commands

@@ -38,6 +38,9 @@ var (
 
 type iconfig interface {
 	SaveTyped(*config.HostConfigTyped) error
+	Get(string, string) (string, error)
+	Set(string, string, string) error
+	Write() error
 }
 
 // Authenticator is used to authenticate our users.
