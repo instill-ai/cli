@@ -49,7 +49,7 @@ type Authenticator struct {
 	oauth2.Config
 }
 
-func init() {
+func initEnv() {
 	// use env vars in dev mode
 	if build.Version == "" {
 		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
@@ -64,6 +64,7 @@ func init() {
 
 // HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
 func HostConfigInstillCloud() *config.HostConfigTyped {
+	initEnv()
 	host := config.DefaultHostConfig()
 	host.APIHostname = "api.instill.tech"
 	host.IsDefault = true
@@ -134,7 +135,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cf
 	maxAge := 0
 	loginURL, state := auth.LoginURL([]string{audience}, prompt, maxAge)
 
-	fmt.Fprintf(IO.Out, "Login to %s. Press ctrl + c to end the process.\n\n", hostname)
+	fmt.Fprintf(IO.Out, "Log into %s. Press ctrl + c to end the process.\n\n", host.Oauth2Hostname)
 	fmt.Fprintf(IO.Out, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", loginURL)
 
 	if err := f.Browser.Browse(loginURL); err != nil {

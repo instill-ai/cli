@@ -68,6 +68,7 @@ func logoutRun(opts *LogoutOptions) error {
 	}
 
 	candidates, err := cfg.Hosts()
+	// TODO filter candidates with oauth2 hostname only
 	if err != nil {
 		return err
 	}
@@ -80,7 +81,7 @@ func logoutRun(opts *LogoutOptions) error {
 			hostname = candidates[0]
 		} else {
 			err = prompt.SurveyAskOne(&survey.Select{
-				Message: "What account do you want to log out of?",
+				Message: "Which account do you want to log out of?",
 				Options: candidates,
 			}, &hostname)
 
@@ -121,9 +122,9 @@ func logoutRun(opts *LogoutOptions) error {
 		}
 	}
 
+	// TODO invalidate the token instead of removing the whole instance
 	cfg.UnsetHost(hostname)
 	err = cfg.Write()
-	// TODO invalidate token
 	if err != nil {
 		return fmt.Errorf("failed to write config, authentication configuration not updated: %w", err)
 	}
