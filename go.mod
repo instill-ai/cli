@@ -6,7 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/briandowns/spinner v1.18.1
-	github.com/charmbracelet/glamour v0.6.0
+	github.com/charmbracelet/glamour v0.6.1-0.20230822193950-b8953ce4af51
 	github.com/cli/browser v1.1.0
 	github.com/cli/safeexec v1.0.0
 	github.com/coreos/go-oidc/v3 v3.6.0
@@ -38,7 +38,7 @@ require (
 )
 
 require (
-	github.com/alecthomas/chroma v0.10.0 // indirect
+	github.com/alecthomas/chroma/v2 v2.8.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

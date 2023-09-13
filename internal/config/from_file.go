@@ -226,25 +226,20 @@ func (c *fileConfig) HostsTyped() ([]HostConfigTyped, error) {
 			return nil, err
 		}
 	}
-	// default goes first
-	sort.SliceStable(ret, func(i, _ int) bool {
-		return ret[i].IsDefault
+	// sort by name
+	sort.SliceStable(ret, func(i, j int) bool {
+		return ret[i].APIHostname < ret[j].APIHostname
 	})
 	return ret, nil
 }
 
 // DefaultHostname returns the default API hostname, or a fallback in case of none or an error.
 func (c *fileConfig) DefaultHostname() string {
-	hosts, err := c.HostsTyped()
+	hostname, err := c.Get("", "default_hostname")
 	if err != nil {
 		return instance.Default()
 	}
-	for _, h := range hosts {
-		if h.IsDefault {
-			return h.APIHostname
-		}
-	}
-	return hosts[0].APIHostname
+	return hostname
 }
 
 func (c *fileConfig) MakeConfigForHost(hostname string) *HostConfig {
@@ -382,12 +377,12 @@ func hostConfigToTyped(conf *HostConfig) (*HostConfigTyped, error) {
 		return nil, err
 	}
 	ht.IDToken = v
-	v, err = conf.GetOptionalStringValue("audience")
+	v, err = conf.GetOptionalStringValue("oauth2_audience")
 	if err != nil {
 		return nil, err
 	}
 	ht.Oauth2Audience = v
-	v, err = conf.GetOptionalStringValue("issuer")
+	v, err = conf.GetOptionalStringValue("oauth2_issuer")
 	if err != nil {
 		return nil, err
 	}
@@ -421,31 +416,31 @@ func hostTypedToConfig(host *HostConfigTyped, conf *HostConfig) error {
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("access_token", host.TokenType)
+	err = conf.SetStringValue("access_token", host.AccessToken)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("expiry", host.TokenType)
+	err = conf.SetStringValue("expiry", host.Expiry)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("refresh_token", host.TokenType)
+	err = conf.SetStringValue("refresh_token", host.RefreshToken)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("id_token", host.TokenType)
+	err = conf.SetStringValue("id_token", host.IDToken)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("audience", host.TokenType)
+	err = conf.SetStringValue("oauth2_audience", host.Oauth2Audience)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("issuer", host.TokenType)
+	err = conf.SetStringValue("oauth2_issuer", host.Oauth2Issuer)
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("oauth2_hostname", host.TokenType)
+	err = conf.SetStringValue("oauth2_hostname", host.Oauth2Hostname)
 	if err != nil {
 		return err
 	}

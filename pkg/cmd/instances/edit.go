@@ -97,9 +97,7 @@ func runEdit(opts *EditOptions) error {
 	}
 
 	if opts.Oauth2 != "" && (opts.Secret == "" || opts.ClientID == "") {
-		return fmt.Errorf(
-			"ERROR: failed to edit instance %s:\n--secret and --client-id required when --oauth2 specified",
-			opts.APIHostname)
+		return fmt.Errorf("ERROR: --secret and --client-id required when --oauth2 is specified")
 	}
 
 	host.APIHostname = opts.APIHostname
@@ -113,7 +111,7 @@ func runEdit(opts *EditOptions) error {
 
 	err = cfg.SaveTyped(host)
 	if err != nil {
-		return fmt.Errorf("ERROR: failed to edit instance '%s': %w", opts.APIHostname, err)
+		return fmt.Errorf("ERROR: failed to edit instance '%s':\n%w", opts.APIHostname, err)
 	}
 
 	cmdutil.P("Instance '%s' has been saved", host.APIHostname)

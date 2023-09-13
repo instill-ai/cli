@@ -92,28 +92,25 @@ func runAdd(opts *AddOptions) error {
 	apiHost := opts.APIHostname
 	for _, h := range hosts {
 		if h.APIHostname == apiHost {
-			return fmt.Errorf("apiHost '%s' already exists", apiHost)
+			return fmt.Errorf("ERROR: instance '%s' already exists", apiHost)
 		}
 	}
 
 	if opts.Oauth2 != "" && (opts.Secret == "" || opts.ClientID == "") {
-		return fmt.Errorf(
-			"ERROR: failed to add instance '%s':\n--secret and --client-id required when --oauth2 specified",
-			opts.APIHostname)
+		return fmt.Errorf("ERROR: --secret and --client-id required when --oauth2 is specified")
 	}
 
-	host := &config.HostConfigTyped{
-		APIHostname:    opts.APIHostname,
-		IsDefault:      opts.Default,
-		Oauth2Hostname: opts.Oauth2,
-		Oauth2Audience: opts.Audience,
-		Oauth2Issuer:   opts.Issuer,
-		Oauth2ClientID: opts.ClientID,
-		Oauth2Secret:   opts.Secret,
-		APIVersion:     opts.APIVersion,
-	}
+	host := config.DefaultHostConfig()
+	host.APIHostname = opts.APIHostname
+	host.IsDefault = opts.Default
+	host.Oauth2Hostname = opts.Oauth2
+	host.Oauth2Audience = opts.Audience
+	host.Oauth2Issuer = opts.Issuer
+	host.Oauth2ClientID = opts.ClientID
+	host.Oauth2Secret = opts.Secret
+	host.APIVersion = opts.APIVersion
 
-	err = cfg.SaveTyped(host)
+	err = cfg.SaveTyped(&host)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to add instance '%s': %w", opts.APIHostname, err)
 	}

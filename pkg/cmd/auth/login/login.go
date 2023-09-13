@@ -81,10 +81,22 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 	for _, h := range hosts {
 		if h.APIHostname == hostname {
 			host = &h
+			break
 		}
 	}
 	if host == nil {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+	}
+
+	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2Secret == "" {
+		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
+
+			You fix it with:
+			$ instill instances edit %s \
+				--oauth2 HOSTNAME \
+				--client-id CLIENT_ID \
+				--secret SECRET`, hostname, hostname)
+		return fmt.Errorf(e)
 	}
 
 	if host.RefreshToken != "" && opts.Interactive {
