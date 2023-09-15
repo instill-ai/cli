@@ -48,7 +48,7 @@ func TestNormalizeHostname(t *testing.T) {
 func TestHostnameValidator(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    interface{}
+		input    string
 		wantsErr bool
 	}{
 		{
@@ -57,23 +57,23 @@ func TestHostnameValidator(t *testing.T) {
 			wantsErr: false,
 		},
 		{
+			name:     "port number",
+			input:    "hostname:123",
+			wantsErr: false,
+		},
+		{
+			name:     "empty",
+			input:    "",
+			wantsErr: true,
+		},
+		{
 			name:     "hostname with slashes",
 			input:    "//internal.instance",
 			wantsErr: true,
 		},
 		{
-			name:     "empty hostname",
+			name:     "whitespace",
 			input:    "   ",
-			wantsErr: true,
-		},
-		{
-			name:     "hostname with colon",
-			input:    "internal.instance:2205",
-			wantsErr: true,
-		},
-		{
-			name:     "non-string hostname",
-			input:    62,
 			wantsErr: true,
 		},
 	}
@@ -86,29 +86,6 @@ func TestHostnameValidator(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
-		})
-	}
-}
-
-func TestRESTPrefix(t *testing.T) {
-	tests := []struct {
-		host string
-		want string
-	}{
-		{
-			host: "instill.tech",
-			want: "https://api.instill.tech/",
-		},
-		{
-			host: "instill.localhost",
-			want: "http://api.instill.localhost/",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.host, func(t *testing.T) {
-			if got := RESTPrefix(tt.host); got != tt.want {
-				t.Errorf("RESTPrefix() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }

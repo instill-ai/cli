@@ -4,23 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/instill-ai/cli/internal/instance"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/instill-ai/cli/internal/instance"
 )
 
-func httpRequest(client *http.Client, hostname string, method string, p string, params interface{}, headers []string) (*http.Response, error) {
+func httpRequest(client *http.Client, hostname string, method string, path string, params interface{}, headers []string) (*http.Response, error) {
 
-	var requestURL string
-	if strings.HasPrefix(p, "https://") {
-		requestURL = p
-	} else {
-		requestURL = instance.RESTPrefix(hostname) + strings.TrimPrefix(p, "/")
-	}
+	requestURL := instance.GetProtocol(hostname) + strings.TrimPrefix(path, "/")
 
 	var body io.Reader
 	var bodyIsJSON bool

@@ -54,6 +54,8 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		Config:     f.Config,
 		HTTPClient: f.HTTPClient,
 	}
+	// TODO handle error
+	cfg, _ := opts.Config()
 
 	cmd := &cobra.Command{
 		Use:   "api <endpoint>",
@@ -138,7 +140,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.Hostname, "instance", "", "Override currently selected instance")
+	cmd.Flags().StringVar(&opts.Hostname, "hostname", cfg.DefaultHostname(), "Target instance")
 	cmd.Flags().StringVarP(&opts.RequestMethod, "method", "X", "GET", "The HTTP method for the request")
 	cmd.Flags().StringArrayVarP(&opts.MagicFields, "field", "F", nil, "Add a typed parameter in `key=value` format")
 	cmd.Flags().StringArrayVarP(&opts.RawFields, "raw-field", "f", nil, "Add a string parameter in `key=value` format")
@@ -199,32 +201,46 @@ func apiRun(opts *ApiOptions) error {
 		defer opts.IO.StopPager()
 	}
 
+	// get the host config
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
 	}
-
-	host := cfg.DefaultHostname()
+	var host *config.HostConfigTyped
 	if err != nil {
 		return err
 	}
-
-	if opts.Hostname != "" {
-		host = opts.Hostname
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
+		return err
+	}
+	for i := range hosts {
+		if hosts[i].APIHostname == opts.Hostname {
+			host = &hosts[i]
+			break
+		}
+	}
+	if host == nil {
+		return fmt.Errorf("instance '%s' doesn't exist", opts.Hostname)
 	}
 
+	// set up the request
+	// TODO support other services than VDP
+	requestPath = "vdp/" + host.APIVersion + "/" + strings.TrimPrefix(requestPath, "/")
+	if host.AccessToken != "" {
+		requestHeaders = append(requestHeaders, "Authorization: Bearer "+host.AccessToken)
+	}
+
+	// http request & output
 	template := export.NewTemplate(opts.IO, opts.Template)
-
-	resp, err := httpRequest(httpClient, host, method, requestPath, requestBody, requestHeaders)
+	resp, err := httpRequest(httpClient, host.APIHostname, method, requestPath, requestBody, requestHeaders)
 	if err != nil {
 		return err
 	}
-
 	err = processResponse(resp, opts, headersOutputStream, &template)
 	if err != nil {
 		return err
 	}
-
 	return template.End()
 }
 
