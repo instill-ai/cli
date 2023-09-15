@@ -23,7 +23,9 @@ import (
 )
 
 func Test_NewCmdApi(t *testing.T) {
-	f := &cmdutil.Factory{}
+	f := &cmdutil.Factory{
+		Config: config.ConfigStubFactory,
+	}
 
 	tests := []struct {
 		name     string
@@ -35,7 +37,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "override method",
 			cli:  "pipelines -XDELETE",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "DELETE",
 				RequestMethodPassed: true,
 				RequestPath:         "pipelines",
@@ -55,7 +57,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with headers",
 			cli:  "user -H 'accept: text/plain' -i",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "user",
@@ -75,7 +77,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with silenced output",
 			cli:  "models --silent",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "models",
@@ -95,7 +97,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with request body from file",
 			cli:  "user --input myfile",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "user",
@@ -120,7 +122,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with cache",
 			cli:  "user --cache 5m",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "user",
@@ -140,7 +142,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with template",
 			cli:  "user -t 'hello {{.name}}'",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "user",
@@ -160,7 +162,7 @@ func Test_NewCmdApi(t *testing.T) {
 			name: "with jq filter",
 			cli:  "user -q .name",
 			wants: ApiOptions{
-				Hostname:            "",
+				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
 				RequestPath:         "user",
@@ -372,7 +374,7 @@ func Test_apiRun(t *testing.T) {
 			stream, _, stdout, stderr := iostreams.Test()
 
 			tt.options.IO = stream
-			tt.options.Config = func() (config.Config, error) { return config.NewBlankConfig(), nil }
+			tt.options.Config = config.ConfigStubFactory
 			tt.options.HTTPClient = func() (*http.Client, error) {
 				var tr roundTripper = func(req *http.Request) (*http.Response, error) {
 					resp := tt.httpResponse
@@ -458,9 +460,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 					}
 					return &http.Client{Transport: tr}, nil
 				},
-				Config: func() (config.Config, error) {
-					return config.NewBlankConfig(), nil
-				},
+				Config: config.ConfigStubFactory,
 			}
 
 			err := apiRun(&options)
@@ -469,7 +469,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 			}
 
 			assert.Equal(t, "POST", resp.Request.Method)
-			assert.Equal(t, "/hello?a=b&c=d", resp.Request.URL.RequestURI())
+			assert.Equal(t, "/vdp/v1alpha/hello?a=b&c=d", resp.Request.URL.RequestURI())
 			assert.Equal(t, tt.contentLength, resp.Request.ContentLength)
 			assert.Equal(t, "", resp.Request.Header.Get("Content-Type"))
 			assert.Equal(t, tt.inputContents, bodyBytes)
@@ -493,9 +493,7 @@ func Test_apiRun_cache(t *testing.T) {
 			}
 			return &http.Client{Transport: tr}, nil
 		},
-		Config: func() (config.Config, error) {
-			return config.NewBlankConfig(), nil
-		},
+		Config: config.ConfigStubFactory,
 
 		RequestPath: "pipelines",
 		CacheTTL:    time.Minute,
