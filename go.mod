@@ -24,7 +24,7 @@ require (
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/muesli/reflow v0.2.1-0.20210502190812-c80126ec2ad5
 	github.com/muesli/termenv v0.9.0
-	github.com/ory/graceful v0.1.2
+	github.com/ory/graceful v0.1.3
 	github.com/ory/x v0.0.364
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/pflag v1.0.5
