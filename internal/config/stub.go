@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/instill-ai/cli/internal/instance"
 )
 
 type ConfigStub map[string]string
@@ -52,4 +53,32 @@ func (c ConfigStub) DefaultHost() (string, error) {
 
 func (c ConfigStub) DefaultHostWithSource() (string, string, error) {
 	return "", "", nil
+}
+
+func (c ConfigStub) DefaultHostname() string {
+	return instance.FallbackHostname()
+}
+
+func (c ConfigStub) HostsTyped() ([]HostConfigTyped, error) {
+	ins := []HostConfigTyped{
+		{
+			APIHostname:    "api.instill.tech",
+			IsDefault:      true,
+			APIVersion:     "v1alpha",
+			Oauth2Hostname: "auth.instill.tech",
+			Oauth2Audience: "https://api.instill.tech",
+			Oauth2Issuer:   "https://auth.instill.tech/",
+			Oauth2Secret:   "foobar",
+			Oauth2ClientID: "barfoo",
+		},
+	}
+	return ins, nil
+}
+
+func (c ConfigStub) SaveTyped(*HostConfigTyped) error {
+	return nil
+}
+
+func ConfigStubFactory() (Config, error) {
+	return ConfigStub{}, nil
 }

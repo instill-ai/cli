@@ -2,6 +2,8 @@ package login
 
 import (
 	"bytes"
+	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/instance"
 	"testing"
 
 	"github.com/google/shlex"
@@ -34,7 +36,7 @@ func Test_NewCmdLogin(t *testing.T) {
 			stdinTTY: true,
 			cli:      "",
 			wants: LoginOptions{
-				Hostname:    "",
+				Hostname:    instance.FallbackHostname(),
 				Interactive: true,
 			},
 		},
@@ -46,6 +48,7 @@ func Test_NewCmdLogin(t *testing.T) {
 			f := &cmdutil.Factory{
 				IOStreams:  io,
 				Executable: func() string { return "/path/to/instill" },
+				Config:     config.ConfigStubFactory,
 			}
 
 			io.SetStdoutTTY(true)

@@ -160,6 +160,39 @@ func apiRun(opts *ApiOptions) error {
 		return err
 	}
 
+	// get the host config
+	cfg, err := opts.Config()
+	if err != nil {
+		return err
+	}
+	var host *config.HostConfigTyped
+	if err != nil {
+		return err
+	}
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
+		return err
+	}
+	hostname := opts.Hostname
+	if hostname == "" {
+		hostname = cfg.DefaultHostname()
+	}
+	for i := range hosts {
+		if hosts[i].APIHostname == hostname {
+			host = &hosts[i]
+			break
+		}
+	}
+	if host == nil {
+		return fmt.Errorf(heredoc.Docf(
+			`ERROR: instance '%s' does not exist
+
+			You can add it with:
+			$ inst instances add %s`,
+			hostname, hostname))
+	}
+
+	// set up the http client
 	method := opts.RequestMethod
 	requestPath := opts.RequestPath
 	requestHeaders := opts.RequestHeaders
@@ -199,29 +232,6 @@ func apiRun(opts *ApiOptions) error {
 			return err
 		}
 		defer opts.IO.StopPager()
-	}
-
-	// get the host config
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-	var host *config.HostConfigTyped
-	if err != nil {
-		return err
-	}
-	hosts, err := cfg.HostsTyped()
-	if err != nil {
-		return err
-	}
-	for i := range hosts {
-		if hosts[i].APIHostname == opts.Hostname {
-			host = &hosts[i]
-			break
-		}
-	}
-	if host == nil {
-		return fmt.Errorf("instance '%s' doesn't exist", opts.Hostname)
 	}
 
 	// set up the request

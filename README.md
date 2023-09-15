@@ -6,7 +6,7 @@
     <a href="https://www.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Website</a> |
     <a href="https://discord.gg/sevxWsqpGh">Community</a> |
     <a href="https://blog.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Blog</a><br/><br/>
-    <a href="https://docs.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">User Manual</a> |
+    <a href="https://www.instill.tech/docs/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">User Manual</a> |
     <a href="https://discord.gg/sevxWsqpGh">API Reference</a><br/><br/>
     <a href="https://www.instill.tech/get-access/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme"><strong>Get Early Access</strong></a>
 </h4>
@@ -47,6 +47,12 @@ brew install instill-ai/tap/instill
 To upgrade:
 ```
 brew upgrade instill-ai/tap/instill
+```
+
+## Usage
+
+```
+
 ```
 
 ## Issues and discussions

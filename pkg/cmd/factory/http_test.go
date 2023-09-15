@@ -2,6 +2,7 @@ package factory
 
 import (
 	"fmt"
+	"github.com/instill-ai/cli/internal/config"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -139,6 +140,10 @@ func TestNewHTTPClient(t *testing.T) {
 }
 
 type tinyConfig map[string]string
+
+func (c tinyConfig) SaveTyped(typed *config.HostConfigTyped) error {
+	return nil
+}
 
 func (c tinyConfig) Get(host, key string) (string, error) {
 	return c[fmt.Sprintf("%s:%s", host, key)], nil

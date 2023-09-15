@@ -43,7 +43,7 @@ func Test_httpRequest(t *testing.T) {
 			name: "simple GET",
 			args: args{
 				client:  &httpClient,
-				host:    "instill.tech",
+				host:    "api.instill.tech",
 				method:  "GET",
 				p:       "/models",
 				params:  nil,
@@ -61,7 +61,7 @@ func Test_httpRequest(t *testing.T) {
 			name: "GET with leading slash",
 			args: args{
 				client:  &httpClient,
-				host:    "instill.tech",
+				host:    "api.instill.tech",
 				method:  "GET",
 				p:       "/models",
 				params:  nil,
@@ -79,7 +79,7 @@ func Test_httpRequest(t *testing.T) {
 			name: "GET with params",
 			args: args{
 				client: &httpClient,
-				host:   "instill.tech",
+				host:   "api.instill.tech",
 				method: "GET",
 				p:      "models",
 				params: map[string]interface{}{
@@ -99,7 +99,7 @@ func Test_httpRequest(t *testing.T) {
 			name: "POST with params",
 			args: args{
 				client: &httpClient,
-				host:   "github.com",
+				host:   "api.github.com",
 				method: "POST",
 				p:      "repos",
 				params: map[string]interface{}{
@@ -119,7 +119,7 @@ func Test_httpRequest(t *testing.T) {
 			name: "POST with body and type",
 			args: args{
 				client: &httpClient,
-				host:   "github.com",
+				host:   "api.github.com",
 				method: "POST",
 				p:      "repos",
 				params: bytes.NewBufferString("CUSTOM"),

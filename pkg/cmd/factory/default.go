@@ -2,6 +2,7 @@ package factory
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -115,17 +116,20 @@ func executable(fallbackName string) string {
 
 func configFunc() func() (config.Config, error) {
 	var cachedConfig config.Config
-	var configError error
+	var err error
 	return func() (config.Config, error) {
-		if cachedConfig != nil || configError != nil {
-			return cachedConfig, configError
+		if cachedConfig != nil || err != nil {
+			if err != nil {
+				fmt.Printf("ERROR: cant read the config\n%s", err)
+			}
+			return cachedConfig, err
 		}
-		cachedConfig, configError = config.ParseDefaultConfig()
-		if errors.Is(configError, os.ErrNotExist) {
+		cachedConfig, err = config.ParseDefaultConfig()
+		if errors.Is(err, os.ErrNotExist) {
 			cachedConfig = config.NewBlankConfig()
-			configError = nil
+			err = nil
 		}
-		return cachedConfig, configError
+		return cachedConfig, err
 	}
 }
 
