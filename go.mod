@@ -8,7 +8,7 @@ require (
 	github.com/briandowns/spinner v1.18.1
 	github.com/charmbracelet/glamour v0.3.0
 	github.com/cli/browser v1.1.0
-	github.com/cli/safeexec v1.0.0
+	github.com/cli/safeexec v1.0.1
 	github.com/coreos/go-oidc/v3 v3.6.0
 	github.com/creack/pty v1.1.18
 	github.com/dotenv-org/godotenvvault v0.6.0
