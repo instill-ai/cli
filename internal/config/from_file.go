@@ -181,7 +181,7 @@ func (c *fileConfig) Hosts() ([]string, error) {
 		hostnames = append(hostnames, entry.Host)
 	}
 
-	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == instance.Default() })
+	sort.SliceStable(hostnames, func(i, j int) bool { return hostnames[i] == instance.FallbackHostname() })
 
 	return hostnames, nil
 }
@@ -237,7 +237,7 @@ func (c *fileConfig) HostsTyped() ([]HostConfigTyped, error) {
 func (c *fileConfig) DefaultHostname() string {
 	hostname, err := c.Get("", "default_hostname")
 	if err != nil {
-		return instance.Default()
+		return instance.FallbackHostname()
 	}
 	return hostname
 }
