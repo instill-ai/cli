@@ -93,8 +93,10 @@ func (e *InstillEditor) prompt(initialValue string, config *survey.PromptConfig)
 	defer func() { _ = rr.RestoreTermMode() }()
 
 	cursor := e.NewCursor()
-	cursor.Hide()
-	defer cursor.Show()
+	_ = cursor.Hide()
+	defer func() {
+		_ = cursor.Show()
+	}()
 
 	for {
 		// EXTENDED to handle the e to edit / enter to skip behavior + BlankAllowed

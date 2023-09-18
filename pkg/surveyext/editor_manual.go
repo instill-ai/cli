@@ -80,7 +80,7 @@ func edit(editorCommand, fn, initialValue string, stdin io.Reader, stdout io.Wri
 	cmd.Stderr = stderr
 
 	if cursor != nil {
-		cursor.Show()
+		_ = cursor.Show()
 	}
 
 	// open the editor
