@@ -22,7 +22,8 @@ func CheckAuth(cfg config.Config) bool {
 	}
 	defHostname := cfg.DefaultHostname()
 	for _, h := range hosts {
-		if h.APIHostname == defHostname && h.AccessToken != "" {
+		// check the token only for instances with an OAuth2 hostname
+		if h.APIHostname == defHostname && h.AccessToken != "" || h.Oauth2Hostname == "" {
 			// TODO use oauth2.VerifyIDToken?
 			return true
 		}

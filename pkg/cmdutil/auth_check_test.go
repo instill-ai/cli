@@ -15,21 +15,30 @@ func Test_CheckAuth(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "no hosts",
+			name:     "no instances",
 			cfg:      func(c config.Config) {},
 			expected: false,
 		},
 		{
-			name: "host, no access token",
+			name: "no oauth2 hostname, no access token",
+			cfg: func(c config.Config) {
+				_ = c.Set("api.instill.tech", "access_token", "")
+			},
+			expected: true,
+		},
+		{
+			name: "no oauth2 hostname, no access token",
 			cfg: func(c config.Config) {
 				_ = c.Set("instill.tech", "access_token", "")
+				_ = c.Set("instill.tech", "oauth2_hostname", "auth.instill.tech")
 			},
 			expected: false,
 		},
 		{
-			name: "host, access token",
+			name: "oauth2 hostname, access token",
 			cfg: func(c config.Config) {
 				_ = c.Set("instill.tech", "access_token", "a token")
+				_ = c.Set("instill.tech", "oauth2_hostname", "auth.instill.tech")
 			},
 			expected: true,
 		},

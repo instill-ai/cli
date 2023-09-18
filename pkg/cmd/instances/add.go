@@ -28,7 +28,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 		Use: "add",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				return fmt.Errorf("Error: specify an API hostname\n$ inst instances add API_HOSTNAME")
+				return fmt.Errorf("ERROR: specify an API hostname\n$ inst instances add API_HOSTNAME")
 			}
 			if err := instance.HostnameValidator(args[0]); err != nil {
 				return fmt.Errorf("error parsing API hostname %w", err)

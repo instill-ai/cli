@@ -305,6 +305,7 @@ func (c *fileConfig) SaveTyped(host *HostConfigTyped) error {
 	if err != nil {
 		return err
 	}
+	// update the default instance in the main config
 	if host.IsDefault {
 		err = c.Set("", "default_hostname", host.APIHostname)
 		if err != nil {

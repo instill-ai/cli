@@ -10,38 +10,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type RemoveOptions struct {
+type SetDefaultOptions struct {
 	IO             *iostreams.IOStreams
 	Config         func() (config.Config, error)
 	MainExecutable string
 	Interactive    bool
-	APIHostname    string
+	InstanceOptions
 }
 
-func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Command {
-	opts := &RemoveOptions{
+func NewSetDefaultCmd(f *cmdutil.Factory, runF func(*SetDefaultOptions) error) *cobra.Command {
+	opts := &SetDefaultOptions{
 		IO:     f.IOStreams,
 		Config: f.Config,
 	}
 
 	cmd := &cobra.Command{
-		Use: "remove",
+		Use: "set-default",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				return fmt.Errorf("ERROR: specify an API hostname\n$ inst instances remove API_HOSTNAME")
+				return fmt.Errorf("ERROR: specify an API hostname\n$ inst instances set-default API_HOSTNAME")
 			}
 			if err := instance.HostnameValidator(args[0]); err != nil {
 				return fmt.Errorf("error parsing API hostname %w", err)
 			}
 			return nil
 		},
-		Short: "Remove an existing instance",
+		Short: "Mark an instance as the default one",
 		Long: heredoc.Docf(`
-			Remove an existing Instill AI instance, either Cloud or Core.
+			Mark an instance as the default one for commands like "auth" and "api".
+			Can be optionally overloaded with the --hostname param.
 		`),
 		Example: heredoc.Doc(`
-			# remove the local instance instance
-			$ inst instances remove instill.localhost
+			# make instill.localhost the default instance
+			$ inst instances set-default instill.localhost
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -49,19 +50,20 @@ func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Co
 				opts.Interactive = true
 			}
 			opts.APIHostname = args[0]
+
 			opts.MainExecutable = f.Executable()
 			if runF != nil {
 				return runF(opts)
 			}
 
-			return runRemove(opts)
+			return runSetDefault(opts)
 		},
 	}
 
 	return cmd
 }
 
-func runRemove(opts *RemoveOptions) error {
+func runSetDefault(opts *SetDefaultOptions) error {
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
@@ -72,7 +74,6 @@ func runRemove(opts *RemoveOptions) error {
 		return err
 	}
 
-	// TODO use cfg.HostnameExists()
 	apiHost := opts.APIHostname
 	var host *config.HostConfigTyped
 	for _, h := range hosts {
@@ -85,13 +86,14 @@ func runRemove(opts *RemoveOptions) error {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
 
-	cfg.UnsetHost(opts.APIHostname)
-	err = cfg.Write()
+	host.IsDefault = true
+
+	err = cfg.SaveTyped(host)
 	if err != nil {
-		return fmt.Errorf("error removing hostname '%s' - %w", opts.APIHostname, err)
+		return fmt.Errorf("ERROR: failed to set instance '%s' as the default one:\n%w", opts.APIHostname, err)
 	}
 
-	cmdutil.P("Instance '%s' has been removed", opts.APIHostname)
+	cmdutil.P("Instance '%s' has been set as the default one\n", host.APIHostname)
 
 	return nil
 }

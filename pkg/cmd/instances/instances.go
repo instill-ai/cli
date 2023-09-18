@@ -31,7 +31,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(NewEditCmd(f, nil))
 	cmd.AddCommand(NewListCmd(f, nil))
 	cmd.AddCommand(NewRemoveCmd(f, nil))
-	// TODO set-default
+	cmd.AddCommand(NewSetDefaultCmd(f, nil))
 
 	return cmd
 }

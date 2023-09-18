@@ -11,15 +11,6 @@ func FallbackHostname() string {
 	return "api.instill.tech"
 }
 
-// ExtractHostname returns the canonical host name of a Instill instance
-// TODO replace with config.HostConfigTyped.APIHostname
-func ExtractHostname(h string) string {
-	hostname := strings.ToLower(h)
-
-	parts := strings.Split(hostname, ".")
-	return parts[len(parts)-2] + "." + parts[len(parts)-1]
-}
-
 // HostnameValidator validates a hostname, with an optional port number.
 // TODO move to utils
 func HostnameValidator(v string) error {
