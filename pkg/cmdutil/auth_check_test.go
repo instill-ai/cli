@@ -1,6 +1,8 @@
 package cmdutil
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,6 +11,11 @@ import (
 )
 
 func Test_CheckAuth(t *testing.T) {
+	configDir := filepath.Join(t.TempDir(), ".config", "instill")
+	_ = os.MkdirAll(configDir, 0755)
+	os.Setenv(config.INSTILL_CONFIG_DIR, configDir)
+	defer os.Unsetenv(config.INSTILL_CONFIG_DIR)
+
 	tests := []struct {
 		name     string
 		cfg      func(config.Config)

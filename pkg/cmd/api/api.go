@@ -105,7 +105,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
 
 			# set a custom HTTP header
-  			$ instill api -H 'Authorization: Basic ...'
+			$ instill api -H 'Authorization: Basic ...'
 		`),
 		Annotations: map[string]string{
 			"help:environment": heredoc.Doc(`
