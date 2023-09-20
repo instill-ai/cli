@@ -12,16 +12,15 @@ import (
 
 type SetDefaultOptions struct {
 	IO             *iostreams.IOStreams
-	Config         func() (config.Config, error)
+	Config         config.Config
 	MainExecutable string
 	Interactive    bool
-	InstanceOptions
+	APIHostname    string
 }
 
 func NewSetDefaultCmd(f *cmdutil.Factory, runF func(*SetDefaultOptions) error) *cobra.Command {
 	opts := &SetDefaultOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO: f.IOStreams,
 	}
 
 	cmd := &cobra.Command{
@@ -45,6 +44,11 @@ func NewSetDefaultCmd(f *cmdutil.Factory, runF func(*SetDefaultOptions) error) *
 			$ inst instances set-default instill.localhost
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := f.Config()
+			if err != nil {
+				return err
+			}
+			opts.Config = cfg
 
 			if opts.IO.CanPrompt() {
 				opts.Interactive = true
@@ -64,12 +68,7 @@ func NewSetDefaultCmd(f *cmdutil.Factory, runF func(*SetDefaultOptions) error) *
 }
 
 func runSetDefault(opts *SetDefaultOptions) error {
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-
-	hosts, err := cfg.HostsTyped()
+	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err
 	}
@@ -88,12 +87,12 @@ func runSetDefault(opts *SetDefaultOptions) error {
 
 	host.IsDefault = true
 
-	err = cfg.SaveTyped(host)
+	err = opts.Config.SaveTyped(host)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to set instance '%s' as the default one:\n%w", opts.APIHostname, err)
 	}
 
-	cmdutil.P("Instance '%s' has been set as the default one\n", host.APIHostname)
+	cmdutil.P(opts.IO, "Instance '%s' has been set as the default one\n", host.APIHostname)
 
 	return nil
 }

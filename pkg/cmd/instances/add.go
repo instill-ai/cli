@@ -12,7 +12,7 @@ import (
 
 type AddOptions struct {
 	IO             *iostreams.IOStreams
-	Config         func() (config.Config, error)
+	Config         config.Config
 	MainExecutable string
 	Interactive    bool
 	InstanceOptions
@@ -20,8 +20,7 @@ type AddOptions struct {
 
 func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command {
 	opts := &AddOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO: f.IOStreams,
 	}
 
 	cmd := &cobra.Command{
@@ -52,6 +51,11 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 				--client-id CLIENT_ID
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := f.Config()
+			if err != nil {
+				return err
+			}
+			opts.Config = cfg
 
 			if opts.IO.CanPrompt() {
 				opts.Interactive = true
@@ -79,12 +83,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 }
 
 func runAdd(opts *AddOptions) error {
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-
-	hosts, err := cfg.HostsTyped()
+	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err
 	}
@@ -110,12 +109,12 @@ func runAdd(opts *AddOptions) error {
 	host.Oauth2Secret = opts.Secret
 	host.APIVersion = opts.APIVersion
 
-	err = cfg.SaveTyped(&host)
+	err = opts.Config.SaveTyped(&host)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to add instance '%s': %w", opts.APIHostname, err)
 	}
 
-	cmdutil.P("Instance '%s' has been added", host.APIHostname)
+	cmdutil.P(opts.IO, "Instance '%s' has been added\n", host.APIHostname)
 
 	return nil
 }

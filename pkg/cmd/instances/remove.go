@@ -12,7 +12,7 @@ import (
 
 type RemoveOptions struct {
 	IO             *iostreams.IOStreams
-	Config         func() (config.Config, error)
+	Config         config.Config
 	MainExecutable string
 	Interactive    bool
 	APIHostname    string
@@ -20,8 +20,7 @@ type RemoveOptions struct {
 
 func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Command {
 	opts := &RemoveOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO: f.IOStreams,
 	}
 
 	cmd := &cobra.Command{
@@ -44,6 +43,11 @@ func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Co
 			$ inst instances remove instill.localhost
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := f.Config()
+			if err != nil {
+				return err
+			}
+			opts.Config = cfg
 
 			if opts.IO.CanPrompt() {
 				opts.Interactive = true
@@ -62,12 +66,7 @@ func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Co
 }
 
 func runRemove(opts *RemoveOptions) error {
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-
-	hosts, err := cfg.HostsTyped()
+	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err
 	}
@@ -85,13 +84,13 @@ func runRemove(opts *RemoveOptions) error {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
 
-	cfg.UnsetHost(opts.APIHostname)
-	err = cfg.Write()
+	opts.Config.UnsetHost(opts.APIHostname)
+	err = opts.Config.Write()
 	if err != nil {
 		return fmt.Errorf("error removing hostname '%s' - %w", opts.APIHostname, err)
 	}
 
-	cmdutil.P("Instance '%s' has been removed", opts.APIHostname)
+	cmdutil.P(opts.IO, "Instance '%s' has been removed\n", opts.APIHostname)
 
 	return nil
 }

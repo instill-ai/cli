@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/glamour"
+	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/olekukonko/tablewriter"
 	"io"
 )
 
-func PrintMarkdown(md string) error {
+func PrintMarkdown(io *iostreams.IOStreams, md string) error {
 	tr, _ := glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
 		glamour.WithWordWrap(0),
@@ -18,7 +19,7 @@ func PrintMarkdown(md string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(out)
+	fmt.Fprint(io.Out, out)
 	return nil
 }
 
@@ -36,6 +37,6 @@ func GenTable(columns []string, data [][]string) string {
 }
 
 // P is a shorthand for print and heredoc.
-func P(txt string, args ...interface{}) {
-	fmt.Print(heredoc.Docf(txt, args...))
+func P(io *iostreams.IOStreams, txt string, args ...interface{}) {
+	_, _ = fmt.Fprint(io.Out, heredoc.Docf(txt, args...))
 }

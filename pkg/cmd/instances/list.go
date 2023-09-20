@@ -11,15 +11,14 @@ import (
 
 type ListOptions struct {
 	IO             *iostreams.IOStreams
-	Config         func() (config.Config, error)
+	Config         config.Config
 	MainExecutable string
 	Interactive    bool
 }
 
 func NewListCmd(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Command {
 	opts := &ListOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO: f.IOStreams,
 	}
 
 	cmd := &cobra.Command{
@@ -34,6 +33,11 @@ func NewListCmd(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Comman
 			$ inst instances list
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := f.Config()
+			if err != nil {
+				return err
+			}
+			opts.Config = cfg
 
 			if opts.IO.CanPrompt() {
 				opts.Interactive = true
@@ -44,26 +48,21 @@ func NewListCmd(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Comman
 				return runF(opts)
 			}
 
-			return runListCmd(opts)
+			return runList(opts)
 		},
 	}
 
 	return cmd
 }
 
-func runListCmd(opts *ListOptions) error {
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-
-	hosts, err := cfg.HostsTyped()
+func runList(opts *ListOptions) error {
+	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err
 	}
 	cols := []string{"Default", "API Hostname", "Oauth2 Hostname", "Oauth2 Audience", "Oauth2 Issuer", "API Version"}
 	var data [][]string
-	defHostname := cfg.DefaultHostname()
+	defHostname := opts.Config.DefaultHostname()
 	for _, h := range hosts {
 		def := ""
 		if h.APIHostname == defHostname {
@@ -74,7 +73,7 @@ func runListCmd(opts *ListOptions) error {
 	}
 
 	md := cmdutil.GenTable(cols, data)
-	err = cmdutil.PrintMarkdown(md)
+	err = cmdutil.PrintMarkdown(opts.IO, md)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to list instances: %w", err)
 	}

@@ -12,7 +12,7 @@ import (
 
 type EditOptions struct {
 	IO             *iostreams.IOStreams
-	Config         func() (config.Config, error)
+	Config         config.Config
 	MainExecutable string
 	Interactive    bool
 	NoAuth         bool
@@ -21,8 +21,7 @@ type EditOptions struct {
 
 func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Command {
 	opts := &EditOptions{
-		IO:     f.IOStreams,
-		Config: f.Config,
+		IO: f.IOStreams,
 	}
 
 	cmd := &cobra.Command{
@@ -49,6 +48,11 @@ func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Comman
 			$ inst instances edit instill.localhost --no-auth
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := f.Config()
+			if err != nil {
+				return err
+			}
+			opts.Config = cfg
 
 			if opts.IO.CanPrompt() {
 				opts.Interactive = true
@@ -78,12 +82,7 @@ func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Comman
 }
 
 func runEdit(opts *EditOptions) error {
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
-	}
-
-	hosts, err := cfg.HostsTyped()
+	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err
 	}
@@ -128,12 +127,12 @@ func runEdit(opts *EditOptions) error {
 		host.APIVersion = opts.APIVersion
 	}
 
-	err = cfg.SaveTyped(host)
+	err = opts.Config.SaveTyped(host)
 	if err != nil {
 		return fmt.Errorf("ERROR: failed to edit instance '%s':\n%w", opts.APIHostname, err)
 	}
 
-	cmdutil.P("Instance '%s' has been saved\n", host.APIHostname)
+	cmdutil.P(opts.IO, "Instance '%s' has been saved\n", host.APIHostname)
 
 	return nil
 }
