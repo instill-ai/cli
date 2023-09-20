@@ -18,6 +18,7 @@ type Config interface {
 	CheckWriteable(string, string) error
 	Write() error
 	SaveTyped(*HostConfigTyped) error
+	MakeConfigForHost(hostname string) *HostConfig
 }
 
 type ConfigOption struct {

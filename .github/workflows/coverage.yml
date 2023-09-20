@@ -23,3 +23,5 @@ jobs:
           file: ./coverage.txt
           flags: unittests
           name: codecov-umbrella
+          gcov_ignore: "internal/config/stub.go"
+

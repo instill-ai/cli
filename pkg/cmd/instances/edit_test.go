@@ -141,6 +141,18 @@ func TestInstancesEditCmdRun(t *testing.T) {
 			stdout: "Instance 'api.instill.tech' has been saved\n",
 			isErr:  false,
 		},
+		{
+			name: "instances edit api.instill.tech --no-auth",
+			input: &EditOptions{
+				Config: config.ConfigStub{},
+				InstanceOptions: InstanceOptions{
+					APIHostname: "api.instill.tech",
+				},
+				NoAuth: true,
+			},
+			stdout: "Instance 'api.instill.tech' has been saved\n",
+			isErr:  false,
+		},
 	}
 
 	for _, tt := range tests {

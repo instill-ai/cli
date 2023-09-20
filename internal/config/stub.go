@@ -60,6 +60,10 @@ func (c ConfigStub) DefaultHostname() string {
 	return instance.FallbackHostname()
 }
 
+func (c ConfigStub) MakeConfigForHost(hostname string) *HostConfig {
+	return nil
+}
+
 func (c ConfigStub) HostsTyped() ([]HostConfigTyped, error) {
 	ins := []HostConfigTyped{
 		{
