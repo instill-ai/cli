@@ -49,10 +49,43 @@ To upgrade:
 brew upgrade instill-ai/tap/instill
 ```
 
-## Usage
+## Usage examples
 
-```
+```bash
+# log in
+$ instill auth login
 
+# list pipelines
+$ instill api pipelines
+
+# list models
+$ instill api models
+
+# add parameters to a GET request
+$ instill api models?visibility=public
+
+# list instances
+$ instill instances list
+
+# selected a default instance
+$ instill instances set-default my-host.com
+
+# add an instance
+$ instill instances add instill.localhost \
+    --oauth2 auth.instill.tech \
+    --audience https://instill.tech \
+    --issuer https://auth.instill.tech/ \
+    --secret YOUR_SECRET \
+    --client-id CLIENT_ID
+
+# add parameters to a POST request
+$ instill api -X POST oauth2/token?audience=...&grant_type=...
+
+# add nested JSON body to a POST request
+$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
+
+# set a custom HTTP header
+$ instill api -H 'Authorization: Basic mytoken' ...
 ```
 
 ## Issues and discussions
