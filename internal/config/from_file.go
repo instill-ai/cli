@@ -353,61 +353,17 @@ func hostConfigToTyped(conf *HostConfig) (*HostConfigTyped, error) {
 	ht := &HostConfigTyped{
 		APIHostname: conf.Host,
 	}
-	v, err := conf.GetOptionalStringValue("token_type")
-	if err != nil {
-		return nil, err
-	}
-	ht.TokenType = v
-	v, err = conf.GetOptionalStringValue("access_token")
-	if err != nil {
-		return nil, err
-	}
-	ht.AccessToken = v
-	v, err = conf.GetOptionalStringValue("expiry")
-	if err != nil {
-		return nil, err
-	}
-	ht.Expiry = v
-	v, err = conf.GetOptionalStringValue("refresh_token")
-	if err != nil {
-		return nil, err
-	}
-	ht.RefreshToken = v
-	v, err = conf.GetOptionalStringValue("id_token")
-	if err != nil {
-		return nil, err
-	}
-	ht.IDToken = v
-	v, err = conf.GetOptionalStringValue("oauth2_audience")
-	if err != nil {
-		return nil, err
-	}
-	ht.Oauth2Audience = v
-	v, err = conf.GetOptionalStringValue("oauth2_issuer")
-	if err != nil {
-		return nil, err
-	}
-	ht.Oauth2Issuer = v
-	v, err = conf.GetOptionalStringValue("oauth2_hostname")
-	if err != nil {
-		return nil, err
-	}
-	ht.Oauth2Hostname = v
-	v, err = conf.GetOptionalStringValue("oauth2_secret")
-	if err != nil {
-		return nil, err
-	}
-	ht.Oauth2Secret = v
-	v, err = conf.GetOptionalStringValue("oauth2_client_id")
-	if err != nil {
-		return nil, err
-	}
-	ht.Oauth2ClientID = v
-	v, err = conf.GetOptionalStringValue("api_version")
-	if err != nil {
-		return nil, err
-	}
-	ht.APIVersion = v
+	ht.TokenType = conf.GetOptionalStringValue("token_type")
+	ht.AccessToken = conf.GetOptionalStringValue("access_token")
+	ht.Expiry = conf.GetOptionalStringValue("expiry")
+	ht.RefreshToken = conf.GetOptionalStringValue("refresh_token")
+	ht.IDToken = conf.GetOptionalStringValue("id_token")
+	ht.Oauth2Audience = conf.GetOptionalStringValue("oauth2_audience")
+	ht.Oauth2Issuer = conf.GetOptionalStringValue("oauth2_issuer")
+	ht.Oauth2Hostname = conf.GetOptionalStringValue("oauth2_hostname")
+	ht.Oauth2Secret = conf.GetOptionalStringValue("oauth2_secret")
+	ht.Oauth2ClientID = conf.GetOptionalStringValue("oauth2_client_id")
+	ht.APIVersion = conf.GetOptionalStringValue("api_version")
 	return ht, nil
 }
 

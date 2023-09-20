@@ -50,3 +50,7 @@ func TestHostnameValidator(t *testing.T) {
 		})
 	}
 }
+
+func TestFallbackHostname(t *testing.T) {
+	assert.Equal(t, "api.instill.tech", FallbackHostname())
+}

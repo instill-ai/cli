@@ -35,6 +35,11 @@ func TestInstancesRemoveCmd(t *testing.T) {
 			},
 			isErr: false,
 		},
+		{
+			name:  "wrong hostname",
+			input: "foo|bar",
+			isErr: true,
+		},
 	}
 
 	for _, tt := range tests {
