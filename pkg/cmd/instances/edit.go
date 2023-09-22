@@ -108,8 +108,8 @@ func runEdit(opts *EditOptions) error {
 		host.Oauth2Hostname = ""
 		host.Oauth2Audience = ""
 	} else if opts.Oauth2 != "" {
-		if (host.Oauth2ClientSecret == "" || host.Oauth2ClientID == "") && (opts.Secret == "" || opts.ClientID == "") {
-			return fmt.Errorf("ERROR: --secret and --client-id required when --oauth2 is specified")
+		if (host.Oauth2ClientSecret == "" || host.Oauth2ClientID == "") && (opts.ClientSecret == "" || opts.ClientID == "") {
+			return fmt.Errorf("ERROR: --client-secret and --client-id required when --oauth2 is specified")
 		}
 		host.Oauth2Hostname = opts.Oauth2
 		if opts.Audience != "" {
@@ -118,8 +118,8 @@ func runEdit(opts *EditOptions) error {
 		if opts.Issuer != "" {
 			host.Oauth2Issuer = opts.Issuer
 		}
-		if opts.Secret != "" {
-			host.Oauth2ClientSecret = opts.Secret
+		if opts.ClientSecret != "" {
+			host.Oauth2ClientSecret = opts.ClientSecret
 		}
 		if opts.ClientID != "" {
 			host.Oauth2ClientID = opts.ClientID

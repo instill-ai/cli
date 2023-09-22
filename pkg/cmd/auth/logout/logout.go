@@ -28,7 +28,7 @@ func NewCmdLogout(f *cmdutil.Factory, runF func(*LogoutOptions) error) *cobra.Co
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Args:  cobra.ExactArgs(0),
-		Short: "Log out of an Instill instance",
+		Short: "Log out of an Instill Core or Instill Cloud instance",
 		Long: heredoc.Doc(`Remove authentication for a Instill host.
 
 			This command removes the authentication configuration for a host either specified
@@ -38,7 +38,7 @@ func NewCmdLogout(f *cmdutil.Factory, runF func(*LogoutOptions) error) *cobra.Co
 			$ instill auth logout
 			# => select what host to log out of via a prompt
 
-			$ instill auth logout --hostname instill.tech
+			$ instill auth logout --hostname api.instill.tech
 			# => log out of specified host
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -49,7 +49,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 				--oauth2 auth.instill.tech \
 				--audience https://instill.tech \
 				--issuer https://auth.instill.tech/ \
-				--secret YOUR_SECRET \
+				--client-secret YOUR_SECRET \
 				--client-id CLIENT_ID
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -97,8 +97,8 @@ func runAdd(opts *AddOptions) error {
 		}
 	}
 
-	if opts.Oauth2 != "" && (opts.Secret == "" || opts.ClientID == "") {
-		return fmt.Errorf("ERROR: --secret and --client-id required when --oauth2 is specified")
+	if opts.Oauth2 != "" && (opts.ClientSecret == "" || opts.ClientID == "") {
+		return fmt.Errorf("ERROR: --client-secret and --client-id required when --oauth2 is specified")
 	}
 
 	host := config.DefaultHostConfig()
@@ -108,7 +108,7 @@ func runAdd(opts *AddOptions) error {
 	host.Oauth2Audience = opts.Audience
 	host.Oauth2Issuer = opts.Issuer
 	host.Oauth2ClientID = opts.ClientID
-	host.Oauth2ClientSecret = opts.Secret
+	host.Oauth2ClientSecret = opts.ClientSecret
 	host.APIVersion = opts.APIVersion
 
 	err = opts.Config.SaveTyped(&host)

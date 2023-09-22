@@ -8,14 +8,14 @@ import (
 )
 
 type InstanceOptions = struct {
-	APIHostname string
-	Oauth2      string
-	Issuer      string
-	Audience    string
-	ClientID    string
-	Secret      string
-	Default     bool
-	APIVersion  string
+	APIHostname  string
+	Oauth2       string
+	Issuer       string
+	Audience     string
+	ClientID     string
+	ClientSecret string
+	Default      bool
+	APIVersion   string
 }
 
 func New(f *cmdutil.Factory) *cobra.Command {
@@ -47,5 +47,5 @@ func AddInstanceFlags(cmd *cobra.Command, opts *InstanceOptions) {
 	cmd.Flags().StringVarP(&opts.Issuer, "issuer", "", "", "OAuth2 issuer (optional)")
 	// TODO get these via a prompt to avoid the shell history?
 	cmd.Flags().StringVarP(&opts.ClientID, "client-id", "", "", "OAuth2 client ID (optional)")
-	cmd.Flags().StringVarP(&opts.Secret, "secret", "", "", "OAuth2 client secret (optional)")
+	cmd.Flags().StringVarP(&opts.ClientSecret, "client-secret", "", "", "OAuth2 client secret (optional)")
 }

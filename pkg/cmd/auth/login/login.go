@@ -95,7 +95,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 			$ instill instances edit %s \
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
-				--secret SECRET`, hostname, hostname)
+				--client-secret SECRET`, hostname, hostname)
 		return fmt.Errorf(e)
 	}
 

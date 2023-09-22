@@ -122,14 +122,14 @@ func TestInstancesEditCmdRun(t *testing.T) {
 			isErr:  false,
 		},
 		{
-			name: "instances edit api.instill.tech --oauth2 bar1 --secret bar2 --client-id bar3",
+			name: "instances edit api.instill.tech --oauth2 bar1 --client-secret bar2 --client-id bar3",
 			input: &EditOptions{
 				Config: config.ConfigStub{},
 				InstanceOptions: InstanceOptions{
-					APIHostname: "api.instill.tech",
-					Oauth2:      "bar1",
-					Secret:      "bar2",
-					ClientID:    "bar3",
+					APIHostname:  "api.instill.tech",
+					Oauth2:       "bar1",
+					ClientSecret: "bar2",
+					ClientID:     "bar3",
 				},
 			},
 			expectFn: func(t *testing.T, cfg config.Config) {
