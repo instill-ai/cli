@@ -16,6 +16,7 @@ func NewCmdVersion(f *cmdutil.Factory, version, buildDate string) *cobra.Command
 		Hidden: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprint(f.IOStreams.Out, Format(version, buildDate))
+			// TODO check the VDP version
 		},
 	}
 

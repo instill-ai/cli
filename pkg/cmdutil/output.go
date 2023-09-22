@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/glamour"
@@ -40,5 +41,5 @@ func GenTable(columns []string, data [][]string) string {
 
 // P is a shorthand for print and heredoc.
 func P(io *iostreams.IOStreams, txt string, args ...interface{}) {
-	_, _ = fmt.Fprint(io.Out, heredoc.Docf(txt, args...))
+	_, _ = fmt.Fprint(io.Out, strings.Trim(heredoc.Docf(txt, args...), " \n")+"\n")
 }
