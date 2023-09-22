@@ -17,7 +17,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hashicorp/go-version v1.3.0
 	github.com/henvic/httpretty v0.0.6
-	github.com/itchyny/gojq v0.12.7
+	github.com/itchyny/gojq v0.12.13
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-colorable v0.1.13
@@ -62,7 +62,7 @@ require (
 	github.com/hashicorp/go-hclog v1.2.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/timefmt-go v0.1.3 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jandelgado/gcov2lcov v1.0.6 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
