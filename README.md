@@ -6,7 +6,7 @@
     <a href="https://www.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Website</a> |
     <a href="https://discord.gg/sevxWsqpGh">Community</a> |
     <a href="https://blog.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">Blog</a><br/><br/>
-    <a href="https://docs.instill.tech/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">User Manual</a> |
+    <a href="https://www.instill.tech/docs/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme">User Manual</a> |
     <a href="https://discord.gg/sevxWsqpGh">API Reference</a><br/><br/>
     <a href="https://www.instill.tech/get-access/?utm_source=github&utm_medium=banner&utm_campaign=cli_readme"><strong>Get Early Access</strong></a>
 </h4>
@@ -47,6 +47,45 @@ brew install instill-ai/tap/instill
 To upgrade:
 ```
 brew upgrade instill-ai/tap/instill
+```
+
+## Usage examples
+
+```bash
+# log in
+$ instill auth login
+
+# list pipelines
+$ instill api pipelines
+
+# list models
+$ instill api models
+
+# add parameters to a GET request
+$ instill api models?visibility=public
+
+# list instances
+$ instill instances list
+
+# selected a default instance
+$ instill instances set-default my-host.com
+
+# add an instance
+$ instill instances add instill.localhost \
+    --oauth2 auth.instill.tech \
+    --audience https://instill.tech \
+    --issuer https://auth.instill.tech/ \
+    --secret YOUR_SECRET \
+    --client-id CLIENT_ID
+
+# add parameters to a POST request
+$ instill api -X POST oauth2/token?audience=...&grant_type=...
+
+# add nested JSON body to a POST request
+$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
+
+# set a custom HTTP header
+$ instill api -H 'Authorization: Basic mytoken' ...
 ```
 
 ## Issues and discussions

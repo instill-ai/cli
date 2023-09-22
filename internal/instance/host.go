@@ -1,56 +1,53 @@
 package instance
 
 import (
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
-const defaultHostname = "instill.tech"
-
-// localhost is the domain name of a local Instill instance
-const localhost = "instill.localhost"
-
-// Default returns the host name of the default Instill instance
-func Default() string {
-	return defaultHostname
+// FallbackHostname returns the host name of the default Instill Cloud instance.
+func FallbackHostname() string {
+	return "api.instill.tech"
 }
 
-// ExtractHostname returns the canonical host name of a Instill instance
-func ExtractHostname(h string) string {
-	hostname := strings.ToLower(h)
-
-	parts := strings.Split(hostname, ".")
-	return parts[len(parts)-2] + "." + parts[len(parts)-1]
-}
-
-// HostnameValidator validates a hostname
-func HostnameValidator(v interface{}) error {
-	hostname, valid := v.(string)
-	if !valid {
-		return errors.New("hostname is not a string")
+// HostnameValidator validates a hostname, with an optional port number.
+// TODO move to utils
+func HostnameValidator(v string) error {
+	// without a port
+	host1 := struct {
+		Name string `validate:"required,hostname"`
+	}{
+		Name: v,
 	}
-
-	if len(strings.TrimSpace(hostname)) < 1 {
-		return errors.New("a value is required")
+	err1 := validator.New().Struct(&host1)
+	// with a port
+	host2 := struct {
+		Name string `validate:"required,hostname_port"`
+	}{
+		Name: v,
 	}
-	if strings.ContainsRune(hostname, '/') || strings.ContainsRune(hostname, ':') {
-		return errors.New("invalid hostname")
+	err2 := validator.New().Struct(&host2)
+	if err1 != nil && err2 != nil {
+		return fmt.Errorf("hostname not valid")
 	}
 	return nil
 }
 
 // RESTPrefix sets the prefix of Instill API URL
+// TODO remove
 func RESTPrefix(hostname string) string {
-	if strings.EqualFold(hostname, localhost) {
-		return fmt.Sprintf("http://api.%s/", hostname)
+	if strings.EqualFold(hostname, "localhost") {
+		return fmt.Sprintf("http://%s/", hostname)
 	}
-	return fmt.Sprintf("https://api.%s/", hostname)
+	return fmt.Sprintf("https://%s/", hostname)
 }
 
-// HostPrefix sets the prefix of Instill domain
-func HostPrefix(hostname string) string {
-	if strings.EqualFold(hostname, localhost) {
+// GetProtocol returns the correct protocol based on a hostname
+func GetProtocol(hostname string) string {
+	// TODO support port numbers
+	if strings.HasSuffix(hostname, "localhost") {
 		return fmt.Sprintf("http://%s/", hostname)
 	}
 	return fmt.Sprintf("https://%s/", hostname)

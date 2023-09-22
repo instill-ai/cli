@@ -11,7 +11,7 @@ import (
 )
 
 type showable interface {
-	Show()
+	Show() error
 }
 
 func Edit(editorCommand, fn, initialValue string, stdin io.Reader, stdout io.Writer, stderr io.Writer, cursor showable) (string, error) {
@@ -80,7 +80,7 @@ func edit(editorCommand, fn, initialValue string, stdin io.Reader, stdout io.Wri
 	cmd.Stderr = stderr
 
 	if cursor != nil {
-		cursor.Show()
+		_ = cursor.Show()
 	}
 
 	// open the editor

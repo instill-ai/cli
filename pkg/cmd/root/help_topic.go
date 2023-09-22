@@ -30,9 +30,6 @@ var HelpTopics = map[string]map[string]string{
 	"environment": {
 		"short": "Environment variables that can be used with instill",
 		"long": heredoc.Doc(`
-			INSTILL_HOSTNAME: specify the Instill hostname for commands that would otherwise assume the
-			"github.com" host when not in a context of an existing repository.
-
 			INSTILL_EDITOR, GIT_EDITOR, VISUAL, EDITOR (in order of precedence): the editor tool to use
 			for authoring text.
 

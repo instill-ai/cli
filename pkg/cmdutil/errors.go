@@ -3,7 +3,6 @@ package cmdutil
 import (
 	"errors"
 	"fmt"
-
 	"github.com/AlecAivazis/survey/v2/terminal"
 )
 

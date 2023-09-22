@@ -2,6 +2,8 @@ package config
 
 import (
 	"errors"
+
+	"github.com/instill-ai/cli/internal/instance"
 )
 
 type ConfigStub map[string]string
@@ -35,6 +37,7 @@ func (c ConfigStub) Hosts() ([]string, error) {
 }
 
 func (c ConfigStub) UnsetHost(hostname string) {
+	// TODO
 }
 
 func (c ConfigStub) CheckWriteable(host, key string) error {
@@ -52,4 +55,53 @@ func (c ConfigStub) DefaultHost() (string, error) {
 
 func (c ConfigStub) DefaultHostWithSource() (string, string, error) {
 	return "", "", nil
+}
+
+func (c ConfigStub) DefaultHostname() string {
+	return instance.FallbackHostname()
+}
+
+func (c ConfigStub) MakeConfigForHost(hostname string) *HostConfig {
+	return nil
+}
+
+func (c ConfigStub) HostsTyped() ([]HostConfigTyped, error) {
+	ins := []HostConfigTyped{
+		{
+			APIHostname:        "api.instill.tech",
+			IsDefault:          true,
+			APIVersion:         "v1alpha",
+			Oauth2Hostname:     "auth.instill.tech",
+			Oauth2Audience:     "https://api.instill.tech",
+			Oauth2Issuer:       "https://auth.instill.tech/",
+			Oauth2ClientSecret: "foobar",
+			Oauth2ClientID:     "barfoo",
+		},
+	}
+	return ins, nil
+}
+
+func (c ConfigStub) SaveTyped(host *HostConfigTyped) error {
+	h := host.APIHostname
+	_ = c.Set(h, "token_type", host.TokenType)
+	_ = c.Set(h, "access_token", host.AccessToken)
+	_ = c.Set(h, "expiry", host.Expiry)
+	_ = c.Set(h, "refresh_token", host.RefreshToken)
+	_ = c.Set(h, "id_token", host.IDToken)
+	_ = c.Set(h, "oauth2_audience", host.Oauth2Audience)
+	_ = c.Set(h, "oauth2_issuer", host.Oauth2Issuer)
+	_ = c.Set(h, "oauth2_hostname", host.Oauth2Hostname)
+	_ = c.Set(h, "oauth2_client_id", host.Oauth2ClientID)
+	_ = c.Set(h, "oauth2_client_secret", host.Oauth2ClientSecret)
+	_ = c.Set(h, "api_version", host.APIVersion)
+	// TODO default instance
+	return c.Write()
+}
+
+func ConfigStubFactory() (Config, error) {
+	return ConfigStub{}, nil
+}
+
+type HostConfigMock struct {
+	HostConfig
 }

@@ -25,3 +25,6 @@ vendor/
 # air configuration file: https://github.com/cosmtrek/air
 .air.toml
 dist/
+
+/*.env
+/coverage.txt

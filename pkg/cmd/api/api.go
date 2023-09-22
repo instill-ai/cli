@@ -54,6 +54,8 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		Config:     f.Config,
 		HTTPClient: f.HTTPClient,
 	}
+	// TODO handle error
+	cfg, _ := opts.Config()
 
 	cmd := &cobra.Command{
 		Use:   "api <endpoint>",
@@ -103,21 +105,17 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
 
 			# set a custom HTTP header
-  			$ instill api -H 'Authorization: Basic ...'
+			$ instill api -H 'Authorization: Basic ...'
 		`),
-		Annotations: map[string]string{
-			"help:environment": heredoc.Doc(`
-				INSTILL_HOSTNAME: make the request to an Instill host other than instill.tech.
-			`),
-		},
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			opts.RequestPath = args[0]
 			opts.RequestMethodPassed = c.Flags().Changed("method")
 
-			if c.Flags().Changed("hostname") {
+			if c.Flags().Changed("instance") {
+				// TODO look for the instance in the config
 				if err := instance.HostnameValidator(opts.Hostname); err != nil {
-					return cmdutil.FlagErrorf("error parsing `--hostname`: %w", err)
+					return cmdutil.FlagErrorf("error parsing `--instance`: %w", err)
 				}
 			}
 
@@ -137,7 +135,7 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.Hostname, "hostname", "", "The Instill hostname for the request (default \"instill.tech\")")
+	cmd.Flags().StringVar(&opts.Hostname, "hostname", cfg.DefaultHostname(), "Target instance")
 	cmd.Flags().StringVarP(&opts.RequestMethod, "method", "X", "GET", "The HTTP method for the request")
 	cmd.Flags().StringArrayVarP(&opts.MagicFields, "field", "F", nil, "Add a typed parameter in `key=value` format")
 	cmd.Flags().StringArrayVarP(&opts.RawFields, "raw-field", "f", nil, "Add a string parameter in `key=value` format")
@@ -157,6 +155,39 @@ func apiRun(opts *ApiOptions) error {
 		return err
 	}
 
+	// get the host config
+	cfg, err := opts.Config()
+	if err != nil {
+		return err
+	}
+	var host *config.HostConfigTyped
+	if err != nil {
+		return err
+	}
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
+		return err
+	}
+	hostname := opts.Hostname
+	if hostname == "" {
+		hostname = cfg.DefaultHostname()
+	}
+	for i := range hosts {
+		if hosts[i].APIHostname == hostname {
+			host = &hosts[i]
+			break
+		}
+	}
+	if host == nil {
+		return fmt.Errorf(heredoc.Docf(
+			`ERROR: instance '%s' does not exist
+
+			You can add it with:
+			$ inst instances add %s`,
+			hostname, hostname))
+	}
+
+	// set up the http client
 	method := opts.RequestMethod
 	requestPath := opts.RequestPath
 	requestHeaders := opts.RequestHeaders
@@ -198,32 +229,23 @@ func apiRun(opts *ApiOptions) error {
 		defer opts.IO.StopPager()
 	}
 
-	cfg, err := opts.Config()
-	if err != nil {
-		return err
+	// set up the request
+	// TODO support other services than VDP
+	requestPath = "vdp/" + host.APIVersion + "/" + strings.TrimPrefix(requestPath, "/")
+	if host.AccessToken != "" {
+		requestHeaders = append(requestHeaders, "Authorization: Bearer "+host.AccessToken)
 	}
 
-	host, err := cfg.DefaultHost()
-	if err != nil {
-		return err
-	}
-
-	if opts.Hostname != "" {
-		host = opts.Hostname
-	}
-
+	// http request & output
 	template := export.NewTemplate(opts.IO, opts.Template)
-
-	resp, err := httpRequest(httpClient, host, method, requestPath, requestBody, requestHeaders)
+	resp, err := httpRequest(httpClient, host.APIHostname, method, requestPath, requestBody, requestHeaders)
 	if err != nil {
 		return err
 	}
-
 	err = processResponse(resp, opts, headersOutputStream, &template)
 	if err != nil {
 		return err
 	}
-
 	return template.End()
 }
 

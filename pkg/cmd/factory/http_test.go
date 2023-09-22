@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
@@ -139,6 +140,10 @@ func TestNewHTTPClient(t *testing.T) {
 }
 
 type tinyConfig map[string]string
+
+func (c tinyConfig) SaveTyped(typed *config.HostConfigTyped) error {
+	return nil
+}
 
 func (c tinyConfig) Get(host, key string) (string, error) {
 	return c[fmt.Sprintf("%s:%s", host, key)], nil

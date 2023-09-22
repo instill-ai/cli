@@ -20,8 +20,9 @@ script/build: script/build.go
 	GOOS= GOARCH= GOARM= GOFLAGS= CGO_ENABLED= go build -o $@ $<
 
 .PHONY: clean
-clean: script/build
-	@script/build $@
+clean:
+	rm -f script/build
+	rm -f bin/instill
 
 # just a convenience task around `go test`
 .PHONY: test

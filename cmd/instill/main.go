@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -15,15 +14,15 @@ import (
 	surveyCore "github.com/AlecAivazis/survey/v2/core"
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/cli/safeexec"
-	"github.com/mattn/go-colorable"
-
 	"github.com/dotenv-org/godotenvvault"
+	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/api"
 	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/internal/update"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmd/root"
@@ -48,12 +47,9 @@ func main() {
 }
 
 func mainRun() exitCode {
-	// load .env in dev mode
+	// optionally load .env in dev mode
 	if build.Version == "" {
-		err := godotenvvault.Load()
-		if err != nil {
-			log.Fatal("Error loading .env file")
-		}
+		_ = godotenvvault.Load()
 	}
 
 	buildDate := build.Date
@@ -119,6 +115,19 @@ func mainRun() exitCode {
 
 	authError := errors.New("authError")
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		// in case there's no hosts.yml config, create one with the default instance
+		f, err := os.Stat(config.HostsConfigFile())
+		exists := err == nil && !f.IsDir()
+		if !exists {
+			// get the (hardcoded) default cloud instance
+			host := oauth2.HostConfigInstillCloud()
+			err = cfg.SaveTyped(host)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(stderr, cs.Bold("No host.yml config, creating a default one..."))
+			fmt.Fprintln(stderr, config.HostsConfigFile())
+		}
 		// require that the user is authenticated before running most commands
 		if cmdutil.IsAuthCheckEnabled(cmd) && !cmdutil.CheckAuth(cfg) {
 			fmt.Fprintln(stderr, cs.Bold("Welcome to Instill CLI!"))
