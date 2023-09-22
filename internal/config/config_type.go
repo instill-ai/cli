@@ -13,10 +13,12 @@ type Config interface {
 	Set(string, string, string) error
 	UnsetHost(string)
 	Hosts() ([]string, error)
-	DefaultHost() (string, error)
-	DefaultHostWithSource() (string, string, error)
+	HostsTyped() ([]HostConfigTyped, error)
+	DefaultHostname() string
 	CheckWriteable(string, string) error
 	Write() error
+	SaveTyped(*HostConfigTyped) error
+	MakeConfigForHost(hostname string) *HostConfig
 }
 
 type ConfigOption struct {

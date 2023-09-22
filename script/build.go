@@ -33,7 +33,6 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/dotenv-org/godotenvvault"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -83,10 +82,8 @@ var tasks = map[string]func(string) error{
 var self string
 
 func main() {
-	err := godotenvvault.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// optionally load the .env file
+	_ = godotenvvault.Load()
 	args := os.Args[:1]
 	for _, arg := range os.Args[1:] {
 		if idx := strings.IndexRune(arg, '='); idx >= 0 {

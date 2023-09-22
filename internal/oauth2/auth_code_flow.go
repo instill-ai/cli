@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/instill-ai/cli/internal/build"
 	"io"
 	"net/http"
 	"os"
@@ -14,14 +13,17 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/instill-ai/cli/api"
-	"github.com/instill-ai/cli/pkg/cmdutil"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/graceful"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/randx"
 	"golang.org/x/oauth2"
+
+	"github.com/instill-ai/cli/api"
+	"github.com/instill-ai/cli/internal/build"
+	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 var (
@@ -36,6 +38,7 @@ var (
 )
 
 type iconfig interface {
+	SaveTyped(*config.HostConfigTyped) error
 	Get(string, string) (string, error)
 	Set(string, string, string) error
 	Write() error
@@ -45,6 +48,33 @@ type iconfig interface {
 type Authenticator struct {
 	*oidc.Provider
 	oauth2.Config
+}
+
+func initEnv() {
+	// use env vars in dev mode
+	if build.Version == "" {
+		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
+		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
+		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
+		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
+		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
+		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
+		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
+	}
+}
+
+// HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
+func HostConfigInstillCloud() *config.HostConfigTyped {
+	initEnv()
+	host := config.DefaultHostConfig()
+	host.APIHostname = "api.instill.tech"
+	host.IsDefault = true
+	host.Oauth2Hostname = hostname
+	host.Oauth2Audience = audience
+	host.Oauth2Issuer = issuer
+	host.Oauth2ClientID = clientID
+	host.Oauth2ClientSecret = clientSecret
+	return &host
 }
 
 // NewAuthenticator instantiates the *Authenticator.
@@ -83,26 +113,21 @@ func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) 
 }
 
 // AuthCodeFlowWithConfig authorizes a user via Authorization Code Flow
-func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStreams, customHostname string) error {
-	if customHostname != "" {
-		return errors.New("TODO handle a custom Core instance")
-	}
-	// use env vars in dev mode
-	if build.Version == "" {
-		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
-		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
-		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
-		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
-		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
-		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
-		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
-	}
+func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cfg iconfig, IO *iostreams.IOStreams) error {
 	cp, err := strconv.Atoi(callbackPort)
 	if err != nil {
 		return err
 	}
 	port := cp
-	auth, err := NewAuthenticator(issuer, clientID, clientSecret, callbackHost, port)
+	issuer := host.APIHostname
+	if host.Oauth2Issuer != "" {
+		issuer = host.Oauth2Issuer
+	}
+	audience := host.APIHostname
+	if host.Oauth2Audience != "" {
+		audience = host.Oauth2Audience
+	}
+	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2ClientSecret, callbackHost, port)
 	if err != nil {
 		return err
 	}
@@ -111,7 +136,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 	maxAge := 0
 	loginURL, state := auth.LoginURL([]string{audience}, prompt, maxAge)
 
-	fmt.Fprintf(IO.Out, "Login to %s. Press ctrl + c to end the process.\n\n", hostname)
+	fmt.Fprintf(IO.Out, "Log into %s. Press ctrl + c to end the process.\n\n", host.Oauth2Hostname)
 	fmt.Fprintf(IO.Out, "Complete the login via your OIDC provider. Launching a browser to:\n\n\t%s\n\n", loginURL)
 
 	if err := f.Browser.Browse(loginURL); err != nil {
@@ -133,27 +158,12 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, cfg iconfig, IO *iostreams.IOStr
 		fmt.Fprintf(IO.Out, "[DEBUG] ID Token:\n\t%s\n\n", token.Extra("id_token"))
 	}
 
-	if err := cfg.Set(hostname, "token_type", token.Type()); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "access_token", token.AccessToken); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "expiry", token.Expiry.Format(time.RFC1123)); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "refresh_token", token.RefreshToken); err != nil {
-		return err
-	}
-
-	if err := cfg.Set(hostname, "id_token", token.Extra("id_token").(string)); err != nil {
-		return err
-	}
-
-	if err := cfg.Write(); err != nil {
+	// TODO use HostConfigTyped
+	host.TokenType = token.Type()
+	host.AccessToken = token.AccessToken
+	host.Expiry = token.Expiry.Format(time.RFC1123)
+	host.IDToken = token.Extra("id_token").(string)
+	if err := cfg.SaveTyped(host); err != nil {
 		return err
 	}
 

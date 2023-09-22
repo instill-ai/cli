@@ -13,6 +13,7 @@ import (
 	authCmd "github.com/instill-ai/cli/pkg/cmd/auth"
 	completionCmd "github.com/instill-ai/cli/pkg/cmd/completion"
 	configCmd "github.com/instill-ai/cli/pkg/cmd/config"
+	instancesCmd "github.com/instill-ai/cli/pkg/cmd/instances"
 	versionCmd "github.com/instill-ai/cli/pkg/cmd/version"
 )
 
@@ -58,6 +59,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))
 	cmd.AddCommand(authCmd.NewCmdAuth(f))
+	cmd.AddCommand(instancesCmd.New(f))
 	cmd.AddCommand(configCmd.NewCmdConfig(f))
 	cmd.AddCommand(completionCmd.NewCmdCompletion(f.IOStreams))
 

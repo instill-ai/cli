@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/instill-ai/cli/api"
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/httpunix"
-	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
@@ -54,10 +54,12 @@ var timezoneNames = map[int]string{
 	50400:  "Pacific/Kiritimati",
 }
 
+// TODO wrong name
 type configHTTPClient interface {
 	Get(string, string) (string, error)
 	Set(string, string, string) error
 	Write() error
+	SaveTyped(*config.HostConfigTyped) error
 }
 
 // NewHTTPClient is a generic authenticated HTTP client for commands
@@ -94,7 +96,7 @@ func NewHTTPClient(io *iostreams.IOStreams, cfg configHTTPClient, appVersion str
 	opts = append(opts,
 		api.AddHeader("User-Agent", fmt.Sprintf("Instill CLI %s", appVersion)),
 		api.AddHeaderFunc("Authorization", func(req *http.Request) (string, error) {
-			hostname := instance.ExtractHostname(getHost(req))
+			hostname := getHost(req)
 			if accessToken, err := cfg.Get(hostname, "access_token"); err == nil && accessToken != "" {
 				// Refresh access token everytime
 				if accessToken, err = oauth2.RefreshToken(cfg, hostname); err == nil && accessToken != "" {

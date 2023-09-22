@@ -8,8 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/internal/instance"
-	"github.com/instill-ai/cli/pkg/cmd/auth/shared"
+	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
@@ -32,9 +31,9 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 	cmd := &cobra.Command{
 		Use:   "login",
 		Args:  cobra.ExactArgs(0),
-		Short: "Authenticate with a Instill host",
+		Short: "Authenticate with an Instill host",
 		Long: heredoc.Docf(`
-			Authenticate with a Instill host.
+			Authenticate with an Instill host.
 
 			The default authentication mode is an authorization code flow.
 		`),
@@ -48,18 +47,6 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 				opts.Interactive = true
 			}
 
-			if cmd.Flags().Changed("hostname") {
-				if err := instance.HostnameValidator(opts.Hostname); err != nil {
-					return cmdutil.FlagErrorf("error parsing --hostname: %w", err)
-				}
-			}
-
-			if !opts.Interactive {
-				if opts.Hostname == "" {
-					opts.Hostname = instance.Default()
-				}
-			}
-
 			opts.MainExecutable = f.Executable()
 			if runF != nil {
 				return runF(opts)
@@ -69,7 +56,10 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", "", "The hostname of the Instill instance to authenticate with")
+	// TODO handle err
+	cfg, _ := opts.Config()
+
+	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", cfg.DefaultHostname(), "Hostname of an already added Instill AI instance")
 
 	return cmd
 }
@@ -82,12 +72,34 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 
 	hostname := opts.Hostname
 
-	if err := cfg.CheckWriteable(hostname, ""); err != nil {
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
 		return err
 	}
 
-	existingRefreshToken, _ := cfg.Get(hostname, "refresh_token")
-	if existingRefreshToken != "" && opts.Interactive {
+	var host *config.HostConfigTyped
+	for _, h := range hosts {
+		if h.APIHostname == hostname {
+			host = &h
+			break
+		}
+	}
+	if host == nil {
+		return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+	}
+
+	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2ClientSecret == "" {
+		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
+
+			You can fix it with:
+			$ instill instances edit %s \
+				--oauth2 HOSTNAME \
+				--client-id CLIENT_ID \
+				--client-secret SECRET`, hostname, hostname)
+		return fmt.Errorf(e)
+	}
+
+	if host.RefreshToken != "" && opts.Interactive {
 		var keepGoing bool
 		err = prompt.SurveyAskOne(&survey.Confirm{
 			Message: fmt.Sprintf(
@@ -103,11 +115,5 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		}
 	}
 
-	return shared.Login(f, &shared.LoginOptions{
-		IO:          opts.IO,
-		Config:      cfg,
-		Hostname:    opts.Hostname,
-		Interactive: opts.Interactive,
-		Executable:  opts.MainExecutable,
-	})
+	return oauth2.AuthCodeFlowWithConfig(f, host, cfg, opts.IO)
 }

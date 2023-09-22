@@ -14,20 +14,20 @@ func DisableAuthCheck(cmd *cobra.Command) {
 	cmd.Annotations["skipAuthCheck"] = "true"
 }
 
+// CheckAuth checks if the default hostname has an access token assigned (without validating it).
 func CheckAuth(cfg config.Config) bool {
-
-	hosts, err := cfg.Hosts()
+	hosts, err := cfg.HostsTyped()
 	if err != nil {
 		return false
 	}
-
-	for _, hostname := range hosts {
-		token, _ := cfg.Get(hostname, "access_token")
-		if token != "" {
+	defHostname := cfg.DefaultHostname()
+	for _, h := range hosts {
+		// check the token only for instances with an OAuth2 hostname
+		if h.APIHostname == defHostname && h.AccessToken != "" || h.Oauth2Hostname == "" {
+			// TODO use oauth2.VerifyIDToken?
 			return true
 		}
 	}
-
 	return false
 }
 

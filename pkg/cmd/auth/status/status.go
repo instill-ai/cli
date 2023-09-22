@@ -88,7 +88,7 @@ func statusRun(opts *StatusOptions) error {
 		}
 
 		addMsg("%s Logged in to %s (%s)", cs.SuccessIcon(), hostname, accessTokenSource)
-		addMsg("%s Access token expires at: %s", cs.SuccessIcon(), cs.Bold(accessTokenExpire))
+		addMsg("%s Access token expires on: %s", cs.SuccessIcon(), cs.Bold(accessTokenExpire))
 
 	}
 
