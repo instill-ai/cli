@@ -107,11 +107,6 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			# set a custom HTTP header
 			$ instill api -H 'Authorization: Basic ...'
 		`),
-		Annotations: map[string]string{
-			"help:environment": heredoc.Doc(`
-				INSTILL_INSTANCE: make the request to an Instill instance other than the currently selected one.
-			`),
-		},
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
 			opts.RequestPath = args[0]
