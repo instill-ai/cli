@@ -2,7 +2,6 @@ package instances
 
 import (
 	"bytes"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"testing"
 
 	"github.com/google/shlex"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 func TestInstancesEditCmd(t *testing.T) {
@@ -136,7 +136,7 @@ func TestInstancesEditCmdRun(t *testing.T) {
 				v, err := cfg.Get("api.instill.tech", "oauth2_hostname")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar1", v)
-				v, err = cfg.Get("api.instill.tech", "oauth2_secret")
+				v, err = cfg.Get("api.instill.tech", "oauth2_client_secret")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar2", v)
 				v, err = cfg.Get("api.instill.tech", "oauth2_client_id")

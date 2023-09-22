@@ -32,13 +32,13 @@ func Test_fileConfig_Typed(t *testing.T) {
 	fc := NewBlankConfig()
 	hc := fc.MakeConfigForHost("foo")
 	_ = hc.SetStringValue("oauth2_hostname", "bar1")
-	_ = hc.SetStringValue("oauth2_secret", "bar2")
+	_ = hc.SetStringValue("oauth2_client_secret", "bar2")
 	_ = hc.SetStringValue("api_version", "bar3")
 	hct, err := hostConfigToTyped(hc)
 	assert.NoError(t, err)
 
 	assert.Equal(t, "bar1", hct.Oauth2Hostname)
-	assert.Equal(t, "bar2", hct.Oauth2Secret)
+	assert.Equal(t, "bar2", hct.Oauth2ClientSecret)
 	assert.Equal(t, "bar3", hct.APIVersion)
 
 	hct.APIVersion = "bar4"

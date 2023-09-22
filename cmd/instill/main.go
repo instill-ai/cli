@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/instill-ai/cli/internal/oauth2"
 	"io"
 	"net"
 	"os"
@@ -15,15 +14,15 @@ import (
 	surveyCore "github.com/AlecAivazis/survey/v2/core"
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/cli/safeexec"
-	"github.com/mattn/go-colorable"
-
 	"github.com/dotenv-org/godotenvvault"
+	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/api"
 	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/internal/update"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmd/root"

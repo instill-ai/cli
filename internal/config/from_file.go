@@ -326,11 +326,11 @@ type HostConfigTyped struct {
 	APIVersion  string `example:"v1alpha"`
 
 	// oauth config
-	Oauth2Hostname string `example:"auth.instill.tech"`
-	Oauth2Audience string `example:"https://instill.tech"`
-	Oauth2Issuer   string `example:"https://auth.instill.tech/"`
-	Oauth2Secret   string
-	Oauth2ClientID string
+	Oauth2Hostname     string `example:"auth.instill.tech"`
+	Oauth2Audience     string `example:"https://instill.tech"`
+	Oauth2Issuer       string `example:"https://auth.instill.tech/"`
+	Oauth2ClientSecret string
+	Oauth2ClientID     string
 
 	// oauth token
 	TokenType    string
@@ -361,7 +361,7 @@ func hostConfigToTyped(conf *HostConfig) (*HostConfigTyped, error) {
 	ht.Oauth2Audience = conf.GetOptionalStringValue("oauth2_audience")
 	ht.Oauth2Issuer = conf.GetOptionalStringValue("oauth2_issuer")
 	ht.Oauth2Hostname = conf.GetOptionalStringValue("oauth2_hostname")
-	ht.Oauth2Secret = conf.GetOptionalStringValue("oauth2_secret")
+	ht.Oauth2ClientSecret = conf.GetOptionalStringValue("oauth2_client_secret")
 	ht.Oauth2ClientID = conf.GetOptionalStringValue("oauth2_client_id")
 	ht.APIVersion = conf.GetOptionalStringValue("api_version")
 	return ht, nil
@@ -405,7 +405,7 @@ func hostTypedToConfig(host *HostConfigTyped, conf *HostConfig) error {
 	if err != nil {
 		return err
 	}
-	err = conf.SetStringValue("oauth2_secret", host.Oauth2Secret)
+	err = conf.SetStringValue("oauth2_client_secret", host.Oauth2ClientSecret)
 	if err != nil {
 		return err
 	}

@@ -5,8 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/instill-ai/cli/internal/build"
-	"github.com/instill-ai/cli/internal/config"
 	"io"
 	"net/http"
 	"os"
@@ -15,14 +13,17 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/instill-ai/cli/api"
-	"github.com/instill-ai/cli/pkg/cmdutil"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/graceful"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/randx"
 	"golang.org/x/oauth2"
+
+	"github.com/instill-ai/cli/api"
+	"github.com/instill-ai/cli/internal/build"
+	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 var (
@@ -72,7 +73,7 @@ func HostConfigInstillCloud() *config.HostConfigTyped {
 	host.Oauth2Audience = audience
 	host.Oauth2Issuer = issuer
 	host.Oauth2ClientID = clientID
-	host.Oauth2Secret = clientSecret
+	host.Oauth2ClientSecret = clientSecret
 	return &host
 }
 
@@ -126,7 +127,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cf
 	if host.Oauth2Audience != "" {
 		audience = host.Oauth2Audience
 	}
-	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2Secret, callbackHost, port)
+	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2ClientSecret, callbackHost, port)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+
 	"github.com/instill-ai/cli/internal/instance"
 )
 
@@ -67,14 +68,14 @@ func (c ConfigStub) MakeConfigForHost(hostname string) *HostConfig {
 func (c ConfigStub) HostsTyped() ([]HostConfigTyped, error) {
 	ins := []HostConfigTyped{
 		{
-			APIHostname:    "api.instill.tech",
-			IsDefault:      true,
-			APIVersion:     "v1alpha",
-			Oauth2Hostname: "auth.instill.tech",
-			Oauth2Audience: "https://api.instill.tech",
-			Oauth2Issuer:   "https://auth.instill.tech/",
-			Oauth2Secret:   "foobar",
-			Oauth2ClientID: "barfoo",
+			APIHostname:        "api.instill.tech",
+			IsDefault:          true,
+			APIVersion:         "v1alpha",
+			Oauth2Hostname:     "auth.instill.tech",
+			Oauth2Audience:     "https://api.instill.tech",
+			Oauth2Issuer:       "https://auth.instill.tech/",
+			Oauth2ClientSecret: "foobar",
+			Oauth2ClientID:     "barfoo",
 		},
 	}
 	return ins, nil
@@ -91,7 +92,7 @@ func (c ConfigStub) SaveTyped(host *HostConfigTyped) error {
 	_ = c.Set(h, "oauth2_issuer", host.Oauth2Issuer)
 	_ = c.Set(h, "oauth2_hostname", host.Oauth2Hostname)
 	_ = c.Set(h, "oauth2_client_id", host.Oauth2ClientID)
-	_ = c.Set(h, "oauth2_secret", host.Oauth2Secret)
+	_ = c.Set(h, "oauth2_client_secret", host.Oauth2ClientSecret)
 	_ = c.Set(h, "api_version", host.APIVersion)
 	// TODO default instance
 	return c.Write()

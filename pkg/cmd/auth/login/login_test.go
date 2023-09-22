@@ -2,13 +2,13 @@ package login
 
 import (
 	"bytes"
-	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/internal/instance"
 	"testing"
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )

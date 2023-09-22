@@ -2,13 +2,13 @@ package factory
 
 import (
 	"fmt"
-	"github.com/instill-ai/cli/internal/config"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/instill-ai/cli/api"
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/httpunix"
 	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/iostreams"

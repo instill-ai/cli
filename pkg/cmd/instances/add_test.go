@@ -2,8 +2,9 @@ package instances
 
 import (
 	"bytes"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"testing"
+
+	"github.com/instill-ai/cli/pkg/iostreams"
 
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
@@ -136,7 +137,7 @@ func TestInstancesAddCmdRun(t *testing.T) {
 				v, err := cfg.Get("foo", "oauth2_hostname")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar1", v)
-				v, err = cfg.Get("foo", "oauth2_secret")
+				v, err = cfg.Get("foo", "oauth2_client_secret")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar2", v)
 				v, err = cfg.Get("foo", "oauth2_client_id")

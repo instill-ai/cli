@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+
 	"github.com/instill-ai/cli/internal/oauth2"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -33,7 +34,7 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 		Args:  cobra.ExactArgs(0),
 		Short: "Authenticate with an Instill host",
 		Long: heredoc.Docf(`
-			Authenticate with am Instill host.
+			Authenticate with an Instill host.
 
 			The default authentication mode is an authorization code flow.
 		`),
@@ -88,10 +89,10 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
 	}
 
-	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2Secret == "" {
+	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2ClientSecret == "" {
 		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
 
-			You fix it with:
+			You can fix it with:
 			$ instill instances edit %s \
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \

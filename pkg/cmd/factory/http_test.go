@@ -2,7 +2,6 @@ package factory
 
 import (
 	"fmt"
-	"github.com/instill-ai/cli/internal/config"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 

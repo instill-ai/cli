@@ -3,11 +3,12 @@ package instances
 import (
 	"fmt"
 	"github.com/MakeNowJust/heredoc"
+	"github.com/spf13/cobra"
+
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
-	"github.com/spf13/cobra"
 )
 
 type EditOptions struct {
@@ -101,12 +102,12 @@ func runEdit(opts *EditOptions) error {
 
 	if opts.NoAuth {
 		host.Oauth2Issuer = ""
-		host.Oauth2Secret = ""
+		host.Oauth2ClientSecret = ""
 		host.Oauth2ClientID = ""
 		host.Oauth2Hostname = ""
 		host.Oauth2Audience = ""
 	} else if opts.Oauth2 != "" {
-		if (host.Oauth2Secret == "" || host.Oauth2ClientID == "") && (opts.Secret == "" || opts.ClientID == "") {
+		if (host.Oauth2ClientSecret == "" || host.Oauth2ClientID == "") && (opts.Secret == "" || opts.ClientID == "") {
 			return fmt.Errorf("ERROR: --secret and --client-id required when --oauth2 is specified")
 		}
 		host.Oauth2Hostname = opts.Oauth2
@@ -117,7 +118,7 @@ func runEdit(opts *EditOptions) error {
 			host.Oauth2Issuer = opts.Issuer
 		}
 		if opts.Secret != "" {
-			host.Oauth2Secret = opts.Secret
+			host.Oauth2ClientSecret = opts.Secret
 		}
 		if opts.ClientID != "" {
 			host.Oauth2ClientID = opts.ClientID

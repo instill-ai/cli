@@ -2,12 +2,14 @@ package instances
 
 import (
 	"fmt"
+
 	"github.com/MakeNowJust/heredoc"
+	"github.com/spf13/cobra"
+
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
-	"github.com/spf13/cobra"
 )
 
 type AddOptions struct {
@@ -106,7 +108,7 @@ func runAdd(opts *AddOptions) error {
 	host.Oauth2Audience = opts.Audience
 	host.Oauth2Issuer = opts.Issuer
 	host.Oauth2ClientID = opts.ClientID
-	host.Oauth2Secret = opts.Secret
+	host.Oauth2ClientSecret = opts.Secret
 	host.APIVersion = opts.APIVersion
 
 	err = opts.Config.SaveTyped(&host)
