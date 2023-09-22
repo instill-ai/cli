@@ -3,11 +3,13 @@ package cmdutil
 import (
 	"bytes"
 	"fmt"
+	"io"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/charmbracelet/glamour"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/olekukonko/tablewriter"
-	"io"
+
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 func PrintMarkdown(io *iostreams.IOStreams, md string) error {

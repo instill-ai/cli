@@ -3,13 +3,12 @@ package login
 import (
 	"fmt"
 
-	"github.com/instill-ai/cli/internal/oauth2"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"

@@ -1,9 +1,9 @@
 package instances
 
 import (
-	"github.com/instill-ai/cli/internal/config"
 	"github.com/spf13/cobra"
 
+	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 

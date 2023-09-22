@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/instill-ai/cli/pkg/iostreams"
-
 	"github.com/google/shlex"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 func TestInstancesAddCmd(t *testing.T) {

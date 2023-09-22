@@ -2,7 +2,6 @@ package instances
 
 import (
 	"bytes"
-	"github.com/instill-ai/cli/pkg/iostreams"
 	"testing"
 
 	"github.com/google/shlex"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 func TestInstancesRemoveCmd(t *testing.T) {
