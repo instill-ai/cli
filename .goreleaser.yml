@@ -46,23 +46,19 @@ builds:
     goarch: [amd64]
 
 archives:
-  - id: nix
-    builds: [macos, linux]
-    <<: &archive_defaults
-      name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: true
-    replacements:
-      darwin: macOS
-    format: tar.gz
-    files:
-      - LICENSE
-  - id: windows
-    builds: [windows]
-    <<: *archive_defaults
-    wrap_in_directory: false
-    format: zip
-    files:
-      - LICENSE
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of uname.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
 
 checksum:
   name_template: 'checksums_v{{ .Version }}_sha256.txt'
