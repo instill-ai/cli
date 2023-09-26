@@ -2,7 +2,6 @@ package instances
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,16 +17,14 @@ import (
 )
 
 type DeployOptions struct {
-	IO *iostreams.IOStreams
-	// TODO Exec
+	IO             *iostreams.IOStreams
+	Exec           ExecDep
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
-	Path           string `validation:"required,dirpath"`
-	Branch         string `validate:"required"`
+	Path           string `validate:"required,dirpath" example:"/home/instill-core/"`
+	Branch         string `validate:"required" example:"main"`
 }
-
-var p = cmdutil.P
 
 func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Command {
 	opts := &DeployOptions{
@@ -62,9 +59,9 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 	}
 	pwd, err := os.Getwd()
 	if err != nil {
-		slog.Error("Couldn't get pwd", err)
+		logger.Error("Couldn't get pwd", err)
 	}
-	dir := filepath.Join(filepath.Dir(pwd), "instill-core")
+	dir := filepath.Join(filepath.Dir(pwd), "instill-core") + string(os.PathSeparator)
 	cmd.Flags().StringVarP(&opts.Path, "path", "p", dir, "Destination directory")
 	cmd.Flags().StringVarP(&opts.Branch, "branch", "b", "main", "Source branch, used to test new features")
 
@@ -79,7 +76,7 @@ func runDeploy(opts *DeployOptions) error {
 	start := time.Now()
 	err = validator.New().Struct(opts)
 	if err != nil {
-		return fmt.Errorf("ERROR: wrong input: %w", err)
+		return fmt.Errorf("ERROR: wrong input, %w", err)
 	}
 
 	// check the deps
@@ -94,38 +91,43 @@ func runDeploy(opts *DeployOptions) error {
 	// init the dir
 	p(io2, "Deploying Instill Core to:\n%s", path)
 	_, err = os.Stat(path)
-	if !os.IsNotExist(err) {
+	if os.IsExist(err) {
 		return fmt.Errorf("ERROR: destination directory already exists")
 	}
 
 	// build and run
-	cmd := exec.Command(
-		"git", "clone", "--depth", "1", "--branch", opts.Branch, "https://github.com/instill-ai/vdp.git", path)
 	p(io2, "GIT clone: in progress")
-	out, err := cmd.Output()
-	outStr := fmt.Sprintf("%s", out)
+	out, err := execCmd(opts.Exec,
+		"git", "clone", "--depth", "1", "--branch", opts.Branch,
+		"https://github.com/instill-ai/vdp.git", path)
 	if err != nil {
-		return fmt.Errorf("ERROR: cant clone VDP, %w:\n%s", err, outStr)
+		return fmt.Errorf("ERROR: cant clone VDP, %w:\n%s", err, out)
 	}
 	// TODO progress
 	p(io2, "GIT clone: done")
-	err = os.Chdir(opts.Path)
+
+	err = os.Chdir(path)
 	if err != nil {
 		return fmt.Errorf("ERROR: can't open the destination, %w", err)
 	}
-	cmd = exec.Command("make", "all")
+
 	p(io2, "make all: in progress")
-	out, err = cmd.Output()
-	outStr = fmt.Sprintf("%s", out)
+	// TODO INS-2141
+	//cmd = exec.Command("make", "all")
+	out, err = execCmd(opts.Exec, "make", "latest", "PROFILE=all")
 	if err != nil {
-		return fmt.Errorf("ERROR: make all failed, %w\n%s", err, outStr)
+		return fmt.Errorf("ERROR: make all failed, %w\n%s", err, out)
 	}
 	// TODO progress
 	p(io2, "make all: done")
 
 	err = opts.Config.Set("", "local-instance-path", path)
 	if err != nil {
-		return err
+		return fmt.Errorf("ERROR: saving config, %w", err)
+	}
+	err = opts.Config.Write()
+	if err != nil {
+		return fmt.Errorf("ERROR: saving config, %w", err)
 	}
 
 	// print a summary
