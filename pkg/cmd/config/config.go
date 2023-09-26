@@ -7,9 +7,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/pkg/cmdutil"
+
 	cmdGet "github.com/instill-ai/cli/pkg/cmd/config/get"
 	cmdSet "github.com/instill-ai/cli/pkg/cmd/config/set"
-	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
 func NewCmdConfig(f *cmdutil.Factory) *cobra.Command {

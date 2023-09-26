@@ -23,11 +23,6 @@ builds:
         - -X github.com/instill-ai/cli/internal/build.Date={{ time "2006-01-02" }}
         - -X github.com/instill-ai/cli/internal/oauth2.clientID={{ .Env.INSTILL_OAUTH_CLIENT_ID }}
         - -X github.com/instill-ai/cli/internal/oauth2.clientSecret={{ .Env.INSTILL_OAUTH_CLIENT_SECRET }}
-        - -X github.com/instill-ai/cli/internal/oauth2.issuer={{ .Env.INSTILL_OAUTH_ISSUER }}
-        - -X github.com/instill-ai/cli/internal/oauth2.hostname={{ .Env.INSTILL_OAUTH_HOSTNAME }}
-        - -X github.com/instill-ai/cli/internal/oauth2.audience={{ .Env.INSTILL_OAUTH_AUDIENCE }}
-        - -X github.com/instill-ai/cli/internal/oauth2.callbackHost={{ .Env.INSTILL_OAUTH_CALLBACK_HOST }}
-        - -X github.com/instill-ai/cli/internal/oauth2.callbackPort={{ .Env.INSTILL_OAUTH_CALLBACK_PORT }}
         - -X main.updaterEnabled=instill-ai/cli
     id: macos
     goos: [darwin]
@@ -61,7 +56,7 @@ archives:
         format: zip
 
 checksum:
-  name_template: 'checksums_v{{ .Version }}_sha256.txt'
+  name_template: "checksums_v{{ .Version }}_sha256.txt"
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
@@ -73,7 +68,7 @@ changelog:
     - title: Features
       regexp: "^.*feat[(\\w)]*:+.*$"
       order: 0
-    - title: 'Bug fixes'
+    - title: "Bug fixes"
       regexp: "^.*fix[(\\w)]*:+.*$"
       order: 1
 

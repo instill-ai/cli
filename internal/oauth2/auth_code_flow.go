@@ -20,22 +20,31 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/instill-ai/cli/api"
-	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 var (
-	// The "Instill CLI" OAuth app
-	clientID     string
-	clientSecret string
-	issuer       string
-	audience     string
-	hostname     string
-	callbackHost string
-	callbackPort string
+	// The "Instill CLI" OAuth app (build-time default to api.instill.tech)
+	clientID = ""
+	// This value is safe to be embedded in version control (build-time default to api.instill.tech)
+	clientSecret = ""
 )
+
+// HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
+func HostConfigInstillCloud() *config.HostConfigTyped {
+
+	host := config.DefaultHostConfig()
+	host.APIHostname = "api.instill.tech"
+	host.IsDefault = true
+	host.Oauth2Hostname = "auth.instill.tech"
+	host.Oauth2Audience = "https://api.instill.tech"
+	host.Oauth2Issuer = "https://auth.instill.tech/"
+	host.Oauth2ClientID = clientID
+	host.Oauth2ClientSecret = clientSecret
+	return &host
+}
 
 type iconfig interface {
 	SaveTyped(*config.HostConfigTyped) error
@@ -48,33 +57,6 @@ type iconfig interface {
 type Authenticator struct {
 	*oidc.Provider
 	oauth2.Config
-}
-
-func initEnv() {
-	// use env vars in dev mode
-	if build.Version == "" {
-		clientID = os.Getenv("INSTILL_OAUTH_CLIENT_ID")
-		hostname = os.Getenv("INSTILL_OAUTH_HOSTNAME")
-		audience = os.Getenv("INSTILL_OAUTH_AUDIENCE")
-		issuer = os.Getenv("INSTILL_OAUTH_ISSUER")
-		clientSecret = os.Getenv("INSTILL_OAUTH_CLIENT_SECRET")
-		callbackHost = os.Getenv("INSTILL_OAUTH_CALLBACK_HOST")
-		callbackPort = os.Getenv("INSTILL_OAUTH_CALLBACK_PORT")
-	}
-}
-
-// HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
-func HostConfigInstillCloud() *config.HostConfigTyped {
-	initEnv()
-	host := config.DefaultHostConfig()
-	host.APIHostname = "api.instill.tech"
-	host.IsDefault = true
-	host.Oauth2Hostname = hostname
-	host.Oauth2Audience = audience
-	host.Oauth2Issuer = issuer
-	host.Oauth2ClientID = clientID
-	host.Oauth2ClientSecret = clientSecret
-	return &host
 }
 
 // NewAuthenticator instantiates the *Authenticator.
@@ -114,11 +96,10 @@ func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) 
 
 // AuthCodeFlowWithConfig authorizes a user via Authorization Code Flow
 func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cfg iconfig, IO *iostreams.IOStreams) error {
-	cp, err := strconv.Atoi(callbackPort)
-	if err != nil {
-		return err
-	}
-	port := cp
+
+	serverHost := "localhost"
+	serverPort := 8085
+
 	issuer := host.APIHostname
 	if host.Oauth2Issuer != "" {
 		issuer = host.Oauth2Issuer
@@ -127,7 +108,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cf
 	if host.Oauth2Audience != "" {
 		audience = host.Oauth2Audience
 	}
-	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2ClientSecret, callbackHost, port)
+	auth, err := NewAuthenticator(issuer, host.Oauth2ClientID, host.Oauth2ClientSecret, serverHost, serverPort)
 	if err != nil {
 		return err
 	}
@@ -144,7 +125,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cf
 	}
 
 	tokenChan := make(chan *oauth2.Token)
-	go handleCallback(auth, callbackHost, port, state, IO, tokenChan)
+	go handleCallback(auth, serverHost, serverPort, state, IO, tokenChan)
 	token := <-tokenChan
 	if token == nil {
 		return errors.New("error receiving the token")
