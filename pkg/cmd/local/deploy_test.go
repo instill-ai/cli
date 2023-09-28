@@ -3,6 +3,7 @@ package local
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/shlex"
@@ -27,7 +28,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "no arguments",
 			input: "",
 			output: DeployOptions{
-				Path:   pwd + "/instill-core/",
+				Path:   filepath.Join(pwd, "instill-core") + string(os.PathSeparator),
 				Branch: "main",
 			},
 			isErr: false,
@@ -103,7 +104,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:   pwd + "/instill-core/",
+				Path:   filepath.Join(pwd, "instill-core") + string(os.PathSeparator),
 				Branch: "main",
 				Exec:   execMock,
 				OS:     osMock,
