@@ -8,9 +8,10 @@ import (
 type ExecMock struct{}
 
 func (e *ExecMock) Command(name string, arg ...string) *exec.Cmd {
+	path, _ := exec.LookPath("echo")
 	return &exec.Cmd{
-		Path: "/usr/sbin/ls",
-		Args: []string{"/"},
+		Path: path,
+		Args: []string{},
 	}
 }
 
