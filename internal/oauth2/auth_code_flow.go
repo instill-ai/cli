@@ -71,7 +71,7 @@ func NewAuthenticator(issuer, clientID, clientSecret, callbackHost string, callb
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
 		RedirectURL:  fmt.Sprintf("http://%s:%d/%s", callbackHost, callbackPort, "callback"),
-		Scopes:       []string{"offline", "openid", "email", "profile"},
+		Scopes:       []string{"offline_access", "openid", "email", "profile"},
 	}
 
 	return &Authenticator{
@@ -142,6 +142,7 @@ func AuthCodeFlowWithConfig(f *cmdutil.Factory, host *config.HostConfigTyped, cf
 	// TODO use HostConfigTyped
 	host.TokenType = token.Type()
 	host.AccessToken = token.AccessToken
+	host.RefreshToken = token.RefreshToken
 	host.Expiry = token.Expiry.Format(time.RFC1123)
 	host.IDToken = token.Extra("id_token").(string)
 	if err := cfg.SaveTyped(host); err != nil {
