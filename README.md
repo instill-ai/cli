@@ -59,10 +59,10 @@ $ instill auth login
 $ instill api pipelines
 
 # list models
-$ instill api models
+$ instill api model/models
 
 # add parameters to a GET request
-$ instill api models?visibility=public
+$ instill api model/models?visibility=public
 
 # list instances
 $ instill instances list

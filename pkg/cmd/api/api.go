@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"regexp"
@@ -46,6 +47,20 @@ type ApiOptions struct {
 
 	Config     func() (config.Config, error)
 	HTTPClient func() (*http.Client, error)
+}
+
+var logger *slog.Logger
+
+func init() {
+	var lvl = new(slog.LevelVar)
+	if os.Getenv("INSTILL_DEBUG") != "" {
+		lvl.Set(slog.LevelDebug)
+	} else {
+		lvl.Set(slog.LevelError + 1)
+	}
+	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: lvl,
+	}))
 }
 
 func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command {
@@ -229,12 +244,14 @@ func apiRun(opts *ApiOptions) error {
 		defer opts.IO.StopPager()
 	}
 
-	// set up the request
-	// TODO support other services than VDP
-	requestPath = "vdp/" + host.APIVersion + "/" + strings.TrimPrefix(requestPath, "/")
+	// handle API prefixes
+	requestPath = handleAPIPrefix(requestPath, host.APIVersion)
+
 	if host.AccessToken != "" {
 		requestHeaders = append(requestHeaders, "Authorization: Bearer "+host.AccessToken)
 	}
+
+	logger.Debug("api request", "host", host.APIHostname, "path", requestPath)
 
 	// http request & output
 	template := export.NewTemplate(opts.IO, opts.Template)
@@ -247,6 +264,23 @@ func apiRun(opts *ApiOptions) error {
 		return err
 	}
 	return template.End()
+}
+
+func handleAPIPrefix(path, version string) string {
+	// handle API prefixes
+	path = strings.TrimPrefix(path, "/")
+	prefixed := false
+	for _, p := range []string{"model", "base", "vdp"} {
+		if strings.HasPrefix(path, p) {
+			path = p + "/" + version + strings.TrimPrefix(path, p)
+			prefixed = true
+			break
+		}
+	}
+	if !prefixed {
+		path = "vdp/" + version + "/" + path
+	}
+	return path
 }
 
 func processResponse(resp *http.Response, opts *ApiOptions, headersOutputStream io.Writer, template *export.Template) (err error) {
