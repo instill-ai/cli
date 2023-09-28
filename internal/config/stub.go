@@ -66,6 +66,7 @@ func (c ConfigStub) MakeConfigForHost(hostname string) *HostConfig {
 }
 
 func (c ConfigStub) HostsTyped() ([]HostConfigTyped, error) {
+
 	ins := []HostConfigTyped{
 		{
 			APIHostname:        "api.instill.tech",

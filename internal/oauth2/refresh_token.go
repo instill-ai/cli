@@ -11,11 +11,23 @@ import (
 func RefreshToken(cfg iconfig, hostname string) (string, error) {
 
 	var (
-		accessToken  string
-		refreshToken string
-		expiry       time.Time
-		err          error
+		oauth2ClientID     string
+		oauth2ClientSecret string
+		accessToken        string
+		refreshToken       string
+		expiry             time.Time
+		err                error
 	)
+
+	oauth2ClientID, err = cfg.Get(hostname, "oauth2_client_id")
+	if err != nil {
+		return "", err
+	}
+
+	oauth2ClientSecret, err = cfg.Get(hostname, "oauth2_client_secret")
+	if err != nil {
+		return "", err
+	}
 
 	accessToken, err = cfg.Get(hostname, "access_token")
 	if err != nil {
@@ -42,8 +54,8 @@ func RefreshToken(cfg iconfig, hostname string) (string, error) {
 	}
 
 	conf := &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
+		ClientID:     oauth2ClientID,
+		ClientSecret: oauth2ClientSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("https://auth.%s/oauth2/auth", hostname),
 			TokenURL: fmt.Sprintf("https://auth.%s/oauth2/token", hostname),

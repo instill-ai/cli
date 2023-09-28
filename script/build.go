@@ -13,8 +13,6 @@
 //     - INSTILL_OAUTH_HOSTNAME
 //     - INSTILL_OAUTH_AUDIENCE
 //     - INSTILL_OAUTH_ISSUER
-//     - INSTILL_OAUTH_CALLBACK_HOST
-//     - INSTILL_OAUTH_CALLBACK_PORT
 //     - SOURCE_DATE_EPOCH: enables reproducible builds
 //     - GO_LDFLAGS
 //
@@ -30,8 +28,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/cli/safeexec"
-	"github.com/dotenv-org/godotenvvault"
 	"io"
 	"os"
 	"os/exec"
@@ -40,17 +36,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
 
-var oauthFields = [][]string{
-	{"INSTILL_OAUTH_CLIENT_SECRET", "clientSecret"},
-	{"INSTILL_OAUTH_CLIENT_ID", "clientID"},
-	{"INSTILL_OAUTH_ISSUER", "issuer"},
-	{"INSTILL_OAUTH_HOSTNAME", "hostname"},
-	{"INSTILL_OAUTH_AUDIENCE", "audience"},
-	{"INSTILL_OAUTH_CALLBACK_HOST", "callbackHost"},
-	{"INSTILL_OAUTH_CALLBACK_PORT", "callbackPort"},
-}
+	"github.com/cli/safeexec"
+	"github.com/dotenv-org/godotenvvault"
+)
 
 var tasks = map[string]func(string) error{
 	"bin/instill": func(exe string) error {
@@ -63,13 +52,9 @@ var tasks = map[string]func(string) error{
 		ldflags := os.Getenv("GO_LDFLAGS")
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Version=%s %s", version(), ldflags)
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Date=%s %s", date(), ldflags)
-		oauthSecret := os.Getenv(oauthFields[0][0])
-		if oauthSecret != "" {
-			for _, v := range oauthFields {
-				nameEnv, nameVar := v[0], v[1]
-				ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.%s=%s %s",
-					nameVar, os.Getenv(nameEnv), ldflags)
-			}
+		if oauthSecret := os.Getenv("INSTILL_OAUTH_CLIENT_SECRET"); oauthSecret != "" {
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.clientID=%s %s", os.Getenv("INSTILL_OAUTH_CLIENT_ID"), ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.clientSecret=%s %s", oauthSecret, ldflags)
 		}
 
 		return run("go", "build", "-trimpath", "-ldflags", ldflags, "-o", exe, "./cmd/instill")

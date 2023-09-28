@@ -2,13 +2,16 @@ package login
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
+	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/oauth2"
+	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
@@ -65,27 +68,51 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 }
 
 func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
+
+	var host *config.HostConfigTyped
+
 	cfg, err := opts.Config()
 	if err != nil {
 		return err
 	}
 
-	hostname := opts.Hostname
-
-	hosts, err := cfg.HostsTyped()
-	if err != nil {
-		return err
-	}
-
-	var host *config.HostConfigTyped
-	for _, h := range hosts {
-		if h.APIHostname == hostname {
-			host = &h
-			break
+	// in case there's no hosts.yml config, create one with the default instance
+	fs, err := os.Stat(config.HostsConfigFile())
+	if !(err == nil && !fs.IsDir()) {
+		// get the (hardcoded) default cloud instance
+		host = oauth2.HostConfigInstillCloud()
+		err = cfg.SaveTyped(host)
+		if err != nil {
+			return err
 		}
-	}
-	if host == nil {
-		return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+
+		cmdFactory := factory.New(build.Version)
+		stderr := cmdFactory.IOStreams.ErrOut
+		cs := cmdFactory.IOStreams.ColorScheme()
+
+		fmt.Fprintln(stderr, cs.Bold("No host.yml config, creating one with the default host \"api.instill.tech\"..."))
+		fmt.Fprintln(stderr, config.HostsConfigFile())
+		fmt.Fprintln(stderr, "")
+	} else {
+
+		hostname := opts.Hostname
+
+		hosts, err := cfg.HostsTyped()
+		if err != nil {
+			return err
+		}
+
+		for _, h := range hosts {
+			if h.APIHostname == hostname {
+				host = &h
+				break
+			}
+		}
+
+		if host == nil {
+			return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+		}
+
 	}
 
 	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2ClientSecret == "" {
@@ -95,7 +122,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 			$ instill instances edit %s \
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
-				--client-secret SECRET`, hostname, hostname)
+				--client-secret CLIENT_SECRET`, host.APIHostname, host.APIHostname)
 		return fmt.Errorf(e)
 	}
 
@@ -104,7 +131,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		err = prompt.SurveyAskOne(&survey.Confirm{
 			Message: fmt.Sprintf(
 				"You're already logged into %s. Do you want to re-authenticate?",
-				hostname),
+				host.APIHostname),
 			Default: false,
 		}, &keepGoing)
 		if err != nil {

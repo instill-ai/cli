@@ -31,9 +31,3 @@ jobs:
           # secrets
           INSTILL_OAUTH_CLIENT_ID: ${{ secrets.oauth2ClientId }}
           INSTILL_OAUTH_CLIENT_SECRET: ${{ secrets.oauth2ClientSecret }}
-          # config
-          INSTILL_OAUTH_ISSUER: ${{ vars.INSTILL_OAUTH_ISSUER }}
-          INSTILL_OAUTH_HOSTNAME: ${{ vars.INSTILL_OAUTH_HOSTNAME }}
-          INSTILL_OAUTH_AUDIENCE: ${{ vars.INSTILL_OAUTH_AUDIENCE }}
-          INSTILL_OAUTH_CALLBACK_HOST: ${{ vars.INSTILL_OAUTH_CALLBACK_HOST }}
-          INSTILL_OAUTH_CALLBACK_PORT: ${{ vars.INSTILL_OAUTH_CALLBACK_PORT }}
