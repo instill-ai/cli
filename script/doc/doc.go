@@ -21,7 +21,7 @@ func main() {
 	buildDate := build.Date
 	buildVersion := build.Version
 	cmdFactory := factory.New(buildVersion)
-	runGenManCmd(root.NewCmdRoot(cmdFactory, buildVersion, buildDate))
+	_ = runGenManCmd(root.NewCmdRoot(cmdFactory, buildVersion, buildDate))
 }
 
 func runGenManCmd(cmd *cobra.Command) error {
