@@ -123,6 +123,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 
 	// TODO INS-1659 drop in favor of OAuth2
 	if instance.IsLocal(host.APIHostname) {
+		fmt.Println("Logging into the local Instill Core instance...")
 		var pass string
 		err = prompt.SurveyAskOne(&survey.Password{
 			Message: "Enter your password",
