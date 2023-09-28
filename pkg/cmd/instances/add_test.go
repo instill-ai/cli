@@ -165,7 +165,7 @@ func TestInstancesAddCmdRun(t *testing.T) {
 		tt.input.IO = io
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := runAdd(tt.input)
+			err := RunAdd(tt.input)
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {

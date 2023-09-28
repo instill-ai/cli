@@ -2,6 +2,8 @@ package login
 
 import (
 	"bytes"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/google/shlex"
@@ -84,4 +86,30 @@ func Test_NewCmdLogin(t *testing.T) {
 			assert.Equal(t, tt.wants.Interactive, gotOpts.Interactive)
 		})
 	}
+}
+
+type mockRoundTripper struct {
+	response *http.Response
+}
+
+func (rt *mockRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
+	return rt.response, nil
+}
+
+func TestLocalLogin(t *testing.T) {
+	// fixtures
+	token1 := "foobar"
+	json := `{ "access_token": "` + token1 + `" }`
+	recorder := httptest.NewRecorder()
+	recorder.Header().Add("Content-Type", "application/json")
+	_, err := recorder.WriteString(json)
+	assert.NoError(t, err)
+	expectedResponse := recorder.Result()
+	transport := &mockRoundTripper{expectedResponse}
+	// test
+	token2, err := loginLocal(transport, "baz", "baz")
+	// assert
+	assert.NoError(t, err)
+	assert.Equal(t, token1, token2)
+
 }

@@ -1,7 +1,11 @@
 package login
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -10,8 +14,10 @@ import (
 
 	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
+	instances "github.com/instill-ai/cli/pkg/cmd/local"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
@@ -115,6 +121,27 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 
 	}
 
+	// TODO INS-1659 drop in favor of OAuth2
+	if instance.IsLocal(host.APIHostname) {
+		var pass string
+		err = prompt.SurveyAskOne(&survey.Password{
+			Message: "Enter your password",
+		}, &pass)
+		if err != nil {
+			return fmt.Errorf("could not prompt: %w", err)
+		}
+		token, err := loginLocal(nil, host.APIHostname, pass)
+		if err != nil {
+			return fmt.Errorf("ERROR: login failed, %w", err)
+		}
+		host.AccessToken = token
+		err = cfg.SaveTyped(host)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	if host.Oauth2Hostname == "" || host.Oauth2ClientID == "" || host.Oauth2ClientSecret == "" {
 		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
 
@@ -143,4 +170,46 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 	}
 
 	return oauth2.AuthCodeFlowWithConfig(f, host, cfg, opts.IO)
+}
+
+type localLoginResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
+type localLoginRequest struct {
+	Name string `json:"username"`
+	Pass string `json:"password"`
+}
+
+// loginLocal handles dedicated auth flow for Instill Core.
+func loginLocal(transport http.RoundTripper, hostname, password string) (string, error) {
+	url := instance.GetProtocol(hostname) + "base/v1alpha/auth/login"
+	data := &localLoginRequest{
+		Name: instances.DefUsername,
+		Pass: password,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	client := &http.Client{Transport: transport}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	var response localLoginResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", err
+	}
+	return response.AccessToken, nil
 }

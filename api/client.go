@@ -138,8 +138,8 @@ func (err HTTPError) Error() string {
 }
 
 // REST performs a REST request and parses the response.
-func (c Client) REST(hostname string, method string, p string, body io.Reader, data interface{}) error {
-	req, err := http.NewRequest(method, restURL(hostname, p), body)
+func (c Client) REST(hostname string, method string, path string, body io.Reader, data interface{}) error {
+	req, err := http.NewRequest(method, instance.GetProtocol(hostname), body)
 	if err != nil {
 		return err
 	}
@@ -171,13 +171,6 @@ func (c Client) REST(hostname string, method string, p string, body io.Reader, d
 	}
 
 	return nil
-}
-
-func restURL(hostname string, pathOrURL string) string {
-	if strings.HasPrefix(pathOrURL, "https://") || strings.HasPrefix(pathOrURL, "http://") {
-		return pathOrURL
-	}
-	return instance.RESTPrefix(hostname) + pathOrURL
 }
 
 func HandleHTTPError(resp *http.Response) error {

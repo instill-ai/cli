@@ -35,20 +35,14 @@ func HostnameValidator(v string) error {
 	return nil
 }
 
-// RESTPrefix sets the prefix of Instill API URL
-// TODO remove
-func RESTPrefix(hostname string) string {
-	if strings.EqualFold(hostname, "localhost") {
+// GetProtocol returns the correct protocol based on a hostname
+func GetProtocol(hostname string) string {
+	if IsLocal(hostname) {
 		return fmt.Sprintf("http://%s/", hostname)
 	}
 	return fmt.Sprintf("https://%s/", hostname)
 }
 
-// GetProtocol returns the correct protocol based on a hostname
-func GetProtocol(hostname string) string {
-	// TODO support port numbers
-	if strings.HasSuffix(hostname, "localhost") {
-		return fmt.Sprintf("http://%s/", hostname)
-	}
-	return fmt.Sprintf("https://%s/", hostname)
+func IsLocal(hostname string) bool {
+	return strings.HasPrefix(hostname, "localhost")
 }

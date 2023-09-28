@@ -1,4 +1,4 @@
-package instances
+package local
 
 import (
 	"fmt"
@@ -16,6 +16,7 @@ import (
 type StopOptions struct {
 	IO             *iostreams.IOStreams
 	Exec           ExecDep
+	OS             OSDep
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
@@ -65,10 +66,14 @@ func runStop(opts *StopOptions) error {
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
-	if err := IsDeployed(path); err != nil {
+	if err := IsDeployed(opts.OS, path); err != nil {
 		return fmt.Errorf("ERROR: %s", err)
 	}
-	err = os.Chdir(path)
+	if opts.OS != nil {
+		err = opts.OS.Chdir(path)
+	} else {
+		err = os.Chdir(path)
+	}
 	if err != nil {
 		return fmt.Errorf("ERROR: can't open the destination, %w", err)
 	}

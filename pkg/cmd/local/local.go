@@ -1,4 +1,4 @@
-package instances
+package local
 
 import (
 	"fmt"
@@ -15,26 +15,33 @@ import (
 
 type ExecDep interface {
 	Command(name string, arg ...string) *exec.Cmd
+	LookPath(file string) (string, error)
 }
 
-const PathConfigKey = "local-instance-path"
+type OSDep interface {
+	Chdir(path string) error
+	Stat(name string) (os.FileInfo, error)
+}
 
-// TODO config
-// const logLevel = slog.LevelInfo
-const logLevel = slog.LevelDebug
+const (
+	ConfigKeyPath = "local-instance-path"
+)
 
 var logger *slog.Logger
 var p = cmdutil.P
 
 func init() {
 	var lvl = new(slog.LevelVar)
-	lvl.Set(logLevel)
+	if os.Getenv("INSTILL_DEBUG") != "" {
+		lvl.Set(slog.LevelDebug)
+	} else {
+		lvl.Set(slog.LevelError + 1)
+	}
 	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: lvl,
 	}))
 }
 
-// TODO logs
 func New(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "local <command>",
@@ -66,12 +73,12 @@ func execCmd(execDep ExecDep, cmd string, params ...string) (string, error) {
 
 // ConfigPath returns a configured path to the local instance.
 func ConfigPath(cfg config.Config) (string, error) {
-	path, err := cfg.Get("", PathConfigKey)
+	path, err := cfg.Get("", ConfigKeyPath)
 	if err != nil {
 		return "", err
 	}
 	if path == "" {
-		return "", fmt.Errorf("config %s is empty", PathConfigKey)
+		return "", fmt.Errorf("config %s is empty", ConfigKeyPath)
 	}
 	return path, nil
 }

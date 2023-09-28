@@ -1,4 +1,4 @@
-package instances
+package local
 
 import (
 	"fmt"
@@ -17,6 +17,7 @@ import (
 type StatusOptions struct {
 	IO             *iostreams.IOStreams
 	Exec           ExecDep
+	OS             OSDep
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
@@ -70,6 +71,7 @@ func runStatus(opts *StatusOptions) error {
 	// init, validate
 	io2 := opts.IO
 	exec2 := opts.Exec
+	os2 := opts.OS
 	path, err := ConfigPath(opts.Config)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
@@ -82,13 +84,13 @@ func runStatus(opts *StatusOptions) error {
 	deployed := "NO"
 	started := "NO"
 	healthy := "NO"
-	if err := IsDeployed(path); err == nil {
+	if err := IsDeployed(os2, path); err == nil {
 		deployed = "YES"
 	}
-	if err := IsStarted(exec2, path); err == nil {
+	if err := IsStarted(exec2, os2, path); err == nil {
 		started = "YES"
 	}
-	errHealthy := IsHealthy(exec2, path)
+	errHealthy := IsHealthy(exec2, os2, path)
 	if errHealthy == nil {
 		healthy = "YES"
 	}
@@ -110,12 +112,21 @@ func runStatus(opts *StatusOptions) error {
 }
 
 // IsDeployed returns no errors if an instance in `path` is a clone of VDP.
-func IsDeployed(path string) error {
-	_, err := os.Stat(path)
+func IsDeployed(osDep OSDep, path string) error {
+	var err error
+	if osDep != nil {
+		_, err = osDep.Stat(path)
+	} else {
+		_, err = os.Stat(path)
+	}
 	if os.IsNotExist(err) {
 		return fmt.Errorf("directory %s doesn't exist", path)
 	}
-	_, err = os.Stat(filepath.Join(path, "Makefile"))
+	if osDep != nil {
+		_, err = osDep.Stat(filepath.Join(path, "Makefile"))
+	} else {
+		_, err = os.Stat(filepath.Join(path, "Makefile"))
+	}
 	if os.IsNotExist(err) {
 		return fmt.Errorf("directory %s isn't Instill Core", path)
 	}
@@ -124,11 +135,16 @@ func IsDeployed(path string) error {
 
 // IsStarted returns no errors if an instance in `path` is running.
 // execDep is used for DI and can be nil.
-func IsStarted(execDep ExecDep, path string) error {
-	if err := IsDeployed(path); err != nil {
+func IsStarted(execDep ExecDep, osDep OSDep, path string) error {
+	var err error
+	if err = IsDeployed(osDep, path); err != nil {
 		return err
 	}
-	err := os.Chdir(path)
+	if osDep != nil {
+		err = osDep.Chdir(path)
+	} else {
+		err = os.Chdir(path)
+	}
 	if err != nil {
 		return err
 	}
@@ -147,11 +163,11 @@ func IsStarted(execDep ExecDep, path string) error {
 // IsHealthy returns no error if an instance in `path` is responding.
 // execDep is used for DI and can be nil.
 // TODO assert responses
-func IsHealthy(execDep ExecDep, path string) error {
-	if err := IsDeployed(path); err != nil {
+func IsHealthy(execDep ExecDep, osDep OSDep, path string) error {
+	if err := IsDeployed(osDep, path); err != nil {
 		return err
 	}
-	if err := IsStarted(execDep, path); err != nil {
+	if err := IsStarted(execDep, osDep, path); err != nil {
 		return err
 	}
 	urls := []string{
