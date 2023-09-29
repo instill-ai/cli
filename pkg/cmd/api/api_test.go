@@ -694,3 +694,37 @@ func Test_processResponse_template(t *testing.T) {
 	`), stdout.String())
 	assert.Equal(t, "", stderr.String())
 }
+
+func TestHandleAPIPrefix(t *testing.T) {
+	tests := []struct {
+		path     string
+		version  string
+		expected string
+	}{
+		{
+			path:     "foo",
+			version:  "1",
+			expected: "vdp/1/foo",
+		},
+		{
+			path:     "model/foo",
+			version:  "1",
+			expected: "model/1/foo",
+		},
+		{
+			path:     "base/foo",
+			version:  "1",
+			expected: "base/1/foo",
+		},
+		{
+			path:     "vdp/foo",
+			version:  "1",
+			expected: "vdp/1/foo",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.version+"/"+tt.path, func(t *testing.T) {
+			assert.Equal(t, tt.expected, handleAPIPrefix(tt.path, tt.version))
+		})
+	}
+}
