@@ -43,3 +43,8 @@ install: bin/instill
 .PHONY: uninstall
 uninstall:
 	rm -f ${DESTDIR}${bindir}/instill
+
+.PHONY: doc
+doc:
+	rm -R doc
+	go run script/doc/doc.go

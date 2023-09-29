@@ -1,2 +1,4 @@
 ignore:
   - "internal/config/stub.go"
+  - "script/build.go"
+  - "script/doc/doc.go"

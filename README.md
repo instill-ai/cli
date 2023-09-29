@@ -33,11 +33,16 @@ Instill AI is on a mission to make AI accessible to everyone. With **Instill Clo
 
 ## Installation
 
-### macOS <!-- omit in toc -->
+You can download binaries from the [releases page][].
 
-`instill` is available via [Homebrew][] and as a downloadable binary from the [releases page][].
+### Linux <!-- omit in toc -->
 
-#### Homebrew <!-- omit in toc -->
+```
+curl -Ls https://github.com/instill-ai/cli/releases/download/v0.2.0-alpha/instill_Linux_x86_64.tar.gz | tar -xzvf -
+./bin/instill
+```
+
+#### MacOS <!-- omit in toc -->
 
 To install:
 ```
@@ -47,6 +52,58 @@ brew install instill-ai/tap/instill
 To upgrade:
 ```
 brew upgrade instill-ai/tap/instill
+```
+
+## Documentation
+
+[Instill CLI](doc/instill.1.md):
+- [api](doc/instill-api.1.md)
+- [auth](doc/instill-auth.1.md)
+  - [login](doc/instill-auth-login.1.md)
+  - [logout](doc/instill-auth-logout.1.md)
+  - [status](doc/instill-auth-status.1.md)
+- [instances](doc/instill-instances.1.md)
+  - [add](doc/instill-instances-add.1.md)
+  - [edit](doc/instill-instances-edit.1.md)
+  - [list](doc/instill-instances-list.1.md)
+  - [set-default](doc/instill-instances-set-default.1.md)
+- [config](doc/instill-config.1.md)
+  - [get](doc/instill-config-get.1.md)
+  - [set](doc/instill-config-set.1.md)
+
+```
+Access Instill services from the command line.
+
+USAGE
+  instill <command> <subcommand> [flags]
+
+CORE COMMANDS
+  api:        Make an authenticated Instill API request
+  auth:       Login and logout
+  completion: Generate shell completion scripts
+  config:     Manage configuration for instill
+  help:       Help about any command
+  instances:  Instances management
+  local:      Local Instill Core instance
+
+FLAGS
+  --help      Show help for command
+  --version   Show instill version
+
+EXAMPLES
+  $ instill api pipelines
+  $ instill config get editor
+  $ instill auth login
+
+ENVIRONMENT VARIABLES
+  See 'instill help environment' for the list of supported environment variables.
+
+LEARN MORE
+  Use 'instill <command> <subcommand> --help' for more information about a command.
+  Read the manual at https://docs.instill.tech
+
+FEEDBACK
+  Please open an issue on https://github.com/instill-ai/cli.
 ```
 
 ## Usage examples
