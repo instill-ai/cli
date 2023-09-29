@@ -96,7 +96,7 @@ func runDeploy(opts *DeployOptions) error {
 			_, err = safeexec.LookPath(n)
 		}
 		if err != nil {
-			return fmt.Errorf("ERROR: docker not found")
+			return fmt.Errorf("ERROR: %s not found", n)
 		}
 	}
 
@@ -122,35 +122,27 @@ func runDeploy(opts *DeployOptions) error {
 		}
 	}
 
-	// build and run
-	p(io2, "GIT clone: in progress")
-	out, err := execCmd(opts.Exec,
-		"git", "clone", "--depth", "1", "--branch", opts.Branch,
-		"https://github.com/instill-ai/vdp.git", path)
-	if err != nil {
-		return fmt.Errorf("ERROR: cant clone VDP, %w:\n%s", err, out)
+	p(io2, "Launch Instill Core")
+	for _, c := range comps {
+		_, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("docker compose ls | grep instill-%s", strings.ToLower(c)))
+		if err != nil {
+			if opts.OS != nil {
+				err = opts.OS.Chdir(filepath.Join(path, strings.ToLower(c)))
+			} else {
+				err = os.Chdir(filepath.Join(path, strings.ToLower(c)))
+			}
+			if err != nil {
+				return fmt.Errorf("ERROR: can't open the destination, %w", err)
+			}
+			p(io2, "Spin up Instill %s...", c)
+			// TODO INS-2141 use make all
+			//cmd = exec.Command("make", "all")
+			out, err := execCmd(opts.Exec, "make", "latest", "PROFILE=all")
+			if err != nil {
+				return fmt.Errorf("ERROR: %s spin-up failed, %w\n%s", c, err, out)
+			}
+		}
 	}
-	// TODO progress
-	p(io2, "GIT clone: done")
-
-	if opts.OS != nil {
-		err = opts.OS.Chdir(path)
-	} else {
-		err = os.Chdir(path)
-	}
-	if err != nil {
-		return fmt.Errorf("ERROR: can't open the destination, %w", err)
-	}
-
-	p(io2, "make latest PROFILE=all: in progress")
-	// TODO INS-2141 use make all
-	//cmd = exec.Command("make", "all")
-	out, err = execCmd(opts.Exec, "make", "latest", "PROFILE=all")
-	if err != nil {
-		return fmt.Errorf("ERROR: make all failed, %w\n%s", err, out)
-	}
-	// TODO progress
-	p(io2, "make all: done")
 
 	// print a summary
 	elapsed := time.Since(start)
