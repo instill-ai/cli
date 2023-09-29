@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/cli/safeexec"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cobra"
 
@@ -91,7 +92,7 @@ func runDeploy(opts *DeployOptions) error {
 		if opts.Exec != nil {
 			_, err = opts.Exec.LookPath(n)
 		} else {
-			_, err = opts.Exec.LookPath(n)
+			_, err = safeexec.LookPath(n)
 		}
 		if err != nil {
 			return fmt.Errorf("ERROR: docker not found")
