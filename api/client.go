@@ -177,7 +177,7 @@ func restURL(hostname string, pathOrURL string) string {
 	if strings.HasPrefix(pathOrURL, "https://") || strings.HasPrefix(pathOrURL, "http://") {
 		return pathOrURL
 	}
-	return instance.RESTPrefix(hostname) + pathOrURL
+	return instance.GetProtocol(hostname) + pathOrURL
 }
 
 func HandleHTTPError(resp *http.Response) error {

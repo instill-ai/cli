@@ -75,7 +75,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 				return runF(opts)
 			}
 
-			return runAdd(opts)
+			return RunAdd(opts)
 		},
 	}
 
@@ -84,17 +84,13 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 	return cmd
 }
 
-func runAdd(opts *AddOptions) error {
-	hosts, err := opts.Config.HostsTyped()
+func RunAdd(opts *AddOptions) error {
+	exists, err := IsInstanceAdded(opts.Config, opts.APIHostname)
 	if err != nil {
 		return err
 	}
-
-	apiHost := opts.APIHostname
-	for _, h := range hosts {
-		if h.APIHostname == apiHost {
-			return fmt.Errorf("ERROR: instance '%s' already exists", apiHost)
-		}
+	if exists {
+		return fmt.Errorf("ERROR: instance '%s' already exists", opts.APIHostname)
 	}
 
 	if opts.Oauth2 != "" && (opts.ClientSecret == "" || opts.ClientID == "") {
@@ -109,7 +105,9 @@ func runAdd(opts *AddOptions) error {
 	host.Oauth2Issuer = opts.Issuer
 	host.Oauth2ClientID = opts.ClientID
 	host.Oauth2ClientSecret = opts.ClientSecret
-	host.APIVersion = opts.APIVersion
+	if opts.APIVersion != "" {
+		host.APIVersion = opts.APIVersion
+	}
 
 	err = opts.Config.SaveTyped(&host)
 	if err != nil {
@@ -119,4 +117,18 @@ func runAdd(opts *AddOptions) error {
 	cmdutil.P(opts.IO, "Instance '%s' has been added\n", host.APIHostname)
 
 	return nil
+}
+
+func IsInstanceAdded(cfg config.Config, host string) (bool, error) {
+	hosts, err := cfg.HostsTyped()
+	if err != nil {
+		return false, err
+	}
+	apiHost := host
+	for _, h := range hosts {
+		if h.APIHostname == apiHost {
+			return true, nil
+		}
+	}
+	return false, nil
 }

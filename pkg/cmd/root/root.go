@@ -14,6 +14,7 @@ import (
 	completionCmd "github.com/instill-ai/cli/pkg/cmd/completion"
 	configCmd "github.com/instill-ai/cli/pkg/cmd/config"
 	instancesCmd "github.com/instill-ai/cli/pkg/cmd/instances"
+	localCmd "github.com/instill-ai/cli/pkg/cmd/local"
 	versionCmd "github.com/instill-ai/cli/pkg/cmd/version"
 )
 
@@ -61,6 +62,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	cmd.AddCommand(authCmd.NewCmdAuth(f))
 	cmd.AddCommand(instancesCmd.New(f))
 	cmd.AddCommand(configCmd.NewCmdConfig(f))
+	cmd.AddCommand(localCmd.New(f))
 	cmd.AddCommand(completionCmd.NewCmdCompletion(f.IOStreams))
 
 	// the `api` command should not inherit any extra HTTP headers
