@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -64,11 +65,11 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 			return runDeploy(opts)
 		},
 	}
-	pwd, err := os.Getwd()
+	d, err := os.UserHomeDir()
 	if err != nil {
-		logger.Error("Couldn't get pwd", err)
+		logger.Error("Couldn't get Home directory", err)
 	}
-	dir := filepath.Join(pwd, "instill-core") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
 	cmd.Flags().StringVarP(&opts.Path, "path", "p", dir, "Destination directory")
 	cmd.Flags().StringVarP(&opts.Branch, "branch", "b", "main", "Source branch, used to test new features")
 
@@ -99,11 +100,26 @@ func runDeploy(opts *DeployOptions) error {
 		}
 	}
 
-	// init the dir
-	p(io2, "Deploying Instill Core to:\n%s", path)
-	_, err = os.Stat(path)
-	if os.IsExist(err) {
-		return fmt.Errorf("ERROR: destination directory already exists")
+	comps := []string{"Base", "VDP", "Model"}
+
+	p(io2, "Download Instill Core to: %s", path)
+	for _, c := range comps {
+		_, err = os.Stat(filepath.Join(path, c))
+		if err == nil {
+			continue
+		}
+		if os.IsNotExist(err) {
+			p(io2, "git clone Instill %s...", c)
+			out, err := execCmd(opts.Exec,
+				"git", "clone", "--depth", "1", "--branch", opts.Branch,
+				fmt.Sprintf("https://github.com/instill-ai/%s.git", c), filepath.Join(path, strings.ToLower(c)))
+			if err != nil {
+				return fmt.Errorf("ERROR: cant clone %s, %w:\n%s", c, err, out)
+			}
+			if err != nil {
+				return fmt.Errorf("ERROR: cant clone %s, %w:\n%s", c, err, out)
+			}
+		}
 	}
 
 	// build and run

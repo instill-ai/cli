@@ -15,7 +15,11 @@ import (
 )
 
 func TestLocalDeployCmd(t *testing.T) {
-	pwd, _ := os.Getwd()
+	d, err := os.UserHomeDir()
+	if err != nil {
+		logger.Error("Couldn't get home directory", err)
+	}
+	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		stdin    string
@@ -28,7 +32,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "no arguments",
 			input: "",
 			output: DeployOptions{
-				Path:   filepath.Join(pwd, "instill-core") + string(os.PathSeparator),
+				Path:   dir,
 				Branch: "main",
 			},
 			isErr: false,
@@ -92,7 +96,11 @@ func TestLocalDeployCmd(t *testing.T) {
 func TestLocalDeployCmdRun(t *testing.T) {
 	execMock := &ExecMock{}
 	osMock := &OSMock{}
-	pwd, _ := os.Getwd()
+	d, err := os.UserHomeDir()
+	if err != nil {
+		logger.Error("Couldn't get home directory", err)
+	}
+	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		input    *DeployOptions
@@ -104,7 +112,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:   filepath.Join(pwd, "instill-core") + string(os.PathSeparator),
+				Path:   dir,
 				Branch: "main",
 				Exec:   execMock,
 				OS:     osMock,
