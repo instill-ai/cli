@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,6 +91,10 @@ func TestLocalDeployCmd(t *testing.T) {
 	}
 }
 
+func checkFoUpdateMock(ExecDep, string, string) (*releaseInfo, error) {
+	return &releaseInfo{}, nil
+}
+
 func TestLocalDeployCmdRun(t *testing.T) {
 	execMock := &ExecMock{}
 	osMock := &OSMock{}
@@ -109,13 +114,62 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:   dir,
-				Exec:   execMock,
-				OS:     osMock,
-				Config: config.ConfigStub{},
+				Path:        dir,
+				Exec:        execMock,
+				OS:          osMock,
+				Config:      config.ConfigStub{},
+				checkUpdate: checkFoUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
 			},
 			stdout: "",
 			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:        dir,
+				Exec:        execMock,
+				OS:          osMock,
+				Config:      config.ConfigStub{},
+				checkUpdate: checkFoUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return fmt.Errorf("")
+				},
+			},
+			stdout: "",
+			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:        dir,
+				Exec:        execMock,
+				OS:          osMock,
+				Config:      config.ConfigStub{},
+				checkUpdate: checkFoUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
+			},
+			stdout: "",
+			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:        "a/path/does/not/exist",
+				Exec:        execMock,
+				OS:          osMock,
+				Config:      config.ConfigStub{},
+				checkUpdate: checkFoUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
+			},
+			stdout: "",
+			isErr:  true,
 		},
 	}
 

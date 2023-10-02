@@ -238,7 +238,7 @@ func checkForUpdate(currentVersion string) (*update.ReleaseInfo, error) {
 
 	repo := updaterEnabled
 	stateFilePath := filepath.Join(config.StateDir(), "state.yml")
-	return update.CheckForUpdate(client, stateFilePath, repo, currentVersion, false)
+	return update.CheckForUpdate(client, stateFilePath, repo, currentVersion)
 }
 
 // basicClient returns an API client for instill.tech only that borrows from but

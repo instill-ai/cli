@@ -87,7 +87,7 @@ func runStatus(opts *StatusOptions) error {
 	}
 
 	p(opts.IO, `
-		Status of the local Instill Core instance
+		Status of the local Instill Core instance:
 
 		Deployed: %s
 		Started: %s
@@ -108,10 +108,9 @@ func isDeployed(execDep ExecDep) error {
 	var checkList = make([]bool, len(projs))
 	for i := range checkList {
 		proj := strings.ToLower(projs[i])
-		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err != nil {
-			continue
+		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err == nil {
+			checkList[i] = true
 		}
-		checkList[i] = true
 	}
 
 	suiteCheck := 0

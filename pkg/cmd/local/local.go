@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/internal/update"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
@@ -25,6 +25,20 @@ type ExecDep interface {
 type OSDep interface {
 	Chdir(path string) error
 	Stat(name string) (os.FileInfo, error)
+}
+
+var gitDescribeSuffixRE = regexp.MustCompile(`\d+-\d+-g[a-f0-9]{8}$`)
+
+// releaseInfo stores information about a release
+type releaseInfo struct {
+	Version     string    `json:"tag_name"`
+	URL         string    `json:"html_url"`
+	PublishedAt time.Time `json:"published_at"`
+}
+
+type StateEntry struct {
+	CheckedForUpdateAt time.Time   `yaml:"checked_for_update_at"`
+	LatestRelease      releaseInfo `yaml:"latest_release"`
 }
 
 const (
@@ -90,10 +104,4 @@ func getConfigPath(cfg config.Config) (string, error) {
 		return "", fmt.Errorf("config %s is empty", ConfigKeyPath)
 	}
 	return path, nil
-}
-
-func checkForUpdate(comp string, currentVersion string) (*update.ReleaseInfo, error) {
-
-	stateFilePath := filepath.Join(config.StateDir(), fmt.Sprintf("%s.yml", comp))
-	return update.CheckForUpdate(nil, stateFilePath, "instill-ai/"+comp, currentVersion, true)
 }

@@ -17,10 +17,11 @@ import (
 	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
-	instances "github.com/instill-ai/cli/pkg/cmd/local"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
+
+	"github.com/instill-ai/cli/pkg/cmd/local"
 )
 
 type LoginOptions struct {
@@ -186,7 +187,7 @@ type localLoginRequest struct {
 func loginLocal(transport http.RoundTripper, hostname, password string) (string, error) {
 	url := instance.GetProtocol(hostname) + "base/v1alpha/auth/login"
 	data := &localLoginRequest{
-		Name: instances.DefUsername,
+		Name: local.DefUsername,
 		Pass: password,
 	}
 	jsonData, err := json.Marshal(data)

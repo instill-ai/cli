@@ -37,12 +37,16 @@ type DeployOptions struct {
 	MainExecutable string
 	Interactive    bool
 	Path           string `validate:"required,dirpath" example:"/home/instill-core/"`
+	checkUpdate    func(ExecDep, string, string) (*releaseInfo, error)
+	isDeployed     func(ExecDep) error
 }
 
 // NewDeployCmd creates a new command
 func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Command {
 	opts := &DeployOptions{
-		IO: f.IOStreams,
+		IO:          f.IOStreams,
+		checkUpdate: checkForUpdate,
+		isDeployed:  isDeployed,
 	}
 
 	cmd := &cobra.Command{
@@ -105,7 +109,7 @@ func runDeploy(opts *DeployOptions) error {
 	}
 
 	// check existing local deployment
-	if err := isDeployed(opts.Exec); err == nil {
+	if err := opts.isDeployed(opts.Exec); err == nil {
 		p(opts.IO, "A local Instill Core deployment detected")
 		for i := range projs {
 			prj := strings.ToLower(projs[i])
@@ -119,7 +123,7 @@ func runDeploy(opts *DeployOptions) error {
 			}
 
 			if currentVersion, err := execCmd(opts.Exec, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
-				newRelease, _ := checkForUpdate(prj, currentVersion)
+				newRelease, _ := opts.checkUpdate(opts.Exec, prj, currentVersion)
 				if newRelease != nil {
 					cmdFactory := factory.New(build.Version)
 					stderr := cmdFactory.IOStreams.ErrOut
@@ -137,21 +141,18 @@ func runDeploy(opts *DeployOptions) error {
 
 	p(opts.IO, "Download the latest Instill Core to: %s", path)
 	for i := range projs {
-		comp := projs[i]
-		_, err = os.Stat(filepath.Join(path, comp))
-		if err == nil {
-			continue
-		}
+		prj := projs[i]
+		_, err = os.Stat(filepath.Join(path, prj))
 		if os.IsNotExist(err) {
-			if latestVersion, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/instill-ai/%s/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'", strings.ToLower(comp))); err == nil {
+			if latestVersion, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/instill-ai/%s/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'", strings.ToLower(prj))); err == nil {
 				latestVersion = strings.Trim(latestVersion, "\n")
 				if out, err := execCmd(opts.Exec, "bash", "-c",
-					fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/%s.git %s", latestVersion, comp, filepath.Join(path, comp))); err != nil {
-					return fmt.Errorf("ERROR: cant clone %s, %w:\n%s", comp, err, out)
+					fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/%s.git %s", latestVersion, prj, filepath.Join(path, prj))); err != nil {
+					return fmt.Errorf("ERROR: cant clone %s, %w:\n%s", prj, err, out)
 				}
-				_, _ = checkForUpdate(comp, latestVersion)
+				_, _ = checkForUpdate(opts.Exec, prj, latestVersion)
 			} else {
-				return fmt.Errorf("ERROR: cant find latest release version of %s, %w:\n%s", comp, err, latestVersion)
+				return fmt.Errorf("ERROR: cant find latest release version of %s, %w:\n%s", prj, err, latestVersion)
 			}
 		}
 	}
