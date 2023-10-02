@@ -2,8 +2,9 @@ package local
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -13,6 +14,7 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
+// StopOptions contains the command line options
 type StopOptions struct {
 	IO             *iostreams.IOStreams
 	Exec           ExecDep
@@ -20,9 +22,9 @@ type StopOptions struct {
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
-	Path           string `validate:"required,dirpath"`
 }
 
+// NewStopCmd creates a new command
 func NewStopCmd(f *cmdutil.Factory, runF func(*StopOptions) error) *cobra.Command {
 	opts := &StopOptions{
 		IO: f.IOStreams,
@@ -32,8 +34,7 @@ func NewStopCmd(f *cmdutil.Factory, runF func(*StopOptions) error) *cobra.Comman
 		Use:   "stop",
 		Short: "Stop a local Instill Core instance",
 		Example: heredoc.Doc(`
-			# stop to /home/me/instill
-			$ inst local stop --path /home/me/instill
+			$ inst local stop
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()
@@ -59,33 +60,36 @@ func NewStopCmd(f *cmdutil.Factory, runF func(*StopOptions) error) *cobra.Comman
 }
 
 func runStop(opts *StopOptions) error {
-	// init, validate
-	var err error
-	io2 := opts.IO
-	path, err := ConfigPath(opts.Config)
+
+	path, err := getConfigPath(opts.Config)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
-	if err := IsDeployed(opts.OS, path); err != nil {
-		return fmt.Errorf("ERROR: %s", err)
-	}
-	if opts.OS != nil {
-		err = opts.OS.Chdir(path)
-	} else {
-		err = os.Chdir(path)
-	}
-	if err != nil {
-		return fmt.Errorf("ERROR: can't open the destination, %w", err)
+	if err := isDeployed(opts.Exec); err != nil {
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
-	p(io2, "Stopping...")
-	out, err := execCmd(opts.Exec, "make", "stop")
-	slog.Debug("make stop", "out", out)
-	if err != nil {
-		return fmt.Errorf("ERROR: when stopping, %w", err)
+	for i := range projs {
+		proj := strings.ToLower(projs[i])
+		if opts.OS != nil {
+			err = opts.OS.Chdir(filepath.Join(path, proj))
+		} else {
+			err = os.Chdir(filepath.Join(path, proj))
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: can't open the destination, %w", err)
+		}
+		p(opts.IO, fmt.Sprintf("Stopping %s...", projs[i]))
+		out, err := execCmd(opts.Exec, "make", "stop")
+		if err != nil {
+			return fmt.Errorf("ERROR: when stopping, %w", err)
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: %s when stopping, %w\n%s", projs[i], err, out)
+		}
 	}
 
-	p(io2, "Instill Core stopped")
+	p(opts.IO, "Instill Core stopped")
 
 	return nil
 }

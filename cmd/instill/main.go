@@ -168,7 +168,7 @@ func mainRun() exitCode {
 			return exitOK
 		}
 		fmt.Fprintf(stderr, "\n\n%s %s → %s\n",
-			ansi.Color("A new release of instill is available:", "yellow"),
+			ansi.Color("A new release of Instill CLI is available:", "yellow"),
 			ansi.Color(buildVersion, "cyan"),
 			ansi.Color(newRelease.Version, "cyan"))
 		if isHomebrew {
@@ -241,7 +241,7 @@ func checkForUpdate(currentVersion string) (*update.ReleaseInfo, error) {
 	return update.CheckForUpdate(client, stateFilePath, repo, currentVersion)
 }
 
-// BasicClient returns an API client for instill.tech only that borrows from but
+// basicClient returns an API client for instill.tech only that borrows from but
 // does not depend on user configuration
 func basicClient(currentVersion string) (*api.Client, error) {
 	var opts []api.ClientOption

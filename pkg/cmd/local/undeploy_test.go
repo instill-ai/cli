@@ -1,4 +1,4 @@
-package instances
+package local
 
 import (
 	"bytes"
@@ -12,33 +12,20 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
-func TestInstancesRemoveCmd(t *testing.T) {
+func TestLocalUndeployCmd(t *testing.T) {
 	tests := []struct {
 		name     string
 		stdin    string
 		stdinTTY bool
 		input    string
-		output   RemoveOptions
+		output   UndeployOptions
 		isErr    bool
 	}{
 		{
 			name:   "no arguments",
 			input:  "",
-			output: RemoveOptions{},
-			isErr:  true,
-		},
-		{
-			name:  "instances remove api.instill.tech",
-			input: "api.instill.tech",
-			output: RemoveOptions{
-				APIHostname: "api.instill.tech",
-			},
-			isErr: false,
-		},
-		{
-			name:  "wrong hostname",
-			input: "foo|bar",
-			isErr: true,
+			output: UndeployOptions{},
+			isErr:  false,
 		},
 	}
 
@@ -62,9 +49,7 @@ func TestInstancesRemoveCmd(t *testing.T) {
 			argv, err := shlex.Split(tt.input)
 			assert.NoError(t, err)
 
-			var gotOpts *RemoveOptions
-			cmd := NewRemoveCmd(f, func(opts *RemoveOptions) error {
-				gotOpts = opts
+			cmd := NewUndeployCmd(f, func(opts *UndeployOptions) error {
 				return nil
 			})
 			cmd.Flags().BoolP("help", "x", false, "")
@@ -81,27 +66,31 @@ func TestInstancesRemoveCmd(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, tt.output.APIHostname, gotOpts.APIHostname)
 		})
 	}
 }
 
-func TestInstancesRemoveCmdRun(t *testing.T) {
+func TestLocalUndeployCmdRun(t *testing.T) {
+	execMock := &ExecMock{}
+	osMock := &OSMock{}
+	cfg := config.ConfigStub{}
+	_ = cfg.Set("", ConfigKeyPath, "/foo/bar")
 	tests := []struct {
 		name     string
-		input    *RemoveOptions
+		input    *UndeployOptions
 		stdout   string
 		stderr   string
 		isErr    bool
 		expectFn func(*testing.T, config.Config)
 	}{
 		{
-			name: "instances remove api.instill.tech",
-			input: &RemoveOptions{
-				APIHostname: "api.instill.tech",
-				Config:      config.ConfigStub{},
+			name: "local undeploy",
+			input: &UndeployOptions{
+				Exec:   execMock,
+				OS:     osMock,
+				Config: cfg,
 			},
-			stdout: "Instance 'api.instill.tech' has been removed\n",
+			stdout: "Instill Core undeployed",
 			isErr:  false,
 		},
 	}
@@ -112,13 +101,13 @@ func TestInstancesRemoveCmdRun(t *testing.T) {
 		tt.input.IO = io
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := RunRemove(tt.input)
+			err := runUndeploy(tt.input)
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Equal(t, tt.stdout, stdout.String())
+			assert.Regexp(t, tt.stdout, stdout.String())
 			assert.Equal(t, tt.stderr, stderr.String())
 			if tt.expectFn != nil {
 				tt.expectFn(t, tt.input.Config)

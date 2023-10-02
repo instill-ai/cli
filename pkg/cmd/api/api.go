@@ -53,7 +53,7 @@ var logger *slog.Logger
 
 func init() {
 	var lvl = new(slog.LevelVar)
-	if os.Getenv("INSTILL_DEBUG") != "" {
+	if os.Getenv("DEBUG") != "" {
 		lvl.Set(slog.LevelDebug)
 	} else {
 		lvl.Set(slog.LevelError + 1)

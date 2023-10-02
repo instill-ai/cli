@@ -27,8 +27,10 @@ clean:
 # just a convenience task around `go test`
 .PHONY: test
 test:
-	go test -race ./...
-
+	@go test -v -race -coverpkg=./... -coverprofile=coverage.out ./...
+	@go tool cover -func=coverage.out
+	@go tool cover -html=coverage.out
+	@rm coverage.out
 ## Install/uninstall tasks are here for use on *nix platform. On Windows, there is no equivalent.
 DESTDIR :=
 prefix  := /usr/local
