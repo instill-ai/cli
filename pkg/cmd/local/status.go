@@ -2,8 +2,7 @@ package local
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/go-playground/validator/v10"
@@ -68,112 +67,98 @@ func NewStatusCmd(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Co
 
 // TODO separate health statuses per API
 func runStatus(opts *StatusOptions) error {
-	// init, validate
-	io2 := opts.IO
-	exec2 := opts.Exec
-	os2 := opts.OS
-	path, err := ConfigPath(opts.Config)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
-	}
-	err = validator.New().Struct(opts)
-	if err != nil {
+
+	if err := validator.New().Struct(opts); err != nil {
 		return fmt.Errorf("ERROR: wrong input, %w", err)
 	}
 
 	deployed := "NO"
 	started := "NO"
 	healthy := "NO"
-	if err := IsDeployed(os2, path); err == nil {
+	if err := isDeployed(opts.Exec); err == nil {
 		deployed = "YES"
 	}
-	if err := IsStarted(exec2, os2, path); err == nil {
+	if err := isStarted(opts.Exec); err == nil {
 		started = "YES"
 	}
-	errHealthy := IsHealthy(exec2, os2, path)
+	errHealthy := isHealthy(opts.Exec)
 	if errHealthy == nil {
 		healthy = "YES"
 	}
 
-	p(io2, `
-		Status of Instill Core in %s
+	p(opts.IO, `
+		Status of the local Instill Core instance
 
 		Deployed: %s
 		Started: %s
 		Healthy: %s
-	`, path, deployed, started, healthy)
+	`, deployed, started, healthy)
 
 	if opts.Verbose && errHealthy != nil {
-		p(io2, "")
-		p(io2, "Error:\n%s", errHealthy)
+		p(opts.IO, "")
+		p(opts.IO, "Error:\n%s", errHealthy)
 	}
 
 	return nil
 }
 
-// IsDeployed returns no errors if an instance in `path` is a clone of VDP.
-func IsDeployed(osDep OSDep, path string) error {
-	var err error
-	if osDep != nil {
-		_, err = osDep.Stat(path)
-	} else {
-		_, err = os.Stat(path)
+// isDeployed returns no errors if an local instance is detected
+func isDeployed(execDep ExecDep) error {
+
+	var checkList = make([]bool, len(projs))
+	for i := range checkList {
+		proj := strings.ToLower(projs[i])
+		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err != nil {
+			continue
+		}
+		checkList[i] = true
 	}
-	if os.IsNotExist(err) {
-		return fmt.Errorf("directory %s doesn't exist", path)
+
+	suiteCheck := 0
+	for i := range checkList {
+		if checkList[i] {
+			suiteCheck++
+		}
 	}
-	if osDep != nil {
-		_, err = osDep.Stat(filepath.Join(path, "Makefile"))
-	} else {
-		_, err = os.Stat(filepath.Join(path, "Makefile"))
+
+	if suiteCheck == len(checkList) {
+		return nil
 	}
-	if os.IsNotExist(err) {
-		return fmt.Errorf("directory %s isn't Instill Core", path)
+
+	return fmt.Errorf("No local Instill Core deployment detected")
+}
+
+// isStarted returns no errors if an instance is running.
+func isStarted(execDep ExecDep) error {
+
+	if err := isDeployed(execDep); err != nil {
+		return err
 	}
+
+	for i := range projs {
+		proj := strings.ToLower(projs[i])
+		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a --format json --filter name=instill-%s | grep running", proj)); err != nil {
+			return fmt.Errorf("%s is not running", projs[i])
+		}
+	}
+
 	return nil
 }
 
-// IsStarted returns no errors if an instance in `path` is running.
-// execDep is used for DI and can be nil.
-func IsStarted(execDep ExecDep, osDep OSDep, path string) error {
-	var err error
-	if err = IsDeployed(osDep, path); err != nil {
-		return err
-	}
-	if osDep != nil {
-		err = osDep.Chdir(path)
-	} else {
-		err = os.Chdir(path)
-	}
-	if err != nil {
-		return err
-	}
-	out, err := execCmd(execDep, "make", "top")
-	logger.Debug("IsStarted", "out", out)
-	if err != nil {
-		logger.Error("make top", "err", err.Error())
-		return err
-	}
-	if out == "" {
-		return fmt.Errorf("make top empty")
-	}
-	return nil
-}
-
-// IsHealthy returns no error if an instance in `path` is responding.
-// execDep is used for DI and can be nil.
+// isHealthy returns no error if an instance in `path` is responding.
 // TODO assert responses
-func IsHealthy(execDep ExecDep, osDep OSDep, path string) error {
-	if err := IsDeployed(osDep, path); err != nil {
+func isHealthy(execDep ExecDep) error {
+	if err := isDeployed(execDep); err != nil {
 		return err
 	}
-	if err := IsStarted(execDep, osDep, path); err != nil {
+	if err := isStarted(execDep); err != nil {
 		return err
 	}
 	urls := []string{
-		":8080/vdp/v1alpha/health/pipeline",
 		":8080/base/v1alpha/health/mgmt",
+		":8080/vdp/v1alpha/health/pipeline",
 		":8080/vdp/v1alpha/health/connector",
+		":8080/model/v1alpha/health/model",
 		":3000/",
 	}
 	for _, url := range urls {

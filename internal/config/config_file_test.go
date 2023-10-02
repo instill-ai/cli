@@ -366,7 +366,7 @@ func Test_StateDir(t *testing.T) {
 				"USERPROFILE":        tempDir,
 				"HOME":               tempDir,
 			},
-			output: filepath.Join(tempDir, ".local", "state", "instill"),
+			output: filepath.Join(tempDir, ".local", "instill", "state"),
 		},
 		{
 			name: "XDG_STATE_HOME specified",
@@ -462,7 +462,7 @@ func Test_autoMigrateStateDir_migration(t *testing.T) {
 	homeDir := t.TempDir()
 	migrateDir := t.TempDir()
 	homeConfigDir := filepath.Join(homeDir, ".config", "instill")
-	migrateStateDir := filepath.Join(migrateDir, ".local", "state", "instill")
+	migrateStateDir := filepath.Join(migrateDir, ".local", "instill")
 
 	homeEnvVar := "HOME"
 	if runtime.GOOS == "windows" {

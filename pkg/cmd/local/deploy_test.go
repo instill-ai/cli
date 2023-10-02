@@ -19,7 +19,7 @@ func TestLocalDeployCmd(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		stdin    string
@@ -32,8 +32,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "no arguments",
 			input: "",
 			output: DeployOptions{
-				Path:   dir,
-				Branch: "main",
+				Path: dir,
 			},
 			isErr: false,
 		},
@@ -41,8 +40,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "local deploy --path /home",
 			input: " --path /home",
 			output: DeployOptions{
-				Path:   "/home",
-				Branch: "main",
+				Path: "/home",
 			},
 			isErr: false,
 		},
@@ -88,7 +86,6 @@ func TestLocalDeployCmd(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.output.Path, gotOpts.Path)
-			assert.Equal(t, tt.output.Branch, gotOpts.Branch)
 		})
 	}
 }
@@ -100,7 +97,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		input    *DeployOptions
@@ -113,12 +110,11 @@ func TestLocalDeployCmdRun(t *testing.T) {
 			name: "local deploy",
 			input: &DeployOptions{
 				Path:   dir,
-				Branch: "main",
 				Exec:   execMock,
 				OS:     osMock,
 				Config: config.ConfigStub{},
 			},
-			stdout: "Instill Core console available under http://localhost:3000",
+			stdout: "",
 			isErr:  false,
 		},
 	}

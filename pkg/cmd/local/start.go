@@ -2,8 +2,9 @@ package local
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -31,8 +32,7 @@ func NewStartCmd(f *cmdutil.Factory, runF func(*StartOptions) error) *cobra.Comm
 		Use:   "start",
 		Short: "Start a local Instill Core instance",
 		Example: heredoc.Doc(`
-			# start to /home/me/instill
-			$ inst local start --path /home/me/instill
+			$ inst local start
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()
@@ -58,33 +58,35 @@ func NewStartCmd(f *cmdutil.Factory, runF func(*StartOptions) error) *cobra.Comm
 }
 
 func runStart(opts *StartOptions) error {
-	// init, validate
-	var err error
-	io2 := opts.IO
-	path, err := ConfigPath(opts.Config)
+	path, err := getConfigPath(opts.Config)
 	if err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
-	if err := IsDeployed(opts.OS, path); err != nil {
+	if err := isDeployed(opts.Exec); err != nil {
 		return fmt.Errorf("ERROR: %w", err)
 	}
-	if opts.OS != nil {
-		err = opts.OS.Chdir(path)
-	} else {
-		err = os.Chdir(path)
-	}
-	if err != nil {
-		return fmt.Errorf("ERROR: can't open the destination, %w", err)
+
+	for i := range projs {
+		proj := strings.ToLower(projs[i])
+		if opts.OS != nil {
+			err = opts.OS.Chdir(filepath.Join(path, proj))
+		} else {
+			err = os.Chdir(filepath.Join(path, proj))
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: can't open the destination, %w", err)
+		}
+		p(opts.IO, fmt.Sprintf("Starting %s...", projs[i]))
+		out, err := execCmd(opts.Exec, "make", "start")
+		if err != nil {
+			return fmt.Errorf("ERROR: when starting, %w", err)
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: %s when starting, %w\n%s", projs[i], err, out)
+		}
 	}
 
-	p(io2, "Starting...")
-	out, err := execCmd(opts.Exec, "make", "start")
-	slog.Debug("make start", "out", out)
-	if err != nil {
-		return fmt.Errorf("ERROR: when starting, try to restart dockerd.t\n%w", err)
-	}
-
-	p(io2, "Instill Core started")
+	p(opts.IO, "Instill Core started")
 
 	return nil
 }

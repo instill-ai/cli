@@ -24,7 +24,7 @@ func Test_HostsTyped(t *testing.T) {
 }
 
 func Test_fileConfig_Typed(t *testing.T) {
-	configDir := filepath.Join(t.TempDir(), ".config", "instill")
+	configDir := filepath.Join(t.TempDir(), ".local", "instill")
 	_ = os.MkdirAll(configDir, 0755)
 	os.Setenv(INSTILL_CONFIG_DIR, configDir)
 	defer os.Unsetenv(INSTILL_CONFIG_DIR)
