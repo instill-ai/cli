@@ -105,19 +105,19 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		`, "`"),
 		Example: heredoc.Doc(`
 			# list pipelines
-			$ instill api pipelines
+			$ instill api vdp/v1alpha/pipelines
 
 			# list models
-			$ instill api models
+			$ instill api model/v1alpha/models
+
+			# get user profile
+			$ instill api base/v1alpha/users/me
 
 			# add parameters to a GET request
-			$ instill api models?visibility=public
-
-			# add parameters to a POST request
-			$ instill api -X POST oauth2/token?audience=...&grant_type=...
+			$ instill api model/v1alpha/models?visibility=public
 
 			# add nested JSON body to a POST request
-			$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
+			$ jq -n '{"inputs":[{"image": <your image base64 encoded string>}]}' | instill api vdp/v1alpha/pipelines/trigger --input -
 
 			# set a custom HTTP header
 			$ instill api -H 'Authorization: Basic ...'
@@ -244,9 +244,6 @@ func apiRun(opts *ApiOptions) error {
 		defer opts.IO.StopPager()
 	}
 
-	// handle API prefixes
-	requestPath = handleAPIPrefix(requestPath, host.APIVersion)
-
 	if host.AccessToken != "" {
 		requestHeaders = append(requestHeaders, "Authorization: Bearer "+host.AccessToken)
 	}
@@ -264,23 +261,6 @@ func apiRun(opts *ApiOptions) error {
 		return err
 	}
 	return template.End()
-}
-
-func handleAPIPrefix(path, version string) string {
-	// handle API prefixes
-	path = strings.TrimPrefix(path, "/")
-	prefixed := false
-	for _, p := range []string{"model", "base", "vdp"} {
-		if strings.HasPrefix(path, p) {
-			path = p + "/" + version + strings.TrimPrefix(path, p)
-			prefixed = true
-			break
-		}
-	}
-	if !prefixed {
-		path = "vdp/" + version + "/" + path
-	}
-	return path
 }
 
 func processResponse(resp *http.Response, opts *ApiOptions, headersOutputStream io.Writer, template *export.Template) (err error) {
