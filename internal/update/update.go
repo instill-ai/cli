@@ -1,8 +1,10 @@
 package update
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -29,15 +31,27 @@ type StateEntry struct {
 }
 
 // CheckForUpdate checks whether this software has had a newer release on GitHub
-func CheckForUpdate(client *api.Client, stateFilePath, repo, currentVersion string) (*ReleaseInfo, error) {
+func CheckForUpdate(client *api.Client, stateFilePath, repo, currentVersion string, preRelease bool) (*ReleaseInfo, error) {
 	stateEntry, _ := getStateEntry(stateFilePath)
 	if stateEntry != nil && time.Since(stateEntry.CheckedForUpdateAt).Hours() < 24 {
 		return nil, nil
 	}
 
-	releaseInfo, err := getLatestReleaseInfo(client, repo)
-	if err != nil {
-		return nil, err
+	var (
+		err         error
+		releaseInfo *ReleaseInfo
+	)
+
+	if !preRelease && client != nil {
+		releaseInfo, err = getLatestReleaseInfo(client, repo)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		releaseInfo, err = getLatestPreReleaseInfo(repo)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = setStateEntry(stateFilePath, time.Now(), *releaseInfo)
@@ -60,6 +74,17 @@ func getLatestReleaseInfo(client *api.Client, repo string) (*ReleaseInfo, error)
 	}
 
 	return &latestRelease, nil
+}
+
+func getLatestPreReleaseInfo(repo string) (*ReleaseInfo, error) {
+	var latestPreRelease ReleaseInfo
+	if output, err := exec.Command("bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/%s/releases | jq -r 'map(select(.prerelease)) | first'", repo)).Output(); err == nil {
+		if err = json.Unmarshal([]byte(output), &latestPreRelease); err != nil {
+			return nil, err
+		}
+	}
+
+	return &latestPreRelease, nil
 }
 
 func getStateEntry(stateFilePath string) (*StateEntry, error) {
