@@ -168,7 +168,7 @@ func mainRun() exitCode {
 			return exitOK
 		}
 		fmt.Fprintf(stderr, "\n\n%s %s → %s\n",
-			ansi.Color("A new release of instill is available:", "yellow"),
+			ansi.Color("A new release of Instill CLI is available:", "yellow"),
 			ansi.Color(buildVersion, "cyan"),
 			ansi.Color(newRelease.Version, "cyan"))
 		if isHomebrew {
