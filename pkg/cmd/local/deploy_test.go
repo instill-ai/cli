@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -19,7 +20,7 @@ func TestLocalDeployCmd(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		stdin    string
@@ -32,8 +33,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "no arguments",
 			input: "",
 			output: DeployOptions{
-				Path:   dir,
-				Branch: "main",
+				Path: dir,
 			},
 			isErr: false,
 		},
@@ -41,8 +41,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			name:  "local deploy --path /home",
 			input: " --path /home",
 			output: DeployOptions{
-				Path:   "/home",
-				Branch: "main",
+				Path: "/home",
 			},
 			isErr: false,
 		},
@@ -88,9 +87,12 @@ func TestLocalDeployCmd(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.output.Path, gotOpts.Path)
-			assert.Equal(t, tt.output.Branch, gotOpts.Branch)
 		})
 	}
+}
+
+func checkForUpdateMock(ExecDep, string, string, string) (*releaseInfo, error) {
+	return &releaseInfo{}, nil
 }
 
 func TestLocalDeployCmdRun(t *testing.T) {
@@ -100,7 +102,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".config", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		input    *DeployOptions
@@ -112,14 +114,62 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:   dir,
-				Branch: "main",
-				Exec:   execMock,
-				OS:     osMock,
-				Config: config.ConfigStub{},
+				Path:           dir,
+				Exec:           execMock,
+				OS:             osMock,
+				Config:         config.ConfigStub{},
+				checkForUpdate: checkForUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
 			},
-			stdout: "Instill Core console available under http://localhost:3000",
+			stdout: "",
 			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:           dir,
+				Exec:           execMock,
+				OS:             osMock,
+				Config:         config.ConfigStub{},
+				checkForUpdate: checkForUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return fmt.Errorf("")
+				},
+			},
+			stdout: "",
+			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:           dir,
+				Exec:           execMock,
+				OS:             osMock,
+				Config:         config.ConfigStub{},
+				checkForUpdate: checkForUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
+			},
+			stdout: "",
+			isErr:  false,
+		},
+		{
+			name: "local deploy",
+			input: &DeployOptions{
+				Path:           "a/path/does/not/exist",
+				Exec:           execMock,
+				OS:             osMock,
+				Config:         config.ConfigStub{},
+				checkForUpdate: checkForUpdateMock,
+				isDeployed: func(ed ExecDep) error {
+					return nil
+				},
+			},
+			stdout: "",
+			isErr:  true,
 		},
 	}
 

@@ -1,42 +1,26 @@
-package update
+package local
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-version"
 	"gopkg.in/yaml.v3"
-
-	"github.com/instill-ai/cli/api"
 )
 
-var gitDescribeSuffixRE = regexp.MustCompile(`\d+-\d+-g[a-f0-9]{8}$`)
-
-// ReleaseInfo stores information about a release
-type ReleaseInfo struct {
-	Version     string    `json:"tag_name"`
-	URL         string    `json:"html_url"`
-	PublishedAt time.Time `json:"published_at"`
-}
-
-type StateEntry struct {
-	CheckedForUpdateAt time.Time   `yaml:"checked_for_update_at"`
-	LatestRelease      ReleaseInfo `yaml:"latest_release"`
-}
-
-// CheckForUpdate checks whether this software has had a newer release on GitHub
-func CheckForUpdate(client *api.Client, stateFilePath, repo, currentVersion string) (*ReleaseInfo, error) {
+// checkForUpdate checks whether this software has had a newer release on GitHub
+func checkForUpdate(execDep ExecDep, stateFilePath, repo, currentVersion string) (*releaseInfo, error) {
 	stateEntry, _ := getStateEntry(stateFilePath)
 	if stateEntry != nil && time.Since(stateEntry.CheckedForUpdateAt).Hours() < 24 {
 		return nil, nil
 	}
 
-	releaseInfo, err := getLatestReleaseInfo(client, repo)
+	releaseInfo, err := getLatestPreReleaseInfo(execDep, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -53,14 +37,16 @@ func CheckForUpdate(client *api.Client, stateFilePath, repo, currentVersion stri
 	return nil, nil
 }
 
-func getLatestReleaseInfo(client *api.Client, repo string) (*ReleaseInfo, error) {
-	var latestRelease ReleaseInfo
-	err := client.REST("github.com", "GET", fmt.Sprintf("repos/%s/releases/latest", repo), nil, &latestRelease)
-	if err != nil {
-		return nil, err
+func getLatestPreReleaseInfo(execDep ExecDep, repo string) (*releaseInfo, error) {
+	var latestPreRelease releaseInfo
+	if output, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/%s/releases | jq -r 'map(select(.prerelease)) | first'", repo)); err == nil {
+		if len(output) > 0 && output[0] == '{' {
+			if err := json.Unmarshal([]byte(output), &latestPreRelease); err != nil {
+				return nil, err
+			}
+		}
 	}
-
-	return &latestRelease, nil
+	return &latestPreRelease, nil
 }
 
 func getStateEntry(stateFilePath string) (*StateEntry, error) {
@@ -78,7 +64,7 @@ func getStateEntry(stateFilePath string) (*StateEntry, error) {
 	return &stateEntry, nil
 }
 
-func setStateEntry(stateFilePath string, t time.Time, r ReleaseInfo) error {
+func setStateEntry(stateFilePath string, t time.Time, r releaseInfo) error {
 	data := StateEntry{CheckedForUpdateAt: t, LatestRelease: r}
 	content, err := yaml.Marshal(data)
 	if err != nil {

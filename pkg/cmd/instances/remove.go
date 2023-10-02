@@ -60,14 +60,14 @@ func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Co
 				return runF(opts)
 			}
 
-			return runRemove(opts)
+			return RunRemove(opts)
 		},
 	}
 
 	return cmd
 }
 
-func runRemove(opts *RemoveOptions) error {
+func RunRemove(opts *RemoveOptions) error {
 	hosts, err := opts.Config.HostsTyped()
 	if err != nil {
 		return err

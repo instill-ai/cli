@@ -60,7 +60,7 @@ func StateDir() string {
 		path = filepath.Join(b, "Instill CLI")
 	} else {
 		c, _ := os.UserHomeDir()
-		path = filepath.Join(c, ".local", "state", "instill")
+		path = filepath.Join(c, ".local", "instill", "state")
 	}
 
 	// If the path does not exist try migrating state from default paths
