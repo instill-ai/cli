@@ -45,3 +45,4 @@ install: bin/inst
 .PHONY: uninstall
 uninstall:
 	rm -f ${DESTDIR}${bindir}/inst
+	rm -f bin/inst

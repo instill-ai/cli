@@ -34,7 +34,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 		`),
 		Annotations: map[string]string{
 			"help:feedback": heredoc.Doc(`
-				Please open an issue on https://github.com/instill-ai/cli.
+				Please open an issue on https://github.com/instill-ai/community.
 			`),
 			"help:environment": heredoc.Doc(`
 				See 'inst help environment' for the list of supported environment variables.

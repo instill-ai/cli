@@ -9,7 +9,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/cli/safeexec"
-	"github.com/go-playground/validator/v10"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
@@ -53,8 +52,7 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 		Use:   "deploy",
 		Short: "Deploy a local Instill Core instance",
 		Example: heredoc.Doc(`
-			# deploy to /home/me/inst
-			$ inst local deploy --path /home/me/inst
+			$ inst local deploy
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()
@@ -79,8 +77,7 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 	if err != nil {
 		logger.Error("Couldn't get Home directory", err)
 	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
-	cmd.Flags().StringVarP(&opts.Path, "path", "p", dir, "Destination directory")
+	opts.Path = filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 
 	return cmd
 }
@@ -90,10 +87,6 @@ func runDeploy(opts *DeployOptions) error {
 	var err error
 	path := opts.Path
 	start := time.Now()
-	err = validator.New().Struct(opts)
-	if err != nil {
-		return fmt.Errorf("ERROR: wrong input, %w", err)
-	}
 
 	// check the deps
 	apps := []string{"bash", "docker", "make", "git", "jq", "grep", "curl"}

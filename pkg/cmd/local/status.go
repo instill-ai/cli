@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
@@ -67,10 +66,6 @@ func NewStatusCmd(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Co
 
 // TODO separate health statuses per API
 func runStatus(opts *StatusOptions) error {
-
-	if err := validator.New().Struct(opts); err != nil {
-		return fmt.Errorf("ERROR: wrong input, %w", err)
-	}
 
 	deployed := "NO"
 	started := "NO"
