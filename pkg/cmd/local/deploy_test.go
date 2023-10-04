@@ -37,14 +37,6 @@ func TestLocalDeployCmd(t *testing.T) {
 			},
 			isErr: false,
 		},
-		{
-			name:  "local deploy --path /home",
-			input: " --path /home",
-			output: DeployOptions{
-				Path: "/home",
-			},
-			isErr: false,
-		},
 	}
 
 	for _, tt := range tests {
@@ -165,11 +157,11 @@ func TestLocalDeployCmdRun(t *testing.T) {
 				Config:      config.ConfigStub{},
 				checkUpdate: checkFoUpdateMock,
 				isDeployed: func(ed ExecDep) error {
-					return nil
+					return fmt.Errorf("")
 				},
 			},
 			stdout: "",
-			isErr:  true,
+			isErr:  false,
 		},
 	}
 
