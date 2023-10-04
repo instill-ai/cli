@@ -17,11 +17,10 @@ import (
 	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/internal/oauth2"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
+	"github.com/instill-ai/cli/pkg/cmd/local"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 	"github.com/instill-ai/cli/pkg/prompt"
-
-	"github.com/instill-ai/cli/pkg/cmd/local"
 )
 
 type LoginOptions struct {
@@ -49,7 +48,7 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 		`),
 		Example: heredoc.Doc(`
 			# start login
-			$ instill auth login
+			$ inst auth login
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -148,7 +147,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
 
 			You can fix it with:
-			$ instill instances edit %s \
+			$ inst instances edit %s \
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
 				--client-secret CLIENT_SECRET`, host.APIHostname, host.APIHostname)

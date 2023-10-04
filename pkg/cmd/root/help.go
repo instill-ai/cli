@@ -127,7 +127,7 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	}
 	if longText != "" && command.LocalFlags().Lookup("jq") != nil {
 		longText = strings.TrimRight(longText, "\n") +
-			"\n\nFor more information about output formatting flags, see `instill help formatting`."
+			"\n\nFor more information about output formatting flags, see `inst help formatting`."
 	}
 
 	helpEntries := []helpEntry{}
@@ -163,8 +163,8 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 		helpEntries = append(helpEntries, helpEntry{"ENVIRONMENT VARIABLES", command.Annotations["help:environment"]})
 	}
 	helpEntries = append(helpEntries, helpEntry{"LEARN MORE", `
-Use 'instill <command> <subcommand> --help' for more information about a command.
-Read the manual at https://docs.instill.tech`})
+Use 'inst <command> <subcommand> --help' for more information about a command.
+Read the manual at https://www.instill.tech/docs`})
 	if _, ok := command.Annotations["help:feedback"]; ok {
 		helpEntries = append(helpEntries, helpEntry{"FEEDBACK", command.Annotations["help:feedback"]})
 	}

@@ -18,11 +18,12 @@
 [![License](https://img.shields.io/github/license/instill-ai/cli.svg?color=lightblue&label=License)](./License.md)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-lightblue.svg)](.github/code_of_conduct.md)
 
-`instill` is the command line interface for **Instill Cloud**.
+`inst` is the command line interface for **Instill Core / Cloud**.
 
 ## Table of contents <!-- omit in toc -->
 - [What is Instill Cloud?](#what-is-instill-cloud)
 - [Installation](#installation)
+- [Usage examples](#usage-examples)
 - [Issues and discussions](#issues-and-discussions)
 
 ## What is Instill Cloud?
@@ -41,51 +42,37 @@ Instill AI is on a mission to make AI accessible to everyone. With **Instill Clo
 
 To install:
 ```
-brew install instill-ai/tap/instill
+brew install instill-ai/tap/inst
 ```
 
 To upgrade:
 ```
-brew upgrade instill-ai/tap/instill
+brew upgrade instill-ai/tap/inst
 ```
 
 ## Usage examples
 
 ```bash
 # log in
-$ instill auth login
+$ inst auth login
 
 # list pipelines
-$ instill api pipelines
+$ inst api pipelines
 
 # list models
-$ instill api model/models
+$ inst api model/models
 
 # add parameters to a GET request
-$ instill api model/models?visibility=public
+$ inst api model/models?visibility=public
 
 # list instances
-$ instill instances list
-
-# selected a default instance
-$ instill instances set-default my-host.com
-
-# add an instance
-$ instill instances add instill.localhost \
-    --oauth2 auth.instill.tech \
-    --audience https://instill.tech \
-    --issuer https://auth.instill.tech/ \
-    --secret YOUR_SECRET \
-    --client-id CLIENT_ID
-
-# add parameters to a POST request
-$ instill api -X POST oauth2/token?audience=...&grant_type=...
+$ inst instances list
 
 # add nested JSON body to a POST request
-$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | instill api demo/tasks/classification/outputs --input -
+$ jq -n '{"contents":[{"url": "https://artifacts.instill.tech/dog.jpg"}]}' | inst api demo/tasks/classification/outputs --input -
 
 # set a custom HTTP header
-$ instill api -H 'Authorization: Basic mytoken' ...
+$ inst api -H 'Authorization: Basic mytoken' ...
 ```
 
 ## Issues and discussions

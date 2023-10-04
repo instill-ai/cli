@@ -49,7 +49,7 @@ func Test_NewCmdLogin(t *testing.T) {
 			io, stdin, _, _ := iostreams.Test()
 			f := &cmdutil.Factory{
 				IOStreams:  io,
-				Executable: func() string { return "/path/to/instill" },
+				Executable: func() string { return "/path/to/inst" },
 				Config:     config.ConfigStubFactory,
 			}
 

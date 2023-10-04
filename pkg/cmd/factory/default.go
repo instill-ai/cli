@@ -21,7 +21,7 @@ func New(appVersion string) *cmdutil.Factory {
 			if exe != "" {
 				return exe
 			}
-			exe = executable("instill")
+			exe = executable("inst")
 			return exe
 		},
 	}
@@ -73,17 +73,17 @@ func browserLauncher(f *cmdutil.Factory) string {
 // PATH, return the absolute location to the program.
 //
 // The idea is that the result of this function is callable in the future and refers to the same
-// installation of instill, even across upgrades. This is needed primarily for Homebrew, which installs software
-// under a location such as `/usr/local/Cellar/instill/1.13.1/bin/instill` and symlinks it from `/usr/local/bin/instill`.
+// installation of inst, even across upgrades. This is needed primarily for Homebrew, which installs software
+// under a location such as `/usr/local/Cellar/inst/1.13.1/bin/inst` and symlinks it from `/usr/local/bin/inst`.
 // When the version is upgraded, Homebrew will often delete older versions, but keep the symlink. Because of
-// this, we want to refer to the `instill` binary as `/usr/local/bin/instill` and not as its internal Homebrew
+// this, we want to refer to the `inst` binary as `/usr/local/bin/inst` and not as its internal Homebrew
 // location.
 //
-// None of this would be needed if we could just refer to Instill CLI as `instill`, i.e. without using an absolute
+// None of this would be needed if we could just refer to Instill CLI as `inst`, i.e. without using an absolute
 // path. However, for some reason Homebrew does not include `/usr/local/bin` in PATH when it invokes git
-// commands to update its taps. If `instill` (no path) is being used as git credential helper, as set up by `instill
+// commands to update its taps. If `inst` (no path) is being used as git credential helper, as set up by `inst
 // auth login`, running `brew update` will print out authentication errors as git is unable to locate
-// Homebrew-installed `instill`.
+// Homebrew-installed `inst`.
 func executable(fallbackName string) string {
 	exe, err := os.Executable()
 	if err != nil {

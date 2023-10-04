@@ -11,7 +11,7 @@ import (
 )
 
 func Test_CheckAuth(t *testing.T) {
-	configDir := filepath.Join(t.TempDir(), ".config", "instill")
+	configDir := filepath.Join(t.TempDir(), ".config", "inst")
 	_ = os.MkdirAll(configDir, 0755)
 	os.Setenv(config.INSTILL_CONFIG_DIR, configDir)
 	defer os.Unsetenv(config.INSTILL_CONFIG_DIR)

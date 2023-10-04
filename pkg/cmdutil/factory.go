@@ -18,6 +18,6 @@ type Factory struct {
 	HTTPClient func() (*http.Client, error)
 	Config     func() (config.Config, error)
 
-	// Executable is the path to the currently invoked instill binary
+	// Executable is the path to the currently invoked inst binary
 	Executable func() string
 }

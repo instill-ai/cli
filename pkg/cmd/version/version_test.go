@@ -5,7 +5,7 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	expects := "instill version 1.4.0 (2020-12-15)\nhttps://github.com/instill-ai/cli/releases/tag/v1.4.0\n"
+	expects := "inst version 1.4.0 (2020-12-15)\nhttps://github.com/instill-ai/cli/releases/tag/v1.4.0\n"
 	if got := Format("1.4.0", "2020-12-15"); got != expects {
 		t.Errorf("Format() = %q, wants %q", got, expects)
 	}

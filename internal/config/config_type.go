@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// This interface describes interacting with some persistent configuration for instill.
+// Config is the interface describes interacting with some persistent configuration for inst.
 type Config interface {
 	Get(string, string) (string, error)
 	GetWithSource(string, string) (string, string, error)
@@ -146,7 +146,7 @@ func NewBlankRoot() *yaml.Node {
 						Value: "https",
 					},
 					{
-						HeadComment: "What editor instill should run. If blank, will refer to environment.",
+						HeadComment: "What editor inst should run. If blank, will refer to environment.",
 						Kind:        yaml.ScalarNode,
 						Value:       "editor",
 					},
@@ -182,7 +182,7 @@ func NewBlankRoot() *yaml.Node {
 						Value: "",
 					},
 					{
-						HeadComment: "What web browser instill should use when opening URLs. If blank, will refer to environment.",
+						HeadComment: "What web browser inst should use when opening URLs. If blank, will refer to environment.",
 						Kind:        yaml.ScalarNode,
 						Value:       "browser",
 					},

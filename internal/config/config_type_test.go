@@ -41,7 +41,7 @@ func Test_defaultConfig(t *testing.T) {
 	expected := heredoc.Doc(`
 		# What protocol to use when performing git operations. Supported values: https
 		protocol: https
-		# What editor instill should run. If blank, will refer to environment.
+		# What editor inst should run. If blank, will refer to environment.
 		editor:
 		# When to interactively prompt. This is a global config that cannot be overridden by hostname. Supported values: enabled, disabled
 		prompt: enabled
@@ -49,7 +49,7 @@ func Test_defaultConfig(t *testing.T) {
 		pager:
 		# The path to a unix socket through which send HTTP connections. If blank, HTTP traffic will be handled by net/http.DefaultTransport.
 		http_unix_socket:
-		# What web browser instill should use when opening URLs. If blank, will refer to environment.
+		# What web browser inst should use when opening URLs. If blank, will refer to environment.
 		browser:
 	`)
 	assert.Equal(t, expected, mainBuf.String())

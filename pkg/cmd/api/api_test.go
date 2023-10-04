@@ -286,7 +286,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `{"message": "THIS IS FINE"}`,
-			stderr: "instill: THIS IS FINE (HTTP 400)\n",
+			stderr: "inst: THIS IS FINE (HTTP 400)\n",
 		},
 		{
 			name: "REST string errors",
@@ -297,7 +297,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `{"errors": ["ALSO", "FINE"]}`,
-			stderr: "instill: ALSO\nFINE\n",
+			stderr: "inst: ALSO\nFINE\n",
 		},
 		{
 			name: "failure",
@@ -307,7 +307,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `gateway timeout`,
-			stderr: "instill: HTTP 502\n",
+			stderr: "inst: HTTP 502\n",
 		},
 		{
 			name: "silent",
@@ -416,7 +416,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 		},
 		{
 			name:          "from file",
-			inputFile:     "instill-test-file",
+			inputFile:     "inst-test-file",
 			inputContents: []byte("I WORK OUT"),
 			contentLength: 10,
 		},
@@ -500,7 +500,7 @@ func Test_apiRun_cache(t *testing.T) {
 	}
 
 	t.Cleanup(func() {
-		cacheDir := filepath.Join(os.TempDir(), "instill-cli-cache")
+		cacheDir := filepath.Join(os.TempDir(), "inst-cli-cache")
 		os.RemoveAll(cacheDir)
 	})
 
@@ -551,7 +551,7 @@ func Test_parseFields(t *testing.T) {
 }
 
 func Test_magicFieldValue(t *testing.T) {
-	f, err := os.CreateTemp(t.TempDir(), "instill-test")
+	f, err := os.CreateTemp(t.TempDir(), "inst-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -630,7 +630,7 @@ func Test_magicFieldValue(t *testing.T) {
 }
 
 func Test_openUserFile(t *testing.T) {
-	f, err := os.CreateTemp(t.TempDir(), "instill-test")
+	f, err := os.CreateTemp(t.TempDir(), "inst-test")
 	if err != nil {
 		t.Fatal(err)
 	}

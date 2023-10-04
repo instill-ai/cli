@@ -4,7 +4,7 @@
 //
 // Known tasks are:
 //
-//   bin/instill:
+//   bin/inst:
 //     Builds the main executable.
 //     Supported environment variables:
 //     - INSTILL_VERSION: determined from source by default
@@ -42,7 +42,7 @@ import (
 )
 
 var tasks = map[string]func(string) error{
-	"bin/instill": func(exe string) error {
+	"bin/inst": func(exe string) error {
 		info, err := os.Stat(exe)
 		if err == nil && !sourceFilesLaterThan(info.ModTime()) {
 			fmt.Printf("%s: `%s` is up to date.\n", self, exe)
@@ -57,7 +57,7 @@ var tasks = map[string]func(string) error{
 			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.clientSecret=%s %s", oauthSecret, ldflags)
 		}
 
-		return run("go", "build", "-trimpath", "-ldflags", ldflags, "-o", exe, "./cmd/instill")
+		return run("go", "build", "-trimpath", "-ldflags", ldflags, "-o", exe, "./cmd/inst")
 	},
 	"clean": func(_ string) error {
 		return rmrf("bin", "share")
@@ -80,9 +80,9 @@ func main() {
 
 	if len(args) < 2 {
 		if isWindowsTarget() {
-			args = append(args, filepath.Join("bin", "instill.exe"))
+			args = append(args, filepath.Join("bin", "inst.exe"))
 		} else {
-			args = append(args, "bin/instill")
+			args = append(args, "bin/inst")
 		}
 	}
 

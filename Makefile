@@ -12,8 +12,8 @@ endif
 
 ## The following tasks delegate to `script/build.go` so they can be run cross-platform.
 
-.PHONY: bin/instill$(EXE)
-bin/instill$(EXE): script/build
+.PHONY: bin/inst$(EXE)
+bin/inst$(EXE): script/build
 	@script/build $@
 
 script/build: script/build.go
@@ -22,7 +22,7 @@ script/build: script/build.go
 .PHONY: clean
 clean:
 	rm -f script/build
-	rm -f bin/instill
+	rm -f bin/inst
 
 # just a convenience task around `go test`
 .PHONY: test
@@ -38,10 +38,10 @@ bindir  := ${prefix}/bin
 mandir  := ${prefix}/share/man
 
 .PHONY: install
-install: bin/instill
+install: bin/inst
 	install -d ${DESTDIR}${bindir}
-	install -m755 bin/instill ${DESTDIR}${bindir}/
+	install -m755 bin/inst ${DESTDIR}${bindir}/
 
 .PHONY: uninstall
 uninstall:
-	rm -f ${DESTDIR}${bindir}/instill
+	rm -f ${DESTDIR}${bindir}/inst

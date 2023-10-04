@@ -174,29 +174,29 @@ func Test_ConfigDir(t *testing.T) {
 				"USERPROFILE":        tempDir,
 				"HOME":               tempDir,
 			},
-			output: filepath.Join(tempDir, ".config", "instill"),
+			output: filepath.Join(tempDir, ".config", "inst"),
 		},
 		{
 			name: "INSTILL_CONFIG_DIR specified",
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "inst_config_dir"),
 			},
-			output: filepath.Join(tempDir, "instill_config_dir"),
+			output: filepath.Join(tempDir, "inst_config_dir"),
 		},
 		{
 			name: "XDG_CONFIG_HOME specified",
 			env: map[string]string{
 				"XDG_CONFIG_HOME": tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 		{
 			name: "INSTILL_CONFIG_DIR and XDG_CONFIG_HOME specified",
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "inst_config_dir"),
 				"XDG_CONFIG_HOME":    tempDir,
 			},
-			output: filepath.Join(tempDir, "instill_config_dir"),
+			output: filepath.Join(tempDir, "inst_config_dir"),
 		},
 		{
 			name:        "AppData specified",
@@ -210,10 +210,10 @@ func Test_ConfigDir(t *testing.T) {
 			name:        "INSTILL_CONFIG_DIR and AppData specified",
 			onlyWindows: true,
 			env: map[string]string{
-				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "instill_config_dir"),
+				"INSTILL_CONFIG_DIR": filepath.Join(tempDir, "inst_config_dir"),
 				"AppData":            tempDir,
 			},
-			output: filepath.Join(tempDir, "instill_config_dir"),
+			output: filepath.Join(tempDir, "inst_config_dir"),
 		},
 		{
 			name:        "XDG_CONFIG_HOME and AppData specified",
@@ -222,7 +222,7 @@ func Test_ConfigDir(t *testing.T) {
 				"XDG_CONFIG_HOME": tempDir,
 				"AppData":         tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 	}
 
@@ -249,7 +249,7 @@ func Test_ConfigDir(t *testing.T) {
 }
 
 func Test_configFile_Write_toDisk(t *testing.T) {
-	configDir := filepath.Join(t.TempDir(), ".config", "instill")
+	configDir := filepath.Join(t.TempDir(), ".config", "inst")
 	_ = os.MkdirAll(configDir, 0755)
 	os.Setenv(INSTILL_CONFIG_DIR, configDir)
 	defer os.Unsetenv(INSTILL_CONFIG_DIR)
@@ -296,7 +296,7 @@ func Test_autoMigrateConfigDir_noMigration_notExist(t *testing.T) {
 
 func Test_autoMigrateConfigDir_noMigration_samePath(t *testing.T) {
 	homeDir := t.TempDir()
-	migrateDir := filepath.Join(homeDir, ".config", "instill")
+	migrateDir := filepath.Join(homeDir, ".config", "inst")
 	err := os.MkdirAll(migrateDir, 0755)
 	assert.NoError(t, err)
 
@@ -319,8 +319,8 @@ func Test_autoMigrateConfigDir_noMigration_samePath(t *testing.T) {
 func Test_autoMigrateConfigDir_migration(t *testing.T) {
 	homeDir := t.TempDir()
 	migrateDir := t.TempDir()
-	homeConfigDir := filepath.Join(homeDir, ".config", "instill")
-	migrateConfigDir := filepath.Join(migrateDir, ".config", "instill")
+	homeConfigDir := filepath.Join(homeDir, ".config", "inst")
+	migrateConfigDir := filepath.Join(migrateDir, ".config", "inst")
 
 	homeEnvVar := "HOME"
 	if runtime.GOOS == "windows" {
@@ -366,14 +366,14 @@ func Test_StateDir(t *testing.T) {
 				"USERPROFILE":        tempDir,
 				"HOME":               tempDir,
 			},
-			output: filepath.Join(tempDir, ".local", "instill", "state"),
+			output: filepath.Join(tempDir, ".local", "inst", "state"),
 		},
 		{
 			name: "XDG_STATE_HOME specified",
 			env: map[string]string{
 				"XDG_STATE_HOME": tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 		{
 			name:        "LocalAppData specified",
@@ -390,7 +390,7 @@ func Test_StateDir(t *testing.T) {
 				"XDG_STATE_HOME": tempDir,
 				"LocalAppData":   tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 	}
 
@@ -438,7 +438,7 @@ func Test_autoMigrateStateDir_noMigration_notExist(t *testing.T) {
 
 func Test_autoMigrateStateDir_noMigration_samePath(t *testing.T) {
 	homeDir := t.TempDir()
-	migrateDir := filepath.Join(homeDir, ".config", "instill")
+	migrateDir := filepath.Join(homeDir, ".config", "inst")
 	err := os.MkdirAll(migrateDir, 0755)
 	assert.NoError(t, err)
 
@@ -461,8 +461,8 @@ func Test_autoMigrateStateDir_noMigration_samePath(t *testing.T) {
 func Test_autoMigrateStateDir_migration(t *testing.T) {
 	homeDir := t.TempDir()
 	migrateDir := t.TempDir()
-	homeConfigDir := filepath.Join(homeDir, ".config", "instill")
-	migrateStateDir := filepath.Join(migrateDir, ".local", "instill")
+	homeConfigDir := filepath.Join(homeDir, ".config", "inst")
+	migrateStateDir := filepath.Join(migrateDir, ".local", "inst")
 
 	homeEnvVar := "HOME"
 	if runtime.GOOS == "windows" {
@@ -509,14 +509,14 @@ func Test_DataDir(t *testing.T) {
 				"USERPROFILE":        tempDir,
 				"HOME":               tempDir,
 			},
-			output: filepath.Join(tempDir, ".local", "share", "instill"),
+			output: filepath.Join(tempDir, ".local", "share", "inst"),
 		},
 		{
 			name: "XDG_DATA_HOME specified",
 			env: map[string]string{
 				"XDG_DATA_HOME": tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 		{
 			name:        "LocalAppData specified",
@@ -533,7 +533,7 @@ func Test_DataDir(t *testing.T) {
 				"XDG_DATA_HOME": tempDir,
 				"LocalAppData":  tempDir,
 			},
-			output: filepath.Join(tempDir, "instill"),
+			output: filepath.Join(tempDir, "inst"),
 		},
 	}
 

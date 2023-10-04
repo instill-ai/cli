@@ -33,7 +33,7 @@ func Format(version, buildDate string) string {
 		dateStr = fmt.Sprintf(" (%s)", buildDate)
 	}
 
-	return fmt.Sprintf("instill version %s%s\n%s\n", version, dateStr, changelogURL(version))
+	return fmt.Sprintf("inst version %s%s\n%s\n", version, dateStr, changelogURL(version))
 }
 
 func changelogURL(version string) string {
