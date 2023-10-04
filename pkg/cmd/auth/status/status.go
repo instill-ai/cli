@@ -29,7 +29,7 @@ func NewCmdStatus(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Co
 		Short: "View authentication status",
 		Long: heredoc.Doc(`Verifies and displays information about your authentication state.
 
-			This command will test your authentication state for each Instill host that instill knows about and
+			This command will test your authentication state for each Instill host that inst knows about and
 			report on any issues.
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -66,7 +66,7 @@ func statusRun(opts *StatusOptions) error {
 	}
 	if len(hostnames) == 0 {
 		fmt.Fprintf(stderr,
-			"You are not logged into any Instill hosts. Run %s to authenticate.\n", cs.Bold("instill auth login"))
+			"You are not logged into any Instill Core/Cloud instances. Run %s to authenticate.\n", cs.Bold("inst auth login"))
 		return cmdutil.SilentError
 	}
 
@@ -94,7 +94,7 @@ func statusRun(opts *StatusOptions) error {
 
 	if !isHostnameFound {
 		fmt.Fprintf(stderr,
-			"Hostname %q not found among authenticated Instill hosts\n", opts.Hostname)
+			"Hostname %q not found among authenticated Instill Core/Cloud hosts\n", opts.Hostname)
 		return cmdutil.SilentError
 	}
 

@@ -21,23 +21,23 @@ import (
 // NewCmdRoot initiates the Cobra command root
 func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "instill <command> <subcommand> [flags]",
+		Use:   "inst <command> <subcommand> [flags]",
 		Short: "Instill CLI",
-		Long:  `Access Instill services from the command line.`,
+		Long:  `Access Instill Core/Cloud from the command line.`,
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-			$ instill api pipelines
-			$ instill config get editor
-			$ instill auth login
+			$ inst api pipelines
+			$ inst config get editor
+			$ inst auth login
 		`),
 		Annotations: map[string]string{
 			"help:feedback": heredoc.Doc(`
 				Please open an issue on https://github.com/instill-ai/cli.
 			`),
 			"help:environment": heredoc.Doc(`
-				See 'instill help environment' for the list of supported environment variables.
+				See 'inst help environment' for the list of supported environment variables.
 			`),
 		},
 	}
@@ -55,7 +55,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	formattedVersion := versionCmd.Format(version, buildDate)
 	cmd.SetVersionTemplate(formattedVersion)
 	cmd.Version = formattedVersion
-	cmd.Flags().Bool("version", false, "Show instill version")
+	cmd.Flags().Bool("version", false, "Show inst version")
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(f, version, buildDate))

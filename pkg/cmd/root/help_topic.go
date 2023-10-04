@@ -9,13 +9,13 @@ import (
 
 var HelpTopics = map[string]map[string]string{
 	"mintty": {
-		"short": "Information about using instill with MinTTY",
+		"short": "Information about using inst with MinTTY",
 		"long": heredoc.Doc(`
 			MinTTY is the terminal emulator that comes by default with Git
-			for Windows.  It has known issues with instill's ability to prompt a
+			for Windows.  It has known issues with inst's ability to prompt a
 			user for input.
 
-			There are a few workarounds to make instill work with MinTTY:
+			There are a few workarounds to make inst work with MinTTY:
 
 			- Reinstall Git for Windows, checking "Enable experimental support for pseudo consoles".
 
@@ -23,12 +23,12 @@ var HelpTopics = map[string]map[string]string{
 			  You can run "C:\Program Files\Git\bin\bash.exe" from any terminal emulator to continue
 			  using all of the tooling in Git For Windows without MinTTY.
 
-			- Prefix invocations of instill with winpty, eg: "winpty instill auth login".
+			- Prefix invocations of inst with winpty, eg: "winpty inst auth login".
 			  NOTE: this can lead to some UI bugs.
 		`),
 	},
 	"environment": {
-		"short": "Environment variables that can be used with instill",
+		"short": "Environment variables that can be used with inst",
 		"long": heredoc.Doc(`
 			INSTILL_EDITOR, GIT_EDITOR, VISUAL, EDITOR (in order of precedence): the editor tool to use
 			for authoring text.
@@ -56,21 +56,21 @@ var HelpTopics = map[string]map[string]string{
 			available in the viewport. When the value is a percentage, it will be applied against
 			the number of columns available in the current viewport.
 
-			INSTILL_NO_UPDATE_NOTIFIER: set to any value to disable update notifications. By default, instill
+			INSTILL_NO_UPDATE_NOTIFIER: set to any value to disable update notifications. By default, inst
 			checks for new releases once every 24 hours and displays an upgrade notice on standard
 			error if a newer version was found.
 
-			INSTILL_CONFIG_DIR: the directory where instill will store configuration files. Default:
-			"$XDG_CONFIG_HOME/instill" or "$HOME/.config/instill".
+			INSTILL_CONFIG_DIR: the directory where inst will store configuration files. Default:
+			"$XDG_CONFIG_HOME/inst" or "$HOME/.config/inst".
 		`),
 	},
 	"reference": {
-		"short": "A comprehensive reference of all instill commands",
+		"short": "A comprehensive reference of all inst commands",
 	},
 	"formatting": {
-		"short": "Formatting options for JSON data exported from instill",
+		"short": "Formatting options for JSON data exported from inst",
 		"long": heredoc.Docf(`
-			Some instill commands support exporting the data as JSON as an alternative to their usual
+			Some inst commands support exporting the data as JSON as an alternative to their usual
 			line-based plain text output. This is suitable for passing structured data to scripts.
 			The JSON output is enabled with the %[1]s--json%[1]s option, followed by the list of fields
 			to fetch. Use the flag without a value to get the list of available fields.
@@ -95,19 +95,9 @@ var HelpTopics = map[string]map[string]string{
 			- %[1]struncate <length> <input>%[1]s: ensures input fits within length
 		`, "`"),
 		"example": heredoc.Doc(`
-			# format issues as table
-			$ instill issue list --json number,title --template \
-			  '{{range .}}{{tablerow (printf "#%v" .number | autocolor "green") .title}}{{end}}'
-
-			# format a pull request using multiple tables with headers
-			$ instill pr view 3519 --json number,title,body,reviews,assignees --template \
-			  '{{printf "#%v" .number}} {{.title}}
-
-			  {{.body}}
-
-			  {{tablerow "ASSIGNEE" "NAME"}}{{range .assignees}}{{tablerow .login .name}}{{end}}{{tablerender}}
-			  {{tablerow "REVIEWER" "STATE" "COMMENT"}}{{range .reviews}}{{tablerow .author.login .state .body}}{{end}}
-			  '
+			# format pipelines as a table
+			$ inst api vdp/v1alpha/pipelines \
+			  --template '{{range .pipelines}}{{tablerow (printf "%v" .name | autocolor "green")}}{{end}}'
 		`),
 	},
 }
@@ -121,7 +111,7 @@ func NewHelpTopic(topic string) *cobra.Command {
 		Hidden:  true,
 		Annotations: map[string]string{
 			"markdown:generate": "true",
-			"markdown:basename": "instill_help_" + topic,
+			"markdown:basename": "inst_help_" + topic,
 		},
 	}
 
@@ -140,6 +130,6 @@ func helpTopicHelpFunc(command *cobra.Command, args []string) {
 }
 
 func helpTopicUsageFunc(command *cobra.Command) error {
-	command.Printf("Usage: instill help %s", command.Use)
+	command.Printf("Usage: inst help %s", command.Use)
 	return nil
 }

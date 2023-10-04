@@ -20,7 +20,7 @@ func TestLocalDeployCmd(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "inst") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		stdin    string
@@ -55,7 +55,7 @@ func TestLocalDeployCmd(t *testing.T) {
 					return config.ConfigStub{}, nil
 				},
 				IOStreams:  io,
-				Executable: func() string { return "/path/to/instill" },
+				Executable: func() string { return "/path/to/inst" },
 			}
 
 			io.SetStdoutTTY(true)
@@ -102,7 +102,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 	if err != nil {
 		logger.Error("Couldn't get home directory", err)
 	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "inst") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		input    *DeployOptions

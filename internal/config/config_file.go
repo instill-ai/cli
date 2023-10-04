@@ -31,12 +31,12 @@ func ConfigDir() string {
 	if a := os.Getenv(INSTILL_CONFIG_DIR); a != "" {
 		path = a
 	} else if b := os.Getenv(XDG_CONFIG_HOME); b != "" {
-		path = filepath.Join(b, "instill")
+		path = filepath.Join(b, "inst")
 	} else if c := os.Getenv(APP_DATA); runtime.GOOS == "windows" && c != "" {
 		path = filepath.Join(c, "Instill CLI")
 	} else {
 		d, _ := os.UserHomeDir()
-		path = filepath.Join(d, ".config", "instill")
+		path = filepath.Join(d, ".config", "inst")
 	}
 
 	// If the path does not exist and the INSTILL_CONFIG_DIR flag is not set try
@@ -55,12 +55,12 @@ func ConfigDir() string {
 func StateDir() string {
 	var path string
 	if a := os.Getenv(XDG_STATE_HOME); a != "" {
-		path = filepath.Join(a, "instill")
+		path = filepath.Join(a, "inst")
 	} else if b := os.Getenv(LOCAL_APP_DATA); runtime.GOOS == "windows" && b != "" {
 		path = filepath.Join(b, "Instill CLI")
 	} else {
 		c, _ := os.UserHomeDir()
-		path = filepath.Join(c, ".local", "instill", "state")
+		path = filepath.Join(c, ".local", "inst", "state")
 	}
 
 	// If the path does not exist try migrating state from default paths
@@ -78,12 +78,12 @@ func StateDir() string {
 func DataDir() string {
 	var path string
 	if a := os.Getenv(XDG_DATA_HOME); a != "" {
-		path = filepath.Join(a, "instill")
+		path = filepath.Join(a, "inst")
 	} else if b := os.Getenv(LOCAL_APP_DATA); runtime.GOOS == "windows" && b != "" {
 		path = filepath.Join(b, "Instill CLI")
 	} else {
 		c, _ := os.UserHomeDir()
-		path = filepath.Join(c, ".local", "share", "instill")
+		path = filepath.Join(c, ".local", "share", "inst")
 	}
 
 	return path
@@ -96,7 +96,7 @@ var errNotExist = errors.New("not exist")
 // If configs exist then move them to newPath
 func autoMigrateConfigDir(newPath string) error {
 	path, err := os.UserHomeDir()
-	if oldPath := filepath.Join(path, ".config", "instill"); err == nil && dirExists(oldPath) {
+	if oldPath := filepath.Join(path, ".config", "inst"); err == nil && dirExists(oldPath) {
 		return migrateDir(oldPath, newPath)
 	}
 
@@ -107,7 +107,7 @@ func autoMigrateConfigDir(newPath string) error {
 // If state file exist then move it to newPath
 func autoMigrateStateDir(newPath string) error {
 	path, err := os.UserHomeDir()
-	if oldPath := filepath.Join(path, ".config", "instill"); err == nil && dirExists(oldPath) {
+	if oldPath := filepath.Join(path, ".config", "inst"); err == nil && dirExists(oldPath) {
 		return migrateFile(oldPath, newPath, "state.yml")
 	}
 

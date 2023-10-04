@@ -1,4 +1,4 @@
-project_name: instill
+project_name: inst
 
 release:
   prerelease: auto
@@ -15,8 +15,8 @@ before:
 
 builds:
   - <<: &build_defaults
-      binary: bin/instill
-      main: ./cmd/instill
+      binary: bin/inst
+      main: ./cmd/inst
       ldflags:
         - -s -w
         - -X github.com/instill-ai/cli/internal/build.Version={{ .Version }}
@@ -76,16 +76,16 @@ brews:
   - tap:
       owner: instill-ai
       name: homebrew-tap
-    description: Instill AI's official command-line tool
+    description: Instill AI's command-line tool
     homepage: https://github.com/instill-ai/cli
     license: "Apache-2.0"
     commit_author:
       name: droplet-bot
       email: 70758845+droplet-bot@users.noreply.github.com
     install: |
-      bin.install "bin/instill"
-      (bash_completion/"instill").write `#{bin}/instill completion -s bash`
-      (fish_completion/"instill.fish").write `#{bin}/instill completion -s fish`
-      (zsh_completion/"_instill").write `#{bin}/instill completion -s zsh`
+      bin.install "bin/inst"
+      (bash_completion/"inst").write `#{bin}/inst completion -s bash`
+      (fish_completion/"inst.fish").write `#{bin}/inst completion -s fish`
+      (zsh_completion/"_inst").write `#{bin}/inst completion -s zsh`
     test: |
-      assert_match "instill version #{version}", shell_output("#{bin}/instill --version")
+      assert_match "inst version #{version}", shell_output("#{bin}/inst --version")

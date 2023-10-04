@@ -33,13 +33,13 @@ func NewCmdCompletion(io *iostreams.IOStreams) *cobra.Command {
 
 			After, add this to your %[1]s~/.bash_profile%[1]s:
 
-				eval "$(instill completion -s bash)"
+				eval "$(inst completion -s bash)"
 
 			### zsh
 
-			Generate a %[1]s_instill%[1]s completion script and put it somewhere in your %[1]s$fpath%[1]s:
+			Generate a %[1]s_inst%[1]s completion script and put it somewhere in your %[1]s$fpath%[1]s:
 
-				instill completion -s zsh > /usr/local/share/zsh/site-functions/_instill
+				inst completion -s zsh > /usr/local/share/zsh/site-functions/_inst
 
 			Ensure that the following is present in your %[1]s~/.zshrc%[1]s:
 
@@ -50,9 +50,9 @@ func NewCmdCompletion(io *iostreams.IOStreams) *cobra.Command {
 
 			### fish
 
-			Generate a %[1]sinstill.fish%[1]s completion script:
+			Generate a %[1]sinst.fish%[1]s completion script:
 
-				instill completion -s fish > ~/.config/fish/completions/instill.fish
+				inst completion -s fish > ~/.config/fish/completions/inst.fish
 
 			### PowerShell
 
@@ -63,7 +63,7 @@ func NewCmdCompletion(io *iostreams.IOStreams) *cobra.Command {
 
 			Add the line and save the file:
 
-				Invoke-Expression -Command $(instill completion -s powershell | Out-String)
+				Invoke-Expression -Command $(inst completion -s powershell | Out-String)
 		`, "`"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if shellType == "" {

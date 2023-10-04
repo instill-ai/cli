@@ -36,7 +36,7 @@ type DeployOptions struct {
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
-	Path           string `validate:"required,dirpath" example:"/home/instill-core/"`
+	Path           string `validate:"required,dirpath" example:"/home/inst"`
 	checkUpdate    func(ExecDep, string, string) (*releaseInfo, error)
 	isDeployed     func(ExecDep) error
 }
@@ -53,8 +53,8 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 		Use:   "deploy",
 		Short: "Deploy a local Instill Core instance",
 		Example: heredoc.Doc(`
-			# deploy to /home/me/instill
-			$ inst local deploy --path /home/me/instill
+			# deploy to /home/me/inst
+			$ inst local deploy --path /home/me/inst
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()
@@ -79,7 +79,7 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 	if err != nil {
 		logger.Error("Couldn't get Home directory", err)
 	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
+	dir := filepath.Join(d, ".local", "inst") + string(os.PathSeparator)
 	cmd.Flags().StringVarP(&opts.Path, "path", "p", dir, "Destination directory")
 
 	return cmd

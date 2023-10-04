@@ -39,7 +39,7 @@ func referenceHelpFn(io *iostreams.IOStreams) func(*cobra.Command, []string) {
 }
 
 func referenceLong(cmd *cobra.Command) string {
-	buf := bytes.NewBufferString("# instill reference\n\n")
+	buf := bytes.NewBufferString("# inst reference\n\n")
 	for _, c := range cmd.Commands() {
 		if c.Hidden {
 			continue

@@ -63,7 +63,7 @@ func TestInstancesAddCmd(t *testing.T) {
 					return config.ConfigStub{}, nil
 				},
 				IOStreams:  io,
-				Executable: func() string { return "/path/to/instill" },
+				Executable: func() string { return "/path/to/inst" },
 			}
 
 			io.SetStdoutTTY(true)

@@ -35,10 +35,10 @@ func NewCmdLogout(f *cmdutil.Factory, runF func(*LogoutOptions) error) *cobra.Co
 			interactively or via --hostname.
 		`),
 		Example: heredoc.Doc(`
-			$ instill auth logout
+			$ inst auth logout
 			# => select what host to log out of via a prompt
 
-			$ instill auth logout --hostname api.instill.tech
+			$ inst auth logout --hostname api.instill.tech
 			# => log out of specified host
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
