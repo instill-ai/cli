@@ -20,17 +20,17 @@ func TestNewCmdCompletion(t *testing.T) {
 		{
 			name:    "no arguments",
 			args:    "completion",
-			wantOut: "complete -o default -F __start_instill instill",
+			wantOut: "complete -o default -F __start_inst inst",
 		},
 		{
 			name:    "zsh completion",
 			args:    "completion -s zsh",
-			wantOut: "compdef _instill instill",
+			wantOut: "compdef _inst inst",
 		},
 		{
 			name:    "fish completion",
 			args:    "completion -s fish",
-			wantOut: "complete -c instill ",
+			wantOut: "complete -c inst",
 		},
 		{
 			name:    "PowerShell completion",
@@ -47,7 +47,7 @@ func TestNewCmdCompletion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			io, _, stdout, stderr := iostreams.Test()
 			completeCmd := NewCmdCompletion(io)
-			rootCmd := &cobra.Command{Use: "instill"}
+			rootCmd := &cobra.Command{Use: "inst"}
 			rootCmd.AddCommand(completeCmd)
 
 			argv, err := shlex.Split(tt.args)

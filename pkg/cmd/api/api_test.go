@@ -286,7 +286,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `{"message": "THIS IS FINE"}`,
-			stderr: "instill: THIS IS FINE (HTTP 400)\n",
+			stderr: "inst: THIS IS FINE (HTTP 400)\n",
 		},
 		{
 			name: "REST string errors",
@@ -297,7 +297,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `{"errors": ["ALSO", "FINE"]}`,
-			stderr: "instill: ALSO\nFINE\n",
+			stderr: "inst: ALSO\nFINE\n",
 		},
 		{
 			name: "failure",
@@ -307,7 +307,7 @@ func Test_apiRun(t *testing.T) {
 			},
 			err:    cmdutil.SilentError,
 			stdout: `gateway timeout`,
-			stderr: "instill: HTTP 502\n",
+			stderr: "inst: HTTP 502\n",
 		},
 		{
 			name: "silent",

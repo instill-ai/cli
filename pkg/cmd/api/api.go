@@ -105,22 +105,22 @@ func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 		`, "`"),
 		Example: heredoc.Doc(`
 			# list pipelines
-			$ instill api vdp/v1alpha/pipelines
+			$ inst api vdp/v1alpha/pipelines
 
 			# list models
-			$ instill api model/v1alpha/models
+			$ inst api model/v1alpha/models
 
 			# get user profile
-			$ instill api base/v1alpha/users/me
+			$ inst api base/v1alpha/users/me
 
 			# add parameters to a GET request
-			$ instill api model/v1alpha/models?visibility=public
+			$ inst api model/v1alpha/models?visibility=public
 
 			# add nested JSON body to a POST request
-			$ jq -n '{"inputs":[{"image": <your image base64 encoded string>}]}' | instill api vdp/v1alpha/pipelines/trigger --input -
+			$ jq -n '{"inputs":[{"image": <your image base64 encoded string>}]}' | inst api vdp/v1alpha/pipelines/trigger --input -
 
 			# set a custom HTTP header
-			$ instill api -H 'Authorization: Basic ...'
+			$ inst api -H 'Authorization: Basic ...'
 		`),
 		Args: cobra.ExactArgs(1),
 		RunE: func(c *cobra.Command, args []string) error {
@@ -317,7 +317,7 @@ func processResponse(resp *http.Response, opts *ApiOptions, headersOutputStream 
 	}
 
 	if serverError != "" {
-		fmt.Fprintf(opts.IO.ErrOut, "instill: %s\n", serverError)
+		fmt.Fprintf(opts.IO.ErrOut, "inst: %s\n", serverError)
 		err = cmdutil.SilentError
 		return
 	}

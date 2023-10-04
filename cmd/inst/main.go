@@ -87,7 +87,7 @@ func mainRun() exitCode {
 		}
 	}
 
-	// Enable running instill from Windows File Explorer's address bar. Without this, the user is told to stop and run from a
+	// Enable running inst from Windows File Explorer's address bar. Without this, the user is told to stop and run from a
 	// terminal. With this, a user can clone a repo (or take other actions) directly from explorer.
 	if len(os.Args) > 1 && os.Args[1] != "" {
 		cobra.MousetrapHelpText = ""
@@ -106,7 +106,7 @@ func mainRun() exitCode {
 		expandedArgs = os.Args[1:]
 	}
 
-	// translate `instill help <command>` to `instill <command> --help` for extensions
+	// translate `inst help <command>` to `inst <command> --help` for extensions
 	if len(expandedArgs) == 2 && expandedArgs[0] == "help" && !hasCommand(rootCmd, expandedArgs[1:]) {
 		expandedArgs = []string{expandedArgs[1], "--help"}
 	}
@@ -119,7 +119,7 @@ func mainRun() exitCode {
 		if cmdutil.IsAuthCheckEnabled(cmd) && !cmdutil.CheckAuth(cfg) {
 			fmt.Fprintln(stderr, cs.Bold("Welcome to Instill CLI!"))
 			fmt.Fprintln(stderr)
-			fmt.Fprintln(stderr, "To authenticate, please run `instill auth login`.")
+			fmt.Fprintln(stderr, "To authenticate, please run `inst auth login`.")
 			return authError
 		}
 
@@ -145,13 +145,13 @@ func mainRun() exitCode {
 
 		if strings.Contains(err.Error(), "Incorrect function") {
 			fmt.Fprintln(stderr, "You appear to be running in MinTTY without pseudo terminal support.")
-			fmt.Fprintln(stderr, "To learn about workarounds for this error, run:  instill help mintty")
+			fmt.Fprintln(stderr, "To learn about workarounds for this error, run:  inst help mintty")
 			return exitError
 		}
 
 		var httpErr api.HTTPError
 		if errors.As(err, &httpErr) && httpErr.StatusCode == 401 {
-			fmt.Fprintln(stderr, "Try authenticating with:  instill auth login")
+			fmt.Fprintln(stderr, "Try authenticating with:  inst auth login")
 		}
 
 		return exitError
@@ -172,7 +172,7 @@ func mainRun() exitCode {
 			ansi.Color(buildVersion, "cyan"),
 			ansi.Color(newRelease.Version, "cyan"))
 		if isHomebrew {
-			fmt.Fprintf(stderr, "To upgrade, run: %s\n", "brew update && brew upgrade instill")
+			fmt.Fprintf(stderr, "To upgrade, run: %s\n", "brew update && brew upgrade inst")
 		}
 		fmt.Fprintf(stderr, "%s\n\n",
 			ansi.Color(newRelease.URL, "yellow"))
@@ -265,7 +265,7 @@ func isRecentRelease(publishedAt time.Time) bool {
 	return !publishedAt.IsZero() && time.Since(publishedAt) < time.Hour*24
 }
 
-// Check whether the instill binary was found under the Homebrew prefix
+// Check whether the inst binary was found under the Homebrew prefix
 func isUnderHomebrew(instillBinary string) bool {
 	brewExe, err := safeexec.LookPath("brew")
 	if err != nil {

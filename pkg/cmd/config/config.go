@@ -15,7 +15,7 @@ import (
 
 func NewCmdConfig(f *cmdutil.Factory) *cobra.Command {
 	longDoc := strings.Builder{}
-	longDoc.WriteString("Display or change configuration settings for instill.\n\n")
+	longDoc.WriteString("Display or change configuration settings for inst.\n\n")
 	longDoc.WriteString("Current respected settings:\n")
 	for _, co := range config.ConfigOptions() {
 		longDoc.WriteString(fmt.Sprintf("- %s: %s", co.Key, co.Description))
@@ -27,7 +27,7 @@ func NewCmdConfig(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "config <command>",
-		Short: "Manage configuration for instill",
+		Short: "Manage configuration for inst",
 		Long:  longDoc.String(),
 	}
 
