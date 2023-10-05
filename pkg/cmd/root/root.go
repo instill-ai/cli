@@ -69,7 +69,7 @@ func NewCmdRoot(f *cmdutil.Factory, version, buildDate string) *cobra.Command {
 	bareHTTPCmdFactory := *f
 	bareHTTPCmdFactory.HTTPClient = bareHTTPClient(f, version)
 
-	cmd.AddCommand(apiCmd.NewCmdApi(&bareHTTPCmdFactory, nil))
+	cmd.AddCommand(apiCmd.NewCmdAPI(&bareHTTPCmdFactory, nil))
 
 	// Help topics
 	cmd.AddCommand(NewHelpTopic("environment"))

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"os"
 	"regexp"
@@ -49,21 +48,8 @@ type ApiOptions struct {
 	HTTPClient func() (*http.Client, error)
 }
 
-var logger *slog.Logger
-
-func init() {
-	var lvl = new(slog.LevelVar)
-	if os.Getenv("DEBUG") != "" {
-		lvl.Set(slog.LevelDebug)
-	} else {
-		lvl.Set(slog.LevelError + 1)
-	}
-	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: lvl,
-	}))
-}
-
-func NewCmdApi(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command {
+// NewCmdAPI creates a new command
+func NewCmdAPI(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command {
 	opts := ApiOptions{
 		IO:         f.IOStreams,
 		Config:     f.Config,
@@ -244,13 +230,6 @@ func apiRun(opts *ApiOptions) error {
 		defer opts.IO.StopPager()
 	}
 
-	if host.AccessToken != "" {
-		requestHeaders = append(requestHeaders, "Authorization: Bearer "+host.AccessToken)
-	}
-
-	logger.Debug("api request", "host", host.APIHostname, "path", requestPath)
-
-	// http request & output
 	template := export.NewTemplate(opts.IO, opts.Template)
 	resp, err := httpRequest(httpClient, host.APIHostname, method, requestPath, requestBody, requestHeaders)
 	if err != nil {
