@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"fmt"
@@ -26,13 +26,13 @@ func NewListCmd(f *cmdutil.Factory, runF func(*ListOptions) error) *cobra.Comman
 	cmd := &cobra.Command{
 		Use:   "list",
 		Args:  cobra.ExactArgs(0),
-		Short: "View added instances",
+		Short: "View added instance",
 		Long: heredoc.Docf(`
-			View added cloud and local instances.
+			View added cloud and local instance.
 		`),
 		Example: heredoc.Doc(`
-			# list instances
-			$ inst instances list
+			# list instance
+			$ inst instance list
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()
@@ -77,7 +77,7 @@ func runList(opts *ListOptions) error {
 	md := cmdutil.GenTable(cols, data)
 	err = cmdutil.PrintMarkdown(opts.IO, md)
 	if err != nil {
-		return fmt.Errorf("ERROR: failed to list instances: %w", err)
+		return fmt.Errorf("ERROR: failed to list instance: %w", err)
 	}
 
 	return nil

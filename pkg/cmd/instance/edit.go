@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Comman
 		Use: "edit",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
-				return fmt.Errorf("ERROR: specify an API hostname\n$ inst instances edit API_HOSTNAME")
+				return fmt.Errorf("ERROR: specify an API hostname\n$ inst instance edit API_HOSTNAME")
 			}
 			if err := instance.HostnameValidator(args[0]); err != nil {
 				return fmt.Errorf("error parsing API hostname %w", err)
@@ -43,11 +43,11 @@ func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Comman
 		`),
 		Example: heredoc.Doc(`
 			# update the issuer for api.instill.tech
-			$ inst instances edit api.instill.tech \
+			$ inst instance edit api.instill.tech \
 				--issuer https://auth.instill.tech/
 
 			# remove authentication for instill.localhost
-			$ inst instances edit instill.localhost --no-auth
+			$ inst instance edit instill.localhost --no-auth
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := f.Config()

@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"bytes"
@@ -12,40 +12,27 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
-func TestInstancesAddCmd(t *testing.T) {
+func TestInstanceSetDefaultCmd(t *testing.T) {
 	tests := []struct {
 		name     string
 		stdin    string
 		stdinTTY bool
 		input    string
-		output   AddOptions
+		output   SetDefaultOptions
 		isErr    bool
 	}{
 		{
 			name:   "no arguments",
 			input:  "",
-			output: AddOptions{},
+			output: SetDefaultOptions{},
 			isErr:  true,
 		},
 		{
-			name:  "instances add foo --default",
-			input: "foo --default",
-			output: AddOptions{
-				InstanceOptions: InstanceOptions{
-					APIHostname: "foo",
-					Default:     true,
-				},
+			name:  "instance set-default api.instill.tech",
+			input: "api.instill.tech",
+			output: SetDefaultOptions{
+				APIHostname: "api.instill.tech",
 			},
-			isErr: false,
-		},
-		{
-			name:  "instances add foo --oauth2 bar",
-			input: "foo --oauth2 bar",
-			output: AddOptions{
-				InstanceOptions: InstanceOptions{
-					APIHostname: "foo",
-					Oauth2:      "bar",
-				}},
 			isErr: false,
 		},
 		{
@@ -75,8 +62,8 @@ func TestInstancesAddCmd(t *testing.T) {
 			argv, err := shlex.Split(tt.input)
 			assert.NoError(t, err)
 
-			var gotOpts *AddOptions
-			cmd := NewAddCmd(f, func(opts *AddOptions) error {
+			var gotOpts *SetDefaultOptions
+			cmd := NewSetDefaultCmd(f, func(opts *SetDefaultOptions) error {
 				gotOpts = opts
 				return nil
 			})
@@ -95,67 +82,27 @@ func TestInstancesAddCmd(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.output.APIHostname, gotOpts.APIHostname)
-			assert.Equal(t, tt.output.Oauth2, gotOpts.Oauth2)
 		})
 	}
 }
 
-func TestInstancesAddCmdRun(t *testing.T) {
+func TestInstanceSetDefaultCmdRun(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *AddOptions
+		input    *SetDefaultOptions
 		stdout   string
 		stderr   string
 		isErr    bool
 		expectFn func(*testing.T, config.Config)
 	}{
 		{
-			name: "instances add foo --default",
-			input: &AddOptions{
-				InstanceOptions: InstanceOptions{
-					APIHostname: "foo",
-					Default:     true,
-				},
-				Config: config.ConfigStub{},
+			name: "instance set-default api.instill.tech",
+			input: &SetDefaultOptions{
+				APIHostname: "api.instill.tech",
+				Config:      config.ConfigStub{},
 			},
-			stdout: "Instance 'foo' has been added\n",
+			stdout: "Instance 'api.instill.tech' has been set as the default one\n",
 			isErr:  false,
-		},
-		{
-			name: "instances add foo --oauth2 bar1 --client-secret bar2 --client-id bar3",
-			input: &AddOptions{
-				Config: config.ConfigStub{},
-				InstanceOptions: InstanceOptions{
-					APIHostname:  "foo",
-					Oauth2:       "bar1",
-					ClientSecret: "bar2",
-					ClientID:     "bar3",
-				},
-			},
-			expectFn: func(t *testing.T, cfg config.Config) {
-				v, err := cfg.Get("foo", "oauth2_hostname")
-				assert.NoError(t, err)
-				assert.Equal(t, "bar1", v)
-				v, err = cfg.Get("foo", "oauth2_client_secret")
-				assert.NoError(t, err)
-				assert.Equal(t, "bar2", v)
-				v, err = cfg.Get("foo", "oauth2_client_id")
-				assert.NoError(t, err)
-				assert.Equal(t, "bar3", v)
-			},
-			stdout: "Instance 'foo' has been added\n",
-			isErr:  false,
-		},
-		{
-			name: "missing oauth2 secret and client id",
-			input: &AddOptions{
-				Config: config.ConfigStub{},
-				InstanceOptions: InstanceOptions{
-					APIHostname: "foo",
-					Oauth2:      "bar1",
-				},
-			},
-			isErr: true,
 		},
 	}
 
@@ -165,7 +112,7 @@ func TestInstancesAddCmdRun(t *testing.T) {
 		tt.input.IO = io
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := RunAdd(tt.input)
+			err := runSetDefault(tt.input)
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {

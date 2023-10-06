@@ -184,7 +184,7 @@ func apiRun(opts *ApiOptions) error {
 			`ERROR: instance '%s' does not exist
 
 			You can add it with:
-			$ inst instances add %s`,
+			$ inst instance add %s`,
 			hostname, hostname))
 	}
 

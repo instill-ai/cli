@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/instill-ai/cli/internal/config"
-	"github.com/instill-ai/cli/pkg/cmd/instances"
+	"github.com/instill-ai/cli/pkg/cmd/instance"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
@@ -105,12 +105,12 @@ func runUndeploy(opts *UndeployOptions) error {
 }
 
 func unregisterInstance(opts *UndeployOptions) error {
-	exists, err := instances.IsInstanceAdded(opts.Config, "localhost:8080")
+	exists, err := instance.IsInstanceAdded(opts.Config, "localhost:8080")
 	if err != nil {
 		return err
 	}
 	if exists {
-		addOpts := &instances.RemoveOptions{
+		addOpts := &instance.RemoveOptions{
 			IO:             opts.IO,
 			Config:         opts.Config,
 			MainExecutable: opts.MainExecutable,
@@ -118,7 +118,7 @@ func unregisterInstance(opts *UndeployOptions) error {
 			APIHostname:    "localhost:8080",
 		}
 		p(opts.IO, "")
-		err = instances.RunRemove(addOpts)
+		err = instance.RunRemove(addOpts)
 		if err != nil {
 			return err
 		}

@@ -147,7 +147,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		e := heredoc.Docf(`ERROR: OAuth2 config isn't complete for '%s'
 
 			You can fix it with:
-			$ inst instances edit %s \
+			$ inst instance edit %s \
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
 				--client-secret CLIENT_SECRET`, host.APIHostname, host.APIHostname)

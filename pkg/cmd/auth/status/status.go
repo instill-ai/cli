@@ -66,7 +66,7 @@ func statusRun(opts *StatusOptions) error {
 	}
 	if len(hostnames) == 0 {
 		fmt.Fprintf(stderr,
-			"You are not logged into any Instill Core/Cloud instances. Run %s to authenticate.\n", cs.Bold("inst auth login"))
+			"You are not logged into any Instill Core/Cloud instance. Run %s to authenticate.\n", cs.Bold("inst auth login"))
 		return cmdutil.SilentError
 	}
 
