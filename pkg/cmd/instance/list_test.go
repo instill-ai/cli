@@ -84,7 +84,7 @@ func TestInstanceListCmdRun(t *testing.T) {
 			input: &ListOptions{
 				Config: config.ConfigStub{},
 			},
-			stdout: "\n  \n\u001B[38;5;252m\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m  DEFAULT │   API HOSTNAME   │  OAUTH2 HOSTNAME  │     OAUTH2 AUDIENCE      │       OAUTH2 ISSUER        │ API VERSION  \u001B[0m\n\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m──────────┼──────────────────┼───────────────────┼──────────────────────────┼────────────────────────────┼──────────────\u001B[0m\n\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m  *       │ api.instill.tech │ auth.instill.tech │ https://api.instill.tech │ https://auth.instill.tech/ │ v1alpha      \u001B[0m\n\u001B[0m\n",
+			stdout: "\n  \n\x1b[38;5;252m\x1b[0m\x1b[38;5;252m\x1b[0m  \x1b[38;5;252m  DEFAULT │   API HOSTNAME   │ API VERSION  \x1b[0m\n\x1b[0m\x1b[38;5;252m\x1b[0m  \x1b[38;5;252m──────────┼──────────────────┼──────────────\x1b[0m\n\x1b[0m\x1b[38;5;252m\x1b[0m  \x1b[38;5;252m  *       │ api.instill.tech │ v1alpha      \x1b[0m\n\x1b[0m\n",
 			isErr:  false,
 		},
 	}

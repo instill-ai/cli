@@ -62,7 +62,7 @@ func runList(opts *ListOptions) error {
 	if err != nil {
 		return err
 	}
-	cols := []string{"Default", "API Hostname", "Oauth2 Hostname", "Oauth2 Audience", "Oauth2 Issuer", "API Version"}
+	cols := []string{"Default", "API Hostname", "API Version"}
 	var data [][]string
 	defHostname := opts.Config.DefaultHostname()
 	for _, h := range hosts {
@@ -70,7 +70,7 @@ func runList(opts *ListOptions) error {
 		if h.APIHostname == defHostname {
 			def = "*"
 		}
-		row := []string{def, h.APIHostname, h.Oauth2Hostname, h.Oauth2Audience, h.Oauth2Issuer, h.APIVersion}
+		row := []string{def, h.APIHostname, h.APIVersion}
 		data = append(data, row)
 	}
 
