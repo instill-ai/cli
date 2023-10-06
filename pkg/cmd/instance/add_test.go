@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"bytes"
@@ -12,38 +12,38 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
-func TestInstancesEditCmd(t *testing.T) {
+func TestInstanceAddCmd(t *testing.T) {
 	tests := []struct {
 		name     string
 		stdin    string
 		stdinTTY bool
 		input    string
-		output   EditOptions
+		output   AddOptions
 		isErr    bool
 	}{
 		{
 			name:   "no arguments",
 			input:  "",
-			output: EditOptions{},
+			output: AddOptions{},
 			isErr:  true,
 		},
 		{
-			name:  "instances edit api.instill.tech --default",
-			input: "api.instill.tech --default",
-			output: EditOptions{
+			name:  "instance add foo --default",
+			input: "foo --default",
+			output: AddOptions{
 				InstanceOptions: InstanceOptions{
-					APIHostname: "api.instill.tech",
+					APIHostname: "foo",
 					Default:     true,
 				},
 			},
 			isErr: false,
 		},
 		{
-			name:  "instances edit api.instill.tech --oauth2 bar",
-			input: "api.instill.tech --oauth2 bar",
-			output: EditOptions{
+			name:  "instance add foo --oauth2 bar",
+			input: "foo --oauth2 bar",
+			output: AddOptions{
 				InstanceOptions: InstanceOptions{
-					APIHostname: "api.instill.tech",
+					APIHostname: "foo",
 					Oauth2:      "bar",
 				}},
 			isErr: false,
@@ -75,8 +75,8 @@ func TestInstancesEditCmd(t *testing.T) {
 			argv, err := shlex.Split(tt.input)
 			assert.NoError(t, err)
 
-			var gotOpts *EditOptions
-			cmd := NewEditCmd(f, func(opts *EditOptions) error {
+			var gotOpts *AddOptions
+			cmd := NewAddCmd(f, func(opts *AddOptions) error {
 				gotOpts = opts
 				return nil
 			})
@@ -100,63 +100,62 @@ func TestInstancesEditCmd(t *testing.T) {
 	}
 }
 
-func TestInstancesEditCmdRun(t *testing.T) {
+func TestInstanceAddCmdRun(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *EditOptions
+		input    *AddOptions
 		stdout   string
 		stderr   string
 		isErr    bool
 		expectFn func(*testing.T, config.Config)
 	}{
 		{
-			name: "instances edit api.instill.tech --default",
-			input: &EditOptions{
+			name: "instance add foo --default",
+			input: &AddOptions{
 				InstanceOptions: InstanceOptions{
-					APIHostname: "api.instill.tech",
+					APIHostname: "foo",
 					Default:     true,
 				},
 				Config: config.ConfigStub{},
 			},
-			stdout: "Instance 'api.instill.tech' has been saved\n",
+			stdout: "Instance 'foo' has been added\n",
 			isErr:  false,
 		},
 		{
-			name: "instances edit api.instill.tech --oauth2 bar1 --client-secret bar2 --client-id bar3",
-			input: &EditOptions{
+			name: "instance add foo --oauth2 bar1 --client-secret bar2 --client-id bar3",
+			input: &AddOptions{
 				Config: config.ConfigStub{},
 				InstanceOptions: InstanceOptions{
-					APIHostname:  "api.instill.tech",
+					APIHostname:  "foo",
 					Oauth2:       "bar1",
 					ClientSecret: "bar2",
 					ClientID:     "bar3",
 				},
 			},
 			expectFn: func(t *testing.T, cfg config.Config) {
-				v, err := cfg.Get("api.instill.tech", "oauth2_hostname")
+				v, err := cfg.Get("foo", "oauth2_hostname")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar1", v)
-				v, err = cfg.Get("api.instill.tech", "oauth2_client_secret")
+				v, err = cfg.Get("foo", "oauth2_client_secret")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar2", v)
-				v, err = cfg.Get("api.instill.tech", "oauth2_client_id")
+				v, err = cfg.Get("foo", "oauth2_client_id")
 				assert.NoError(t, err)
 				assert.Equal(t, "bar3", v)
 			},
-			stdout: "Instance 'api.instill.tech' has been saved\n",
+			stdout: "Instance 'foo' has been added\n",
 			isErr:  false,
 		},
 		{
-			name: "instances edit api.instill.tech --no-auth",
-			input: &EditOptions{
+			name: "missing oauth2 secret and client id",
+			input: &AddOptions{
 				Config: config.ConfigStub{},
 				InstanceOptions: InstanceOptions{
-					APIHostname: "api.instill.tech",
+					APIHostname: "foo",
+					Oauth2:      "bar1",
 				},
-				NoAuth: true,
 			},
-			stdout: "Instance 'api.instill.tech' has been saved\n",
-			isErr:  false,
+			isErr: true,
 		},
 	}
 
@@ -166,7 +165,7 @@ func TestInstancesEditCmdRun(t *testing.T) {
 		tt.input.IO = io
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := runEdit(tt.input)
+			err := RunAdd(tt.input)
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {

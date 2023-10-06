@@ -22,7 +22,7 @@ func Test_CheckAuth(t *testing.T) {
 		expected bool
 	}{
 		{
-			name:     "no instances",
+			name:     "no instance",
 			cfg:      func(c config.Config) {},
 			expected: false,
 		},

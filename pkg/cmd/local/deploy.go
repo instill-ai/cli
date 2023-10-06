@@ -15,7 +15,7 @@ import (
 	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
-	"github.com/instill-ai/cli/pkg/cmd/instances"
+	"github.com/instill-ai/cli/pkg/cmd/instance"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
@@ -205,23 +205,23 @@ func registerInstance(opts *DeployOptions) error {
 	if err != nil {
 		return fmt.Errorf("ERROR: saving config, %w", err)
 	}
-	exists, err := instances.IsInstanceAdded(opts.Config, "localhost:8080")
+	exists, err := instance.IsInstanceAdded(opts.Config, "localhost:8080")
 	if err != nil {
 		return err
 	}
 	if !exists {
-		addOpts := &instances.AddOptions{
+		addOpts := &instance.AddOptions{
 			IO:             opts.IO,
 			Config:         opts.Config,
 			MainExecutable: opts.MainExecutable,
 			Interactive:    false,
-			InstanceOptions: instances.InstanceOptions{
+			InstanceOptions: instance.InstanceOptions{
 				APIHostname: "localhost:8080",
 				Default:     true,
 			},
 		}
 		p(opts.IO, "")
-		err = instances.RunAdd(addOpts)
+		err = instance.RunAdd(addOpts)
 		if err != nil {
 			return err
 		}

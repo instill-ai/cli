@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"github.com/spf13/cobra"
@@ -20,9 +20,9 @@ type InstanceOptions = struct {
 
 func New(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "instances <command>",
-		Short: "Instances management",
-		Long:  `Manage instances of Instill AI, both Cloud and Core.`,
+		Use:   "instance <command>",
+		Short: "Instance management",
+		Long:  `Manage instance of Instill AI, both Cloud and Core.`,
 	}
 
 	cmdutil.DisableAuthCheck(cmd)
@@ -36,7 +36,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-// AddInstanceFlags adds common instances parameters, shared between commands.
+// AddInstanceFlags adds common instance parameters, shared between commands.
 func AddInstanceFlags(cmd *cobra.Command, opts *InstanceOptions) {
 	defs := config.DefaultHostConfig()
 	cmd.Flags().StringVarP(&opts.APIVersion, "api-version", "a", defs.APIVersion, "API version")

@@ -1,4 +1,4 @@
-package instances
+package instance
 
 import (
 	"bytes"
@@ -12,20 +12,33 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
-func TestInstancesListCmd(t *testing.T) {
+func TestInstanceRemoveCmd(t *testing.T) {
 	tests := []struct {
 		name     string
 		stdin    string
 		stdinTTY bool
 		input    string
-		output   ListOptions
+		output   RemoveOptions
 		isErr    bool
 	}{
 		{
 			name:   "no arguments",
 			input:  "",
-			output: ListOptions{},
-			isErr:  false,
+			output: RemoveOptions{},
+			isErr:  true,
+		},
+		{
+			name:  "instance remove api.instill.tech",
+			input: "api.instill.tech",
+			output: RemoveOptions{
+				APIHostname: "api.instill.tech",
+			},
+			isErr: false,
+		},
+		{
+			name:  "wrong hostname",
+			input: "foo|bar",
+			isErr: true,
 		},
 	}
 
@@ -49,7 +62,9 @@ func TestInstancesListCmd(t *testing.T) {
 			argv, err := shlex.Split(tt.input)
 			assert.NoError(t, err)
 
-			cmd := NewListCmd(f, func(opts *ListOptions) error {
+			var gotOpts *RemoveOptions
+			cmd := NewRemoveCmd(f, func(opts *RemoveOptions) error {
+				gotOpts = opts
 				return nil
 			})
 			cmd.Flags().BoolP("help", "x", false, "")
@@ -66,25 +81,27 @@ func TestInstancesListCmd(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
+			assert.Equal(t, tt.output.APIHostname, gotOpts.APIHostname)
 		})
 	}
 }
 
-func TestInstancesListCmdRun(t *testing.T) {
+func TestInstanceRemoveCmdRun(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *ListOptions
+		input    *RemoveOptions
 		stdout   string
 		stderr   string
 		isErr    bool
 		expectFn func(*testing.T, config.Config)
 	}{
 		{
-			name: "instances list",
-			input: &ListOptions{
-				Config: config.ConfigStub{},
+			name: "instance remove api.instill.tech",
+			input: &RemoveOptions{
+				APIHostname: "api.instill.tech",
+				Config:      config.ConfigStub{},
 			},
-			stdout: "\n  \n\u001B[38;5;252m\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m  DEFAULT │   API HOSTNAME   │  OAUTH2 HOSTNAME  │     OAUTH2 AUDIENCE      │       OAUTH2 ISSUER        │ API VERSION  \u001B[0m\n\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m──────────┼──────────────────┼───────────────────┼──────────────────────────┼────────────────────────────┼──────────────\u001B[0m\n\u001B[0m\u001B[38;5;252m\u001B[0m  \u001B[38;5;252m  *       │ api.instill.tech │ auth.instill.tech │ https://api.instill.tech │ https://auth.instill.tech/ │ v1alpha      \u001B[0m\n\u001B[0m\n",
+			stdout: "Instance 'api.instill.tech' has been removed\n",
 			isErr:  false,
 		},
 	}
@@ -95,7 +112,7 @@ func TestInstancesListCmdRun(t *testing.T) {
 		tt.input.IO = io
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := runList(tt.input)
+			err := RunRemove(tt.input)
 			if tt.isErr {
 				assert.Error(t, err)
 			} else {
