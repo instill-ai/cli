@@ -98,7 +98,7 @@ func NewHTTPClient(io *iostreams.IOStreams, cfg configHTTPClient, appVersion str
 		api.AddHeaderFunc("Authorization", func(req *http.Request) (string, error) {
 			hostname := getHost(req)
 			if accessToken, err := cfg.Get(hostname, "access_token"); err == nil && accessToken != "" {
-				// Refresh access token everytime
+				// Refresh access token every time
 				if accessToken, err = oauth2.RefreshToken(cfg, hostname); err == nil && accessToken != "" {
 					return fmt.Sprintf("bearer %s", accessToken), nil
 				}

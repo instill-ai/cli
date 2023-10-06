@@ -1,2 +1,0 @@
-ignore:
-  - "internal/config/stub.go"
