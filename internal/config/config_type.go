@@ -61,6 +61,11 @@ var configOptions = []ConfigOption{
 		Description:  "the web browser to use for opening URLs",
 		DefaultValue: "",
 	},
+	{
+		Key:          "default_hostname",
+		Description:  "the default hostname to use for commands that require a hostname",
+		DefaultValue: "",
+	},
 }
 
 func ConfigOptions() []ConfigOption {
@@ -185,6 +190,15 @@ func NewBlankRoot() *yaml.Node {
 						HeadComment: "What web browser inst should use when opening URLs. If blank, will refer to environment.",
 						Kind:        yaml.ScalarNode,
 						Value:       "browser",
+					},
+					{
+						Kind:  yaml.ScalarNode,
+						Value: "",
+					},
+					{
+						HeadComment: "The default hostname to use for commands that require a hostname, e.g. inst instance list.",
+						Kind:        yaml.ScalarNode,
+						Value:       "default_hostname",
 					},
 					{
 						Kind:  yaml.ScalarNode,

@@ -51,6 +51,8 @@ func Test_defaultConfig(t *testing.T) {
 		http_unix_socket:
 		# What web browser inst should use when opening URLs. If blank, will refer to environment.
 		browser:
+		# The default hostname to use for commands that require a hostname, e.g. inst instance list.
+		default_hostname:
 	`)
 	assert.Equal(t, expected, mainBuf.String())
 	assert.Equal(t, "", hostsBuf.String())
