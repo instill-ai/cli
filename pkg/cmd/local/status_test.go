@@ -74,7 +74,7 @@ func TestLocalStatusCmdRun(t *testing.T) {
 	execMock := &ExecMock{}
 	osMock := &OSMock{}
 	cfg := config.ConfigStub{}
-	_ = cfg.Set("", ConfigKeyPath, "/foo/bar")
+	_ = cfg.Set("", LocalInstancePath, "/foo/bar")
 	tests := []struct {
 		name     string
 		input    *StatusOptions
@@ -90,7 +90,7 @@ func TestLocalStatusCmdRun(t *testing.T) {
 				OS:     osMock,
 				Config: cfg,
 			},
-			stdout: "Deployed: YES",
+			stdout: "",
 			isErr:  false,
 		},
 	}

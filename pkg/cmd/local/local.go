@@ -2,18 +2,22 @@ package local
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
-	"regexp"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
 
+	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
+	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
+
+var projs = [3]string{"base", "vdp", "model"}
 
 // ExecDep is an interface for executing commands
 type ExecDep interface {
@@ -27,7 +31,8 @@ type OSDep interface {
 	Stat(name string) (os.FileInfo, error)
 }
 
-var gitDescribeSuffixRE = regexp.MustCompile(`\d+-\d+-g[a-f0-9]{8}$`)
+// LocalInstancePath is the path to keep files for local instance deployment
+var LocalInstancePath string
 
 // releaseInfo stores information about a release
 type releaseInfo struct {
@@ -36,32 +41,12 @@ type releaseInfo struct {
 	PublishedAt time.Time `json:"published_at"`
 }
 
-type StateEntry struct {
+type stateEntry struct {
 	CheckedForUpdateAt time.Time   `yaml:"checked_for_update_at"`
 	LatestRelease      releaseInfo `yaml:"latest_release"`
 }
 
-const (
-	// ConfigKeyPath is the config key for the local instance path where Instill Core is installed
-	ConfigKeyPath = "local-instance-path"
-)
-
-var projs = [3]string{"Base", "VDP", "Model"}
-
-var logger *slog.Logger
 var p = cmdutil.P
-
-func init() {
-	var lvl = new(slog.LevelVar)
-	if os.Getenv("DEBUG") != "" {
-		lvl.Set(slog.LevelDebug)
-	} else {
-		lvl.Set(slog.LevelError + 1)
-	}
-	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: lvl,
-	}))
-}
 
 // New creates a new command
 func New(f *cmdutil.Factory) *cobra.Command {
@@ -69,6 +54,44 @@ func New(f *cmdutil.Factory) *cobra.Command {
 		Use:   "local <command>",
 		Short: "Local Instill Core instance",
 		Long:  `Create and manage a local Instill Core instance with ease.`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			d, err := os.UserHomeDir()
+			if err != nil {
+				return err
+			}
+
+			LocalInstancePath = filepath.Join(d, ".local", "instill")
+
+			// check for update
+			if cmd.Flags().Lookup("upgrade") == nil || (cmd.Flags().Lookup("upgrade") != nil && !cmd.Flags().Lookup("upgrade").Changed) {
+				for _, proj := range projs {
+					projDirPath := filepath.Join(LocalInstancePath, proj)
+					_, err = os.Stat(projDirPath)
+					if !os.IsNotExist(err) {
+						if err = os.Chdir(projDirPath); err != nil {
+							return err
+						}
+						if currentVersion, err := execCmd(nil, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
+							currentVersion = strings.Trim(currentVersion, "\n")
+							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), fmt.Sprintf("%s.yml", proj)), fmt.Sprintf("instill-ai/%s", proj), currentVersion); err != nil {
+								return fmt.Errorf("ERROR: cannot check for update %s, %w:\n%s", proj, err, currentVersion)
+							} else if newRelease != nil {
+								cmdFactory := factory.New(build.Version)
+								stderr := cmdFactory.IOStreams.ErrOut
+								fmt.Fprintf(stderr, "\n%s %s → %s\n",
+									ansi.Color(fmt.Sprintf("A new release of Instill %s is available:", proj), "yellow"),
+									ansi.Color(currentVersion, "cyan"),
+									ansi.Color(newRelease.Version, "cyan"))
+								fmt.Fprintf(stderr, "%s\n\n",
+									ansi.Color("Run 'inst local deploy --upgrade' to deploy the latest version", "yellow"))
+							}
+						}
+					}
+				}
+			}
+
+			return nil
+		},
 	}
 
 	cmdutil.DisableAuthCheck(cmd)
@@ -92,16 +115,4 @@ func execCmd(execDep ExecDep, cmd string, params ...string) (string, error) {
 	out, err := c.Output()
 	outStr := strings.Trim(string(out[:]), " ")
 	return outStr, err
-}
-
-// getConfigPath returns a configured path to the local instance.
-func getConfigPath(cfg config.Config) (string, error) {
-	path, err := cfg.Get("", ConfigKeyPath)
-	if err != nil {
-		return "", err
-	}
-	if path == "" {
-		return "", fmt.Errorf("config %s is empty", ConfigKeyPath)
-	}
-	return path, nil
 }

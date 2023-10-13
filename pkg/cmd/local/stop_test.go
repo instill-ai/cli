@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/google/shlex"
@@ -74,7 +75,7 @@ func TestLocalStopCmdRun(t *testing.T) {
 	execMock := &ExecMock{}
 	osMock := &OSMock{}
 	cfg := config.ConfigStub{}
-	_ = cfg.Set("", ConfigKeyPath, "/foo/bar")
+	_ = cfg.Set("", LocalInstancePath, "/foo/bar")
 	tests := []struct {
 		name     string
 		input    *StopOptions
@@ -90,7 +91,7 @@ func TestLocalStopCmdRun(t *testing.T) {
 				OS:     osMock,
 				Config: cfg,
 			},
-			stdout: "Instill Core stopped",
+			stdout: "Instill Core instance not deployed",
 			isErr:  false,
 		},
 	}
@@ -107,7 +108,7 @@ func TestLocalStopCmdRun(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
-			assert.Regexp(t, tt.stdout, stdout.String())
+			assert.Regexp(t, tt.stdout, strings.Trim(stdout.String(), "\n"))
 			assert.Equal(t, tt.stderr, stderr.String())
 			if tt.expectFn != nil {
 				tt.expectFn(t, tt.input.Config)

@@ -2,6 +2,7 @@ package local
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -12,6 +13,7 @@ import (
 	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
+// StatusOptions contains the command line options
 type StatusOptions struct {
 	IO             *iostreams.IOStreams
 	Exec           ExecDep
@@ -19,9 +21,9 @@ type StatusOptions struct {
 	Config         config.Config
 	MainExecutable string
 	Interactive    bool
-	Verbose        bool
 }
 
+// NewStatusCmd creates a new command
 func NewStatusCmd(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Command {
 	opts := &StatusOptions{
 		IO: f.IOStreams,
@@ -59,7 +61,6 @@ func NewStatusCmd(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Co
 			return runStatus(opts)
 		},
 	}
-	cmd.Flags().BoolVar(&opts.Verbose, "verbose", false, "Show verbose output")
 
 	return cmd
 }
@@ -67,105 +68,72 @@ func NewStatusCmd(f *cmdutil.Factory, runF func(*StatusOptions) error) *cobra.Co
 // TODO separate health statuses per API
 func runStatus(opts *StatusOptions) error {
 
-	deployed := "NO"
-	started := "NO"
-	healthy := "NO"
-	if err := isDeployed(opts.Exec); err == nil {
-		deployed = "YES"
-	}
-	if err := isStarted(opts.Exec); err == nil {
-		started = "YES"
-	}
-	errHealthy := isHealthy(opts.Exec)
-	if errHealthy == nil {
-		healthy = "YES"
-	}
-
-	p(opts.IO, `
-		Status of the local Instill Core instance:
-
-		Deployed: %s
-		Started: %s
-		Healthy: %s
-	`, deployed, started, healthy)
-
-	if opts.Verbose && errHealthy != nil {
+	if _, err := os.Stat(LocalInstancePath); os.IsNotExist(err) {
 		p(opts.IO, "")
-		p(opts.IO, "Error:\n%s", errHealthy)
-	}
-
-	return nil
-}
-
-// isDeployed returns no errors if an local instance is detected
-func isDeployed(execDep ExecDep) error {
-
-	var checkList = make([]bool, len(projs))
-	for i := range checkList {
-		proj := strings.ToLower(projs[i])
-		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err == nil {
-			checkList[i] = true
-		}
-	}
-
-	suiteCheck := 0
-	for i := range checkList {
-		if checkList[i] {
-			suiteCheck++
-		}
-	}
-
-	if suiteCheck == len(checkList) {
+		p(opts.IO, "Instill Core instance not deployed")
 		return nil
 	}
 
-	return fmt.Errorf("No local Instill Core deployment detected")
-}
-
-// isStarted returns no errors if an instance is running.
-func isStarted(execDep ExecDep) error {
-
-	if err := isDeployed(execDep); err != nil {
-		return err
-	}
-
-	for i := range projs {
-		proj := strings.ToLower(projs[i])
-		if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a --format json --filter name=instill-%s | grep running", proj)); err != nil {
-			return fmt.Errorf("%s is not running", projs[i])
+	for _, proj := range projs {
+		deployed := "NO"
+		started := "NO"
+		healthy := "NO"
+		if err := isProjectDeployed(opts.Exec, proj); err == nil {
+			deployed = "YES"
 		}
+		if err := isProjectStarted(opts.Exec, proj); err == nil {
+			started = "YES"
+		}
+		if err := isProjectHealthy(opts.Exec, proj); err == nil {
+			healthy = "YES"
+		}
+		fmt.Printf("%5s - Deployed: %s | Started: %s | Healthy: %s\n", proj, deployed, started, healthy)
 	}
 
 	return nil
 }
 
-// isHealthy returns no error if an instance in `path` is responding.
-// TODO assert responses
-func isHealthy(execDep ExecDep) error {
-	if err := isDeployed(execDep); err != nil {
+func isProjectDeployed(execDep ExecDep, proj string) error {
+	if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err != nil {
 		return err
 	}
-	if err := isStarted(execDep); err != nil {
+	return nil
+}
+
+func isProjectStarted(execDep ExecDep, proj string) error {
+	if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a --format json --filter name=instill-%s | grep running", proj)); err != nil {
 		return err
 	}
-	urls := []string{
-		":8080/base/v1alpha/health/mgmt",
-		":8080/vdp/v1alpha/health/pipeline",
-		":8080/vdp/v1alpha/health/connector",
-		":8080/model/v1alpha/health/model",
-		":3000/",
+	return nil
+}
+
+func isProjectHealthy(execDep ExecDep, proj string) error {
+
+	var urls []string
+
+	switch proj {
+	case "base":
+		urls = []string{
+			"localhost:8080/base/v1alpha/health/mgmt",
+		}
+	case "vdp":
+		urls = []string{
+			"localhost:8080/vdp/v1alpha/health/pipeline",
+			"localhost:8080/vdp/v1alpha/health/connector",
+		}
+	case "model":
+		urls = []string{
+			"localhost:8080/model/v1alpha/health/model",
+		}
 	}
+
 	for _, url := range urls {
-		u := fmt.Sprintf("localhost%s", url)
-		out, err := execCmd(execDep, "curl", u)
-		logger.Debug("IsHealthy", "url", u, "out", out)
-		if err != nil {
-			logger.Error("IsHealthy", "url", u, "err", err.Error())
+		if out, err := execCmd(execDep, "curl", url); err != nil {
 			return err
-		}
-		if out == "" {
-			return fmt.Errorf("cant reach %s", u)
+		} else if !strings.Contains(out, "SERVING_STATUS_SERVING") {
+			return fmt.Errorf("ERROR: %s is not healthy", url)
 		}
 	}
+
 	return nil
 }

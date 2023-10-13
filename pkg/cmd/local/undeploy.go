@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -61,45 +60,45 @@ func NewUndeployCmd(f *cmdutil.Factory, runF func(*UndeployOptions) error) *cobr
 }
 
 func runUndeploy(opts *UndeployOptions) error {
-
-	path, err := getConfigPath(opts.Config)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
-	}
-
-	if err := isDeployed(opts.Exec); err != nil {
-		return fmt.Errorf("ERROR: %w", err)
-	}
-
-	for i := range projs {
-		proj := strings.ToLower(projs[i])
-		if opts.OS != nil {
-			err = opts.OS.Chdir(filepath.Join(path, proj))
-		} else {
-			err = os.Chdir(filepath.Join(path, proj))
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: can't open the destination, %w", err)
-		}
-		p(opts.IO, fmt.Sprintf("Tearing down Instill %s...", projs[i]))
-		out, err := execCmd(opts.Exec, "make", "down")
-		if err != nil {
-			return fmt.Errorf("ERROR: when tearing down, %w", err)
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: %s when tearing down, %w\n%s", projs[i], err, out)
+	var err error
+	for _, proj := range projs {
+		projDirPath := filepath.Join(LocalInstancePath, proj)
+		_, err = os.Stat(projDirPath)
+		if !os.IsNotExist(err) {
+			if opts.OS != nil {
+				err = opts.OS.Chdir(projDirPath)
+			} else {
+				err = os.Chdir(projDirPath)
+			}
+			if err != nil {
+				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+			}
+			p(opts.IO, fmt.Sprintf("Tearing down %s...", proj))
+			_, err = os.Stat(filepath.Join(projDirPath, "Makefile"))
+			if !os.IsNotExist(err) {
+				out, err := execCmd(opts.Exec, "bash", "-c", "make down")
+				if err != nil {
+					return fmt.Errorf("ERROR: %s when tearing down, %w\n%s", proj, err, out)
+				}
+			}
 		}
 	}
 
-	p(opts.IO, "Remove local Instill Core files in: %s", path)
-	os.RemoveAll(path)
+	_, err = os.Stat(LocalInstancePath)
+	if os.IsNotExist(err) {
+		p(opts.IO, "")
+		p(opts.IO, "Instill Core instance not deployed")
+	} else {
+		if os.RemoveAll(LocalInstancePath); err != nil {
+			return fmt.Errorf("ERROR: cannot remove %s, %w", LocalInstancePath, err)
+		}
+		p(opts.IO, "")
+		p(opts.IO, "Instill Core instance undeployed successfully!")
+	}
 
 	if err := unregisterInstance(opts); err != nil {
 		return err
 	}
-
-	p(opts.IO, "")
-	p(opts.IO, "Instill Core undeployed")
 
 	return nil
 }

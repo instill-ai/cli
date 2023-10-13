@@ -3,8 +3,6 @@ package local
 import (
 	"bytes"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/shlex"
@@ -16,11 +14,7 @@ import (
 )
 
 func TestLocalDeployCmd(t *testing.T) {
-	d, err := os.UserHomeDir()
-	if err != nil {
-		logger.Error("Couldn't get home directory", err)
-	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
+
 	tests := []struct {
 		name     string
 		stdin    string
@@ -30,12 +24,10 @@ func TestLocalDeployCmd(t *testing.T) {
 		isErr    bool
 	}{
 		{
-			name:  "no arguments",
-			input: "",
-			output: DeployOptions{
-				Path: dir,
-			},
-			isErr: false,
+			name:   "no arguments",
+			input:  "",
+			output: DeployOptions{},
+			isErr:  false,
 		},
 	}
 
@@ -59,9 +51,7 @@ func TestLocalDeployCmd(t *testing.T) {
 			argv, err := shlex.Split(tt.input)
 			assert.NoError(t, err)
 
-			var gotOpts *DeployOptions
 			cmd := NewDeployCmd(f, func(opts *DeployOptions) error {
-				gotOpts = opts
 				return nil
 			})
 			cmd.Flags().BoolP("help", "x", false, "")
@@ -78,7 +68,6 @@ func TestLocalDeployCmd(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, tt.output.Path, gotOpts.Path)
 		})
 	}
 }
@@ -90,11 +79,6 @@ func checkForUpdateMock(ExecDep, string, string, string) (*releaseInfo, error) {
 func TestLocalDeployCmdRun(t *testing.T) {
 	execMock := &ExecMock{}
 	osMock := &OSMock{}
-	d, err := os.UserHomeDir()
-	if err != nil {
-		logger.Error("Couldn't get home directory", err)
-	}
-	dir := filepath.Join(d, ".local", "instill") + string(os.PathSeparator)
 	tests := []struct {
 		name     string
 		input    *DeployOptions
@@ -106,12 +90,11 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:           dir,
 				Exec:           execMock,
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ed ExecDep) error {
+				isDeployed: func(ExecDep, string) error {
 					return nil
 				},
 			},
@@ -121,12 +104,11 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:           dir,
 				Exec:           execMock,
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ed ExecDep) error {
+				isDeployed: func(ExecDep, string) error {
 					return fmt.Errorf("")
 				},
 			},
@@ -136,28 +118,12 @@ func TestLocalDeployCmdRun(t *testing.T) {
 		{
 			name: "local deploy",
 			input: &DeployOptions{
-				Path:           dir,
 				Exec:           execMock,
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ed ExecDep) error {
+				isDeployed: func(ExecDep, string) error {
 					return nil
-				},
-			},
-			stdout: "",
-			isErr:  false,
-		},
-		{
-			name: "local deploy",
-			input: &DeployOptions{
-				Path:           "a/path/does/not/exist",
-				Exec:           execMock,
-				OS:             osMock,
-				Config:         config.ConfigStub{},
-				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ed ExecDep) error {
-					return fmt.Errorf("")
 				},
 			},
 			stdout: "",

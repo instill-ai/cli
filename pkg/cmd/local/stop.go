@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -61,31 +60,33 @@ func NewStopCmd(f *cmdutil.Factory, runF func(*StopOptions) error) *cobra.Comman
 
 func runStop(opts *StopOptions) error {
 
-	path, err := getConfigPath(opts.Config)
-	if err != nil {
-		return fmt.Errorf("ERROR: %w", err)
-	}
-	if err := isDeployed(opts.Exec); err != nil {
-		return fmt.Errorf("ERROR: %w", err)
+	if _, err := os.Stat(LocalInstancePath); os.IsNotExist(err) {
+		p(opts.IO, "")
+		p(opts.IO, "Instill Core instance not deployed")
+		return nil
 	}
 
-	for i := range projs {
-		proj := strings.ToLower(projs[i])
-		if opts.OS != nil {
-			err = opts.OS.Chdir(filepath.Join(path, proj))
+	for _, proj := range projs {
+		projDirPath := filepath.Join(LocalInstancePath, proj)
+		if err := isProjectDeployed(opts.Exec, proj); err == nil {
+			if opts.OS != nil {
+				err = opts.OS.Chdir(projDirPath)
+			} else {
+				err = os.Chdir(projDirPath)
+			}
+			if err != nil {
+				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+			}
+			p(opts.IO, fmt.Sprintf("Stopping %s...", proj))
+			out, err := execCmd(opts.Exec, "make", "stop")
+			if err != nil {
+				return fmt.Errorf("ERROR: when stopping, %w", err)
+			}
+			if err != nil {
+				return fmt.Errorf("ERROR: %s when stopping, %w\n%s", proj, err, out)
+			}
 		} else {
-			err = os.Chdir(filepath.Join(path, proj))
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: can't open the destination, %w", err)
-		}
-		p(opts.IO, fmt.Sprintf("Stopping %s...", projs[i]))
-		out, err := execCmd(opts.Exec, "make", "stop")
-		if err != nil {
-			return fmt.Errorf("ERROR: when stopping, %w", err)
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: %s when stopping, %w\n%s", projs[i], err, out)
+			return fmt.Errorf("ERROR: %w", err)
 		}
 	}
 
