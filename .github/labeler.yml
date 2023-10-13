@@ -1,2 +1,2 @@
-instill base:
+instill cli:
   - "**"

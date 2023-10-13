@@ -11,7 +11,7 @@ env:
 before:
   hooks:
     # You may remove this if you don't use go modules.
-    - go mod tidy
+    - go mod download
 
 builds:
   - <<: &build_defaults
@@ -62,7 +62,6 @@ snapshot:
   name_template: "{{ incpatch .Version }}-next"
 
 changelog:
-  use: github
   sort: asc
   groups:
     - title: Features
@@ -71,9 +70,11 @@ changelog:
     - title: "Bug fixes"
       regexp: "^.*fix[(\\w)]*:+.*$"
       order: 1
+    - title: Others
+      order: 999
 
 brews:
-  - tap:
+  - repository:
       owner: instill-ai
       name: homebrew-tap
     description: Instill AI's command-line tool
