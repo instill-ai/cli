@@ -39,7 +39,7 @@ func NewEditCmd(f *cmdutil.Factory, runF func(*EditOptions) error) *cobra.Comman
 		},
 		Short: "Edit an existing instance",
 		Long: heredoc.Docf(`
-			Edit an existing Instill AI instance, either Cloud or Core.
+			Edit an existing Instill Core/Cloud instance.
 		`),
 		Example: heredoc.Doc(`
 			# update the issuer for api.instill.tech

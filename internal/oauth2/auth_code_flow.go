@@ -32,7 +32,7 @@ var (
 	clientSecret = ""
 )
 
-// HostConfigInstillCloud return a host config for the main Instill AI Cloud server.
+// HostConfigInstillCloud return a host config for the main Instill Cloud server.
 func HostConfigInstillCloud() *config.HostConfigTyped {
 
 	host := config.DefaultHostConfig()

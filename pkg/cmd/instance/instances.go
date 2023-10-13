@@ -22,7 +22,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "instance <command>",
 		Short: "Instance management",
-		Long:  `Manage instance of Instill AI, both Cloud and Core.`,
+		Long:  `Manage instance of Instill Core/Cloud.`,
 	}
 
 	cmdutil.DisableAuthCheck(cmd)

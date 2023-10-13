@@ -38,7 +38,7 @@ func NewRemoveCmd(f *cmdutil.Factory, runF func(*RemoveOptions) error) *cobra.Co
 		},
 		Short: "Remove an existing instance",
 		Long: heredoc.Docf(`
-			Remove an existing Instill AI instance, either Cloud or Core.
+			Remove an existing Instill Core/Cloud instance.
 		`),
 		Example: heredoc.Doc(`
 			# remove the local instance instance

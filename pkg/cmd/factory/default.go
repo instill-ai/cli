@@ -120,7 +120,7 @@ func configFunc() func() (config.Config, error) {
 	return func() (config.Config, error) {
 		if cachedConfig != nil || err != nil {
 			if err != nil {
-				fmt.Printf("ERROR: cant read the config\n%s", err)
+				fmt.Printf("ERROR: cannot read the config\n%s", err)
 			}
 			return cachedConfig, err
 		}

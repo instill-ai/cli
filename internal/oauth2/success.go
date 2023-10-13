@@ -128,7 +128,7 @@ const oauthSuccessPage = `
             <h1 class="title">Login Success</h1>
             <p class="text">
               Signed in via your OIDC provider. You can now close the window and
-              start using Instill AI.
+              start using Instill CLI.
             </p>
           </div>
         </div>

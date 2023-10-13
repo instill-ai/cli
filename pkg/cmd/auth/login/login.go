@@ -23,6 +23,7 @@ import (
 	"github.com/instill-ai/cli/pkg/prompt"
 )
 
+// LoginOptions contains the command line options
 type LoginOptions struct {
 	IO             *iostreams.IOStreams
 	Config         func() (config.Config, error)
@@ -31,6 +32,7 @@ type LoginOptions struct {
 	Hostname       string
 }
 
+// NewCmdLogin creates a new command
 func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Command {
 	opts := &LoginOptions{
 		IO:     f.IOStreams,
@@ -40,14 +42,14 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 	cmd := &cobra.Command{
 		Use:   "login",
 		Args:  cobra.ExactArgs(0),
-		Short: "Authenticate with an Instill host",
+		Short: "Authenticate with an Instill Core/Cloud host",
 		Long: heredoc.Docf(`
-			Authenticate with an Instill host.
+			Authenticate with an Instill Core/Cloud host.
 
 			The default authentication mode is an authorization code flow.
 		`),
 		Example: heredoc.Doc(`
-			# start login
+			# login to the default host
 			$ inst auth login
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -68,7 +70,7 @@ func NewCmdLogin(f *cmdutil.Factory, runF func(*LoginOptions) error) *cobra.Comm
 	// TODO handle err
 	cfg, _ := opts.Config()
 
-	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", cfg.DefaultHostname(), "Hostname of an already added Instill AI instance")
+	cmd.Flags().StringVarP(&opts.Hostname, "hostname", "h", cfg.DefaultHostname(), "Hostname of an already added Instill Core/Cloud instance")
 
 	return cmd
 }

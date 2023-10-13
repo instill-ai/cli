@@ -38,7 +38,7 @@ func NewAddCmd(f *cmdutil.Factory, runF func(*AddOptions) error) *cobra.Command 
 		},
 		Short: "Add a new instance",
 		Long: heredoc.Docf(`
-			Add a new Instill AI instance, either Cloud or Core.
+			Add a new Instill Core/Cloud instance.
 		`),
 		Example: heredoc.Doc(`
 			# add a local instance as the default one

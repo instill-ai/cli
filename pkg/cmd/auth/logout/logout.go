@@ -28,8 +28,8 @@ func NewCmdLogout(f *cmdutil.Factory, runF func(*LogoutOptions) error) *cobra.Co
 	cmd := &cobra.Command{
 		Use:   "logout",
 		Args:  cobra.ExactArgs(0),
-		Short: "Log out of an Instill Core or Instill Cloud instance",
-		Long: heredoc.Doc(`Remove authentication for a Instill host.
+		Short: "Log out of an Instill Core/Cloud host",
+		Long: heredoc.Doc(`Remove authentication for an Instill Core/Cloud host.
 
 			This command removes the authentication configuration for a host either specified
 			interactively or via --hostname.
