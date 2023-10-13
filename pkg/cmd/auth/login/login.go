@@ -12,11 +12,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
-	"github.com/instill-ai/cli/internal/build"
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/internal/instance"
 	"github.com/instill-ai/cli/internal/oauth2"
-	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmd/local"
 	"github.com/instill-ai/cli/pkg/cmdutil"
 	"github.com/instill-ai/cli/pkg/iostreams"
@@ -93,34 +91,21 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 		if err != nil {
 			return err
 		}
-
-		cmdFactory := factory.New(build.Version)
-		stderr := cmdFactory.IOStreams.ErrOut
-		cs := cmdFactory.IOStreams.ColorScheme()
-
-		fmt.Fprintln(stderr, cs.Bold("No hosts.yml config, creating one with the default host \"api.instill.tech\"..."))
-		fmt.Fprintln(stderr, config.HostsConfigFile())
-		fmt.Fprintln(stderr, "")
 	} else {
-
 		hostname := opts.Hostname
-
 		hosts, err := cfg.HostsTyped()
 		if err != nil {
 			return err
 		}
-
 		for _, h := range hosts {
 			if h.APIHostname == hostname {
 				host = &h
 				break
 			}
 		}
-
 		if host == nil {
 			return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
 		}
-
 	}
 
 	// TODO INS-1659 drop in favor of OAuth2
