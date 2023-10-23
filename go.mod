@@ -37,6 +37,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/cheggaaa/pb v1.0.29 // indirect
+
 require (
 	github.com/alecthomas/chroma/v2 v2.9.1 // indirect
 	github.com/avast/retry-go/v4 v4.3.0 // indirect
