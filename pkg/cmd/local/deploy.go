@@ -256,7 +256,7 @@ func runDeploy(opts *DeployOptions) error {
 			User:     %s
 			Password: %s
 
-			After changing your password, run "$ inst auth login" with your new password.
+			After changing your password, run "inst auth login" with your new password.
 
 			Deployed in %.0fs to %s
 			`,

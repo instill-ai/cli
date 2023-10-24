@@ -78,7 +78,7 @@ func runUndeploy(opts *UndeployOptions) error {
 			if !os.IsNotExist(err) {
 				out, err := execCmd(opts.Exec, "bash", "-c", "make down")
 				if err != nil {
-					return fmt.Errorf("ERROR: %s when tearing down, %w\n%s", proj, err, out)
+					fmt.Println(fmt.Errorf("ERROR: when tearing down %s, %w\n%s, continue to tear down", proj, err, out))
 				}
 			}
 		}
