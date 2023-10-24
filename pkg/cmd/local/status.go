@@ -112,9 +112,9 @@ func isProjectHealthy(execDep ExecDep, proj string) error {
 	var urls []string
 
 	switch proj {
-	case "base":
+	case "core":
 		urls = []string{
-			"localhost:8080/base/v1alpha/health/mgmt",
+			"localhost:8080/core/v1alpha/health/mgmt",
 		}
 	case "vdp":
 		urls = []string{

@@ -17,7 +17,7 @@ import (
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
-var projs = [3]string{"base", "vdp", "model"}
+var projs = [3]string{"core", "vdp", "model"}
 
 // ExecDep is an interface for executing commands
 type ExecDep interface {
