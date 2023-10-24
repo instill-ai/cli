@@ -86,7 +86,10 @@ func RunRemove(opts *RemoveOptions) error {
 		return fmt.Errorf("ERROR: instance '%s' does not exists", apiHost)
 	}
 
-	opts.Config.UnsetHost(opts.APIHostname)
+	err = opts.Config.UnsetHost(opts.APIHostname)
+	if err != nil {
+		return fmt.Errorf("error unset hostname '%s' - %w", opts.APIHostname, err)
+	}
 	err = opts.Config.Write()
 	if err != nil {
 		return fmt.Errorf("error removing hostname '%s' - %w", opts.APIHostname, err)

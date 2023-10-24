@@ -123,7 +123,11 @@ func logoutRun(opts *LogoutOptions) error {
 	}
 
 	// TODO invalidate the token instead of removing the whole instance
-	cfg.UnsetHost(hostname)
+	err = cfg.UnsetHost(hostname)
+	if err != nil {
+		return fmt.Errorf("error unset hostname '%s' - %w", hostname, err)
+	}
+
 	err = cfg.Write()
 	if err != nil {
 		return fmt.Errorf("failed to write config, authentication configuration not updated: %w", err)

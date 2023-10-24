@@ -36,8 +36,8 @@ func (c ConfigStub) Hosts() ([]string, error) {
 	return nil, nil
 }
 
-func (c ConfigStub) UnsetHost(hostname string) {
-	// TODO
+func (c ConfigStub) UnsetHost(hostname string) error {
+	return nil
 }
 
 func (c ConfigStub) CheckWriteable(host, key string) error {
