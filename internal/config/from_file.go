@@ -89,18 +89,31 @@ func (c *fileConfig) Set(hostname, key, value string) error {
 	}
 }
 
-func (c *fileConfig) UnsetHost(hostname string) {
+func (c *fileConfig) UnsetHost(hostname string) error {
+
 	if hostname == "" {
-		return
+		return nil
 	}
 
 	hostsEntry, err := c.FindEntry("hosts")
 	if err != nil {
-		return
+		return err
 	}
 
 	cm := ConfigMap{hostsEntry.ValueNode}
 	cm.RemoveEntry(hostname)
+
+	_, err = c.hostEntries()
+	if strings.Contains(err.Error(), "could not find any host configurations") {
+		// no hosts, fallback to the default hostname
+		defaultHost := instance.FallbackHostname()
+		err = c.Set("", "default_hostname", defaultHost)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (c *fileConfig) ConfigForHost(hostname string) (*HostConfig, error) {

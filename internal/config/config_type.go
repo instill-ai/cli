@@ -11,7 +11,7 @@ type Config interface {
 	Get(string, string) (string, error)
 	GetWithSource(string, string) (string, string, error)
 	Set(string, string, string) error
-	UnsetHost(string)
+	UnsetHost(string) error
 	Hosts() ([]string, error)
 	HostsTyped() ([]HostConfigTyped, error)
 	DefaultHostname() string
