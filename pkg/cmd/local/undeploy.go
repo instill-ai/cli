@@ -61,25 +61,22 @@ func NewUndeployCmd(f *cmdutil.Factory, runF func(*UndeployOptions) error) *cobr
 
 func runUndeploy(opts *UndeployOptions) error {
 	var err error
-	for _, proj := range projs {
-		projDirPath := filepath.Join(LocalInstancePath, proj)
-		_, err = os.Stat(projDirPath)
+	projDirPath := filepath.Join(LocalInstancePath, "core")
+	_, err = os.Stat(projDirPath)
+	if !os.IsNotExist(err) {
+		if opts.OS != nil {
+			err = opts.OS.Chdir(projDirPath)
+		} else {
+			err = os.Chdir(projDirPath)
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+		}
+		p(opts.IO, "Tearing down Instill Core...")
+		_, err = os.Stat(filepath.Join(projDirPath, "Makefile"))
 		if !os.IsNotExist(err) {
-			if opts.OS != nil {
-				err = opts.OS.Chdir(projDirPath)
-			} else {
-				err = os.Chdir(projDirPath)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
-			}
-			p(opts.IO, fmt.Sprintf("Tearing down %s...", proj))
-			_, err = os.Stat(filepath.Join(projDirPath, "Makefile"))
-			if !os.IsNotExist(err) {
-				out, err := execCmd(opts.Exec, "bash", "-c", "make down")
-				if err != nil {
-					fmt.Println(fmt.Errorf("ERROR: when tearing down %s, %w\n%s, continue to tear down", proj, err, out))
-				}
+			if out, err := execCmd(opts.Exec, "bash", "-c", "make down"); err != nil {
+				fmt.Println(fmt.Errorf("ERROR: when tearing down Instill Core, %w\n%s, continue to tear down", err, out))
 			}
 		}
 	}

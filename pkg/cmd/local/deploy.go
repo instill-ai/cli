@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,6 +36,8 @@ type DeployOptions struct {
 	Interactive    bool
 	Force          bool
 	Upgrade        bool
+	Latest         bool
+	Build          bool
 	checkForUpdate func(ExecDep, string, string, string) (*releaseInfo, error)
 	isDeployed     func(ExecDep, string) error
 }
@@ -74,8 +77,11 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 	}
 
 	cmd.Flags().BoolVarP(&opts.Force, "force", "f", false, "Force to deploy a new local Instill Core instance")
-	cmd.Flags().BoolVarP(&opts.Upgrade, "upgrade", "u", false, "Upgrade Instill Core instance to the latest version")
+	cmd.Flags().BoolVarP(&opts.Upgrade, "upgrade", "u", false, "Upgrade Instill Core instance to the latest release version")
+	cmd.Flags().BoolVarP(&opts.Latest, "latest", "l", false, "Deploy an Instill Core instance with the latest version (unstable)")
+	cmd.Flags().BoolVarP(&opts.Build, "build", "b", false, "Deploy an Instill Core instance and build the images at the local")
 	cmd.MarkFlagsMutuallyExclusive("force", "upgrade")
+	cmd.MarkFlagsMutuallyExclusive("upgrade", "latest")
 
 	return cmd
 }
@@ -99,29 +105,82 @@ func runDeploy(opts *DeployOptions) error {
 	}
 
 	// download the latest version of the projects, if local repos are not present
-	for _, proj := range projs {
-		projDirPath := filepath.Join(LocalInstancePath, proj)
-		_, err = os.Stat(projDirPath)
-		if os.IsNotExist(err) {
-			if latestVersion, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/instill-ai/%s/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'", proj)); err == nil {
-				latestVersion = strings.Trim(latestVersion, "\n")
+	projDirPath := filepath.Join(LocalInstancePath, "core")
+	_, err = os.Stat(projDirPath)
+	if os.IsNotExist(err) {
+		if opts.Latest {
+			if out, err := execCmd(opts.Exec, "bash", "-c",
+				fmt.Sprintf("git clone --depth 1 https://github.com/instill-ai/core.git %s", projDirPath)); err != nil {
+				return fmt.Errorf("ERROR: cannot clone Instill Core repo, %w:\n%s", err, out)
+			}
+		} else {
+			if latestReleaseVersion, err := execCmd(opts.Exec, "bash", "-c", "curl https://api.github.com/repos/instill-ai/core/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'"); err == nil {
+				latestReleaseVersion = strings.Trim(latestReleaseVersion, "\n")
 				if out, err := execCmd(opts.Exec, "bash", "-c",
-					fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/%s.git %s", latestVersion, proj, projDirPath)); err != nil {
-					return fmt.Errorf("ERROR: cannot clone %s, %w:\n%s", proj, err, out)
+					fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/core.git %s", latestReleaseVersion, projDirPath)); err != nil {
+					return fmt.Errorf("ERROR: cannot clone core, %w:\n%s", err, out)
 				}
-				if _, err := opts.checkForUpdate(opts.Exec, filepath.Join(config.StateDir(), fmt.Sprintf("%s.yml", proj)), fmt.Sprintf("instill-ai/%s", proj), latestVersion); err != nil {
-					return fmt.Errorf("ERROR: cannot check for update %s, %w:\n%s", proj, err, latestVersion)
+				if _, err := opts.checkForUpdate(opts.Exec, filepath.Join(config.StateDir(), "core.yml"), "instill-ai/core", latestReleaseVersion); err != nil {
+					return fmt.Errorf("ERROR: cannot check for the update of Instill Core, %w:\n%s", err, latestReleaseVersion)
 				}
 			} else {
-				return fmt.Errorf("ERROR: cannot find latest release version of %s, %w:\n%s", proj, err, latestVersion)
+				return fmt.Errorf("ERROR: cannot find latest release version of Instill Core, %w:\n%s", err, latestReleaseVersion)
 			}
 		}
 	}
 
 	if opts.Force {
 		p(opts.IO, "Tear down Instill Core instance if existing...")
-		for _, proj := range projs {
-			projDirPath := filepath.Join(LocalInstancePath, proj)
+		projDirPath := filepath.Join(LocalInstancePath, "core")
+		_, err = os.Stat(projDirPath)
+		if !os.IsNotExist(err) {
+			if opts.OS != nil {
+				if err = opts.OS.Chdir(projDirPath); err != nil {
+					return err
+				}
+			} else {
+				if err = os.Chdir(projDirPath); err != nil {
+					return err
+				}
+			}
+			if out, err := execCmd(opts.Exec, "bash", "-c", "make down"); err != nil {
+				return fmt.Errorf("ERROR: cannot force tearing down Instill Core, %w:\n%s", err, out)
+			}
+		}
+
+	} else if opts.Upgrade && !opts.Latest {
+		hasNewVersion := false
+		projDirPath := filepath.Join(LocalInstancePath, "core")
+		_, err = os.Stat(projDirPath)
+		if !os.IsNotExist(err) {
+			if opts.OS != nil {
+				if err = opts.OS.Chdir(projDirPath); err != nil {
+					return err
+				}
+			} else {
+				if err = os.Chdir(projDirPath); err != nil {
+					return err
+				}
+			}
+			if currentVersion, err := execCmd(opts.Exec, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
+				currentVersion = strings.Trim(currentVersion, "\n")
+				if currentVersion == "undefined" {
+					currentVersion = "latest"
+				}
+				if newRelease, err := opts.checkForUpdate(opts.Exec, filepath.Join(config.StateDir(), "core.yml"), "instill-ai/core", currentVersion); err != nil {
+					return fmt.Errorf("ERROR: cannot check for the update of Instill Core, %w:\n%s", err, currentVersion)
+				} else if newRelease != nil {
+					p(opts.IO, "Upgrade Instill Core to %s...", newRelease.Version)
+					hasNewVersion = true
+				}
+			} else {
+				return fmt.Errorf("ERROR: cannot find current release version of Instill Core, %w:\n%s", err, currentVersion)
+			}
+		}
+
+		if hasNewVersion {
+			p(opts.IO, "Tear down Instill Core instance if existing...")
+			projDirPath := filepath.Join(LocalInstancePath, "core")
 			_, err = os.Stat(projDirPath)
 			if !os.IsNotExist(err) {
 				if opts.OS != nil {
@@ -134,78 +193,28 @@ func runDeploy(opts *DeployOptions) error {
 					}
 				}
 				if out, err := execCmd(opts.Exec, "bash", "-c", "make down"); err != nil {
-					return fmt.Errorf("ERROR: cannot force tearing down %s, %w:\n%s", proj, err, out)
+					return fmt.Errorf("ERROR: cannot force tearing down Instill Core, %w:\n%s", err, out)
 				}
 			}
-		}
-	} else if opts.Upgrade {
-		hasNewVersion := false
-		for _, proj := range projs {
-			projDirPath := filepath.Join(LocalInstancePath, proj)
-			_, err = os.Stat(projDirPath)
-			if !os.IsNotExist(err) {
-				if opts.OS != nil {
-					if err = opts.OS.Chdir(projDirPath); err != nil {
-						return err
-					}
-				} else {
-					if err = os.Chdir(projDirPath); err != nil {
-						return err
+
+			if dir, err := os.ReadDir(projDirPath); err == nil {
+				for _, d := range dir {
+					if os.RemoveAll(path.Join([]string{projDirPath, d.Name()}...)); err != nil {
+						return fmt.Errorf("ERROR: cannot remove %s, %w", projDirPath, err)
 					}
 				}
-				if currentVersion, err := execCmd(opts.Exec, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
-					currentVersion = strings.Trim(currentVersion, "\n")
-					if newRelease, err := opts.checkForUpdate(opts.Exec, filepath.Join(config.StateDir(), fmt.Sprintf("%s.yml", proj)), fmt.Sprintf("instill-ai/%s", proj), currentVersion); err != nil {
-						return fmt.Errorf("ERROR: cannot check for update %s, %w:\n%s", proj, err, currentVersion)
-					} else if newRelease != nil {
-						p(opts.IO, "Upgrade %s to %s...", proj, newRelease.Version)
-						hasNewVersion = true
-					}
-				} else {
-					return fmt.Errorf("ERROR: cannot find current release version of %s, %w:\n%s", proj, err, currentVersion)
-				}
+			} else {
+				return fmt.Errorf("ERROR: cannot read %s, %w", projDirPath, err)
 			}
-		}
 
-		if hasNewVersion {
-			p(opts.IO, "Tear down Instill Core instance if existing...")
-			for _, proj := range projs {
-				projDirPath := filepath.Join(LocalInstancePath, proj)
-				_, err = os.Stat(projDirPath)
-				if !os.IsNotExist(err) {
-					if opts.OS != nil {
-						if err = opts.OS.Chdir(projDirPath); err != nil {
-							return err
-						}
-					} else {
-						if err = os.Chdir(projDirPath); err != nil {
-							return err
-						}
-					}
-					if out, err := execCmd(opts.Exec, "bash", "-c", "make down"); err != nil {
-						return fmt.Errorf("ERROR: cannot force tearing down %s, %w:\n%s", proj, err, out)
-					}
+			if latestVersion, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/instill-ai/%s/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'", "core")); err == nil {
+				latestVersion = strings.Trim(latestVersion, "\n")
+				if out, err := execCmd(opts.Exec, "bash", "-c",
+					fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/core.git %s", latestVersion, projDirPath)); err != nil {
+					return fmt.Errorf("ERROR: cannot clone Instill Core, %w:\n%s", err, out)
 				}
-
-				if dir, err := os.ReadDir(projDirPath); err == nil {
-					for _, d := range dir {
-						if os.RemoveAll(path.Join([]string{projDirPath, d.Name()}...)); err != nil {
-							return fmt.Errorf("ERROR: cannot remove %s, %w", projDirPath, err)
-						}
-					}
-				} else {
-					return fmt.Errorf("ERROR: cannot read %s, %w", projDirPath, err)
-				}
-
-				if latestVersion, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/instill-ai/%s/releases | jq -r 'map(select(.prerelease)) | first | .tag_name'", proj)); err == nil {
-					latestVersion = strings.Trim(latestVersion, "\n")
-					if out, err := execCmd(opts.Exec, "bash", "-c",
-						fmt.Sprintf("git clone --depth 1 -b %s -c advice.detachedHead=false https://github.com/instill-ai/%s.git %s", latestVersion, proj, projDirPath)); err != nil {
-						return fmt.Errorf("ERROR: cannot clone %s, %w:\n%s", proj, err, out)
-					}
-				} else {
-					return fmt.Errorf("ERROR: cannot find latest release version of %s, %w:\n%s", proj, err, latestVersion)
-				}
+			} else {
+				return fmt.Errorf("ERROR: cannot find latest release version of Instill Core, %w:\n%s", err, latestVersion)
 			}
 		} else {
 			p(opts.IO, "No upgrade available")
@@ -213,37 +222,38 @@ func runDeploy(opts *DeployOptions) error {
 		}
 
 	} else {
-		for _, proj := range projs {
-			if err := opts.isDeployed(opts.Exec, proj); err == nil {
-				p(opts.IO, "A local Instill Core deployment detected")
-				return nil
-			}
+		if err := opts.isDeployed(opts.Exec, "core"); err == nil {
+			p(opts.IO, "A local Instill Core deployment detected")
+			return nil
 		}
 	}
 
-	p(opts.IO, "Launch Instill Core...")
-	for _, proj := range projs {
-		projDirPath := filepath.Join(LocalInstancePath, proj)
-		_, err = os.Stat(projDirPath)
-		if !os.IsNotExist(err) {
-			if opts.OS != nil {
-				err = opts.OS.Chdir(projDirPath)
-			} else {
-				err = os.Chdir(projDirPath)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
-			}
+	_, err = os.Stat(projDirPath)
+	if !os.IsNotExist(err) {
+		if opts.OS != nil {
+			err = opts.OS.Chdir(projDirPath)
+		} else {
+			err = os.Chdir(projDirPath)
 		}
+		if err != nil {
+			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+		}
+	}
 
+	if opts.Latest {
+		p(opts.IO, "Spin up latest Instill Core...")
+		if out, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("make latest BUILD=%s", strconv.FormatBool(opts.Build))); err != nil {
+			return fmt.Errorf("ERROR: Instill Core spin-up failed, %w\n%s", err, out)
+		}
+	} else {
 		if currentVersion, err := execCmd(opts.Exec, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
 			currentVersion = strings.Trim(currentVersion, "\n")
-			p(opts.IO, "Spin up %s %s...", proj, currentVersion)
-			if out, err := execCmd(opts.Exec, "bash", "-c", "make all"); err != nil {
-				return fmt.Errorf("ERROR: %s spin-up failed, %w\n%s", proj, err, out)
-			}
+			p(opts.IO, "Spin up Instill Core %s...", currentVersion)
 		} else {
-			return fmt.Errorf("ERROR: cannot get current tag %s, %w:\n%s", proj, err, currentVersion)
+			return fmt.Errorf("ERROR: cannot get the current tag of Instill Core repo, %w:\n%s", err, currentVersion)
+		}
+		if out, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("make all BUILD=%s", strconv.FormatBool(opts.Build))); err != nil {
+			return fmt.Errorf("ERROR: Instill Core spin-up failed, %w\n%s", err, out)
 		}
 	}
 

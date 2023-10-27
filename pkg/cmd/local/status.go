@@ -74,21 +74,19 @@ func runStatus(opts *StatusOptions) error {
 		return nil
 	}
 
-	for _, proj := range projs {
-		deployed := "NO"
-		started := "NO"
-		healthy := "NO"
-		if err := isProjectDeployed(opts.Exec, proj); err == nil {
-			deployed = "YES"
-		}
-		if err := isProjectStarted(opts.Exec, proj); err == nil {
-			started = "YES"
-		}
-		if err := isProjectHealthy(opts.Exec, proj); err == nil {
-			healthy = "YES"
-		}
-		fmt.Printf("%5s - Deployed: %s | Started: %s | Healthy: %s\n", proj, deployed, started, healthy)
+	deployed := "NO"
+	started := "NO"
+	healthy := "NO"
+	if err := isProjectDeployed(opts.Exec, "core"); err == nil {
+		deployed = "YES"
 	}
+	if err := isProjectStarted(opts.Exec, "core"); err == nil {
+		started = "YES"
+	}
+	if err := isProjectHealthy(opts.Exec, "core"); err == nil {
+		healthy = "YES"
+	}
+	fmt.Printf("Instill Core - Deployed: %s | Started: %s | Healthy: %s\n", deployed, started, healthy)
 
 	return nil
 }

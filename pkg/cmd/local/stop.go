@@ -66,28 +66,26 @@ func runStop(opts *StopOptions) error {
 		return nil
 	}
 
-	for _, proj := range projs {
-		projDirPath := filepath.Join(LocalInstancePath, proj)
-		if err := isProjectDeployed(opts.Exec, proj); err == nil {
-			if opts.OS != nil {
-				err = opts.OS.Chdir(projDirPath)
-			} else {
-				err = os.Chdir(projDirPath)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
-			}
-			p(opts.IO, fmt.Sprintf("Stopping %s...", proj))
-			out, err := execCmd(opts.Exec, "make", "stop")
-			if err != nil {
-				return fmt.Errorf("ERROR: when stopping, %w", err)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: %s when stopping, %w\n%s", proj, err, out)
-			}
+	projDirPath := filepath.Join(LocalInstancePath, "core")
+	if err := isProjectDeployed(opts.Exec, "core"); err == nil {
+		if opts.OS != nil {
+			err = opts.OS.Chdir(projDirPath)
 		} else {
-			return fmt.Errorf("ERROR: %w", err)
+			err = os.Chdir(projDirPath)
 		}
+		if err != nil {
+			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+		}
+		p(opts.IO, "Stopping Instill Core...")
+		out, err := execCmd(opts.Exec, "make", "stop")
+		if err != nil {
+			return fmt.Errorf("ERROR: when stopping, %w", err)
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: when stopping Instill Core, %w\n%s", err, out)
+		}
+	} else {
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	p(opts.IO, "Instill Core stopped")

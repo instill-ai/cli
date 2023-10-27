@@ -17,8 +17,6 @@ import (
 	"github.com/instill-ai/cli/pkg/cmdutil"
 )
 
-var projs = [3]string{"core", "vdp", "model"}
-
 // ExecDep is an interface for executing commands
 type ExecDep interface {
 	Command(name string, arg ...string) *exec.Cmd
@@ -64,22 +62,22 @@ func New(f *cmdutil.Factory) *cobra.Command {
 
 			// check for update
 			if cmd.Flags().Lookup("upgrade") == nil || (cmd.Flags().Lookup("upgrade") != nil && !cmd.Flags().Lookup("upgrade").Changed) {
-				for _, proj := range projs {
-					projDirPath := filepath.Join(LocalInstancePath, proj)
-					_, err = os.Stat(projDirPath)
-					if !os.IsNotExist(err) {
-						if err = os.Chdir(projDirPath); err != nil {
-							return err
-						}
-						if currentVersion, err := execCmd(nil, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
-							currentVersion = strings.Trim(currentVersion, "\n")
-							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), fmt.Sprintf("%s.yml", proj)), fmt.Sprintf("instill-ai/%s", proj), currentVersion); err != nil {
-								return fmt.Errorf("ERROR: cannot check for update %s, %w:\n%s", proj, err, currentVersion)
+				projDirPath := filepath.Join(LocalInstancePath, "core")
+				_, err = os.Stat(projDirPath)
+				if !os.IsNotExist(err) {
+					if err = os.Chdir(projDirPath); err != nil {
+						return err
+					}
+					if currentVersion, err := execCmd(nil, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
+						currentVersion = strings.Trim(currentVersion, "\n")
+						if currentVersion != "undefined" {
+							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), "core.yml"), "instill-ai/core", currentVersion); err != nil {
+								return fmt.Errorf("ERROR: cannot check for the update Instill Core, %w:\n%s", err, currentVersion)
 							} else if newRelease != nil {
 								cmdFactory := factory.New(build.Version)
 								stderr := cmdFactory.IOStreams.ErrOut
 								fmt.Fprintf(stderr, "\n%s %s → %s\n",
-									ansi.Color(fmt.Sprintf("A new release of Instill %s is available:", proj), "yellow"),
+									ansi.Color("A new release of Instill Core is available:", "yellow"),
 									ansi.Color(currentVersion, "cyan"),
 									ansi.Color(newRelease.Version, "cyan"))
 								fmt.Fprintf(stderr, "%s\n\n",

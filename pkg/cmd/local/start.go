@@ -64,28 +64,26 @@ func runStart(opts *StartOptions) error {
 		return nil
 	}
 
-	for _, proj := range projs {
-		projDirPath := filepath.Join(LocalInstancePath, proj)
-		if err := isProjectDeployed(opts.Exec, proj); err == nil {
-			if opts.OS != nil {
-				err = opts.OS.Chdir(projDirPath)
-			} else {
-				err = os.Chdir(projDirPath)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: cannot open the directory: %w", err)
-			}
-			p(opts.IO, fmt.Sprintf("Starting %s...", proj))
-			out, err := execCmd(opts.Exec, "make", "start")
-			if err != nil {
-				return fmt.Errorf("ERROR: when starting, %w", err)
-			}
-			if err != nil {
-				return fmt.Errorf("ERROR: %s when starting, %w\n%s", proj, err, out)
-			}
+	projDirPath := filepath.Join(LocalInstancePath, "core")
+	if err := isProjectDeployed(opts.Exec, "core"); err == nil {
+		if opts.OS != nil {
+			err = opts.OS.Chdir(projDirPath)
 		} else {
-			return fmt.Errorf("ERROR: %w", err)
+			err = os.Chdir(projDirPath)
 		}
+		if err != nil {
+			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
+		}
+		p(opts.IO, "Starting Instill Core...")
+		out, err := execCmd(opts.Exec, "make", "start")
+		if err != nil {
+			return fmt.Errorf("ERROR: when starting, %w", err)
+		}
+		if err != nil {
+			return fmt.Errorf("ERROR: when starting Instill Core, %w\n%s", err, out)
+		}
+	} else {
+		return fmt.Errorf("ERROR: %w", err)
 	}
 
 	p(opts.IO, "Instill Core started")
