@@ -92,19 +92,36 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 			return err
 		}
 	} else {
-		hostname := opts.Hostname
-		hosts, err := cfg.HostsTyped()
-		if err != nil {
+		// in case the hosts.yml is empty
+		cfg, _ := opts.Config()
+		if hosts, err := cfg.HostEntries(); err != nil {
 			return err
-		}
-		for _, h := range hosts {
-			if h.APIHostname == hostname {
-				host = &h
-				break
+		} else if len(hosts) == 0 {
+			// no hosts, fallback to the default hostname
+			host = oauth2.HostConfigInstillCloud()
+			err = cfg.SaveTyped(host)
+			if err != nil {
+				return err
 			}
-		}
-		if host == nil {
-			return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+			err = cfg.Set("", "default_hostname", host.APIHostname)
+			if err != nil {
+				return err
+			}
+		} else {
+			hostname := opts.Hostname
+			hosts, err := cfg.HostsTyped()
+			if err != nil {
+				return err
+			}
+			for _, h := range hosts {
+				if h.APIHostname == hostname {
+					host = &h
+					break
+				}
+			}
+			if host == nil {
+				return fmt.Errorf("ERROR: instance '%s' does not exists", hostname)
+			}
 		}
 	}
 
@@ -171,7 +188,7 @@ type localLoginRequest struct {
 
 // loginLocal handles dedicated auth flow for Instill Core.
 func loginLocal(transport http.RoundTripper, hostname, password string) (string, error) {
-	url := instance.GetProtocol(hostname) + "base/v1alpha/auth/login"
+	url := instance.GetProtocol(hostname) + "core/v1alpha/auth/login"
 	data := &localLoginRequest{
 		Name: local.DefUsername,
 		Pass: password,

@@ -78,8 +78,8 @@ func NewDeployCmd(f *cmdutil.Factory, runF func(*DeployOptions) error) *cobra.Co
 
 	cmd.Flags().BoolVarP(&opts.Force, "force", "f", false, "Force to deploy a new local Instill Core instance")
 	cmd.Flags().BoolVarP(&opts.Upgrade, "upgrade", "u", false, "Upgrade Instill Core instance to the latest release version")
+	cmd.Flags().BoolVarP(&opts.Build, "build", "b", false, "Deploy an Instill Core instance and build latest release version")
 	cmd.Flags().BoolVarP(&opts.Latest, "latest", "l", false, "Deploy an Instill Core instance with the latest version (unstable)")
-	cmd.Flags().BoolVarP(&opts.Build, "build", "b", false, "Deploy an Instill Core instance and build the images at the local")
 	cmd.MarkFlagsMutuallyExclusive("force", "upgrade")
 	cmd.MarkFlagsMutuallyExclusive("upgrade", "latest")
 
@@ -242,7 +242,7 @@ func runDeploy(opts *DeployOptions) error {
 
 	if opts.Latest {
 		p(opts.IO, "Spin up latest Instill Core...")
-		if out, err := execCmd(opts.Exec, "bash", "-c", fmt.Sprintf("make latest BUILD=%s", strconv.FormatBool(opts.Build))); err != nil {
+		if out, err := execCmd(opts.Exec, "bash", "-c", "make latest"); err != nil {
 			return fmt.Errorf("ERROR: Instill Core spin-up failed, %w\n%s", err, out)
 		}
 	} else {

@@ -36,6 +36,10 @@ func (c ConfigStub) Hosts() ([]string, error) {
 	return nil, nil
 }
 
+func (c ConfigStub) HostEntries() ([]*HostConfig, error) {
+	return nil, nil
+}
+
 func (c ConfigStub) UnsetHost(hostname string) error {
 	return nil
 }

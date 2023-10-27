@@ -103,21 +103,11 @@ func (c *fileConfig) UnsetHost(hostname string) error {
 	cm := ConfigMap{hostsEntry.ValueNode}
 	cm.RemoveEntry(hostname)
 
-	_, err = c.hostEntries()
-	if strings.Contains(err.Error(), "could not find any host configurations") {
-		// no hosts, fallback to the default hostname
-		defaultHost := instance.FallbackHostname()
-		err = c.Set("", "default_hostname", defaultHost)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
 func (c *fileConfig) ConfigForHost(hostname string) (*HostConfig, error) {
-	hosts, err := c.hostEntries()
+	hosts, err := c.HostEntries()
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +157,7 @@ func (c *fileConfig) Write() error {
 	return WriteConfigFile(HostsConfigFile(), yamlNormalize(hostsBytes))
 }
 
-func (c *fileConfig) hostEntries() ([]*HostConfig, error) {
+func (c *fileConfig) HostEntries() ([]*HostConfig, error) {
 	entry, err := c.FindEntry("hosts")
 	if err != nil {
 		return []*HostConfig{}, nil
@@ -184,7 +174,7 @@ func (c *fileConfig) hostEntries() ([]*HostConfig, error) {
 // Hosts returns a list of all known hostnames configured in hosts.yml
 // TODO replace with HostsTyped
 func (c *fileConfig) Hosts() ([]string, error) {
-	entries, err := c.hostEntries()
+	entries, err := c.HostEntries()
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +193,7 @@ func (c *fileConfig) Hosts() ([]string, error) {
 // Every call re-reads the config file.
 func (c *fileConfig) HostsTyped() ([]HostConfigTyped, error) {
 	var ret []HostConfigTyped
-	hosts, err := c.hostEntries()
+	hosts, err := c.HostEntries()
 	if err != nil {
 		return nil, err
 	}

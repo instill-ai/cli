@@ -53,6 +53,10 @@ var tasks = map[string]func(string) error{
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Version=%s %s", version(), ldflags)
 		ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/build.Date=%s %s", date(), ldflags)
 		if oauthSecret := os.Getenv("INSTILL_OAUTH_CLIENT_SECRET"); oauthSecret != "" {
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.apiHostname=%s %s", os.Getenv("INSTILL_OAUTH_API_HOSTNAME"), ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.oauth2Hostname=%s %s", os.Getenv("INSTILL_OAUTH_OAUTH_HOSTNAME"), ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.oauth2Audience=%s %s", os.Getenv("INSTILL_OAUTH_OAUTH_AUDIENCE"), ldflags)
+			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.oauth2Issuer=%s %s", os.Getenv("INSTILL_OAUTH_OAUTH_ISSUER"), ldflags)
 			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.clientID=%s %s", os.Getenv("INSTILL_OAUTH_CLIENT_ID"), ldflags)
 			ldflags = fmt.Sprintf("-X github.com/instill-ai/cli/internal/oauth2.clientSecret=%s %s", oauthSecret, ldflags)
 		}

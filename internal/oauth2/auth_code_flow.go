@@ -26,6 +26,14 @@ import (
 )
 
 var (
+	// apiHostname is the default API hostname for the Instill Cloud server.
+	apiHostname = ""
+	// The OAuth2 hostname for the Instill Cloud server.
+	oauth2Hostname = ""
+	// The OAuth2 audience for the Instill Cloud server.
+	oauth2Audience = ""
+	// The OAuth2 issuer for the Instill Cloud server.
+	oauth2Issuer = ""
 	// The "Instill CLI" OAuth app (build-time default to api.instill.tech)
 	clientID = ""
 	// This value is safe to be embedded in version control (build-time default to api.instill.tech)
@@ -36,11 +44,11 @@ var (
 func HostConfigInstillCloud() *config.HostConfigTyped {
 
 	host := config.DefaultHostConfig()
-	host.APIHostname = "api.instill.tech"
+	host.APIHostname = apiHostname
 	host.IsDefault = true
-	host.Oauth2Hostname = "auth.instill.tech"
-	host.Oauth2Audience = "https://api.instill.tech"
-	host.Oauth2Issuer = "https://auth.instill.tech/"
+	host.Oauth2Hostname = oauth2Hostname
+	host.Oauth2Audience = oauth2Audience
+	host.Oauth2Issuer = oauth2Issuer
 	host.Oauth2ClientID = clientID
 	host.Oauth2ClientSecret = clientSecret
 	return &host

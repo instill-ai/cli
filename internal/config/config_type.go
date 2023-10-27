@@ -14,6 +14,7 @@ type Config interface {
 	UnsetHost(string) error
 	Hosts() ([]string, error)
 	HostsTyped() ([]HostConfigTyped, error)
+	HostEntries() ([]*HostConfig, error)
 	DefaultHostname() string
 	CheckWriteable(string, string) error
 	Write() error

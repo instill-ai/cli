@@ -26,5 +26,9 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.botGitHubToken }}
+          INSTILL_API_HOSTNAME: "api.instill.tech"
+          INSTILL_OAUTH_HOSTNAME: "auth.instill.tech"
+          INSTILL_OAUTH_AUDIENCE: "https://api.instill.tech"
+          INSTILL_OAUTH_ISSUER: "https://auth.instill.tech/"
           INSTILL_OAUTH_CLIENT_ID: ${{ secrets.oauth2ClientId }}
           INSTILL_OAUTH_CLIENT_SECRET: ${{ secrets.oauth2ClientSecret }}

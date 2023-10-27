@@ -21,6 +21,10 @@ builds:
         - -s -w
         - -X github.com/instill-ai/cli/internal/build.Version={{ .Version }}
         - -X github.com/instill-ai/cli/internal/build.Date={{ time "2006-01-02" }}
+        - -X github.com/instill-ai/cli/internal/oauth2.apiHostname={{ .Env.INSTILL_API_HOSTNAME }}
+        - -X github.com/instill-ai/cli/internal/oauth2.oauth2Hostname={{ .Env.INSTILL_OAUTH_HOSTNAME }}
+        - -X github.com/instill-ai/cli/internal/oauth2.oauth2Audience={{ .Env.INSTILL_OAUTH_AUDIENCE }}
+        - -X github.com/instill-ai/cli/internal/oauth2.oauth2Issuer={{ .Env.INSTILL_OAUTH_ISSUER }}
         - -X github.com/instill-ai/cli/internal/oauth2.clientID={{ .Env.INSTILL_OAUTH_CLIENT_ID }}
         - -X github.com/instill-ai/cli/internal/oauth2.clientSecret={{ .Env.INSTILL_OAUTH_CLIENT_SECRET }}
         - -X main.updaterEnabled=instill-ai/cli

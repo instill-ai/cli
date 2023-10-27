@@ -97,7 +97,7 @@ func NewCmdAPI(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 			$ inst api model/v1alpha/models
 
 			# get user profile
-			$ inst api base/v1alpha/users/me
+			$ inst api core/v1alpha/users/me
 
 			# add parameters to a GET request
 			$ inst api model/v1alpha/models?visibility=public
