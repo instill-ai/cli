@@ -13,7 +13,6 @@ import (
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/cli/safeexec"
-	"github.com/dotenv-org/godotenvvault"
 	"github.com/mattn/go-colorable"
 	"github.com/mgutz/ansi"
 	"github.com/spf13/cobra"
@@ -47,11 +46,6 @@ func main() {
 }
 
 func mainRun() exitCode {
-	// optionally load .env in dev mode
-	if build.Version == "" {
-		_ = godotenvvault.Load()
-	}
-
 	buildDate := build.Date
 	buildVersion := build.Version
 

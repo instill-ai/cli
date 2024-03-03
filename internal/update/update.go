@@ -55,11 +55,10 @@ func CheckForUpdate(client *api.Client, stateFilePath, repo, currentVersion stri
 
 func getLatestReleaseInfo(client *api.Client, repo string) (*ReleaseInfo, error) {
 	var latestRelease ReleaseInfo
-	err := client.REST("github.com", "GET", fmt.Sprintf("repos/%s/releases/latest", repo), nil, &latestRelease)
+	err := client.REST("api.github.com", "GET", fmt.Sprintf("repos/%s/releases/latest", repo), nil, &latestRelease)
 	if err != nil {
 		return nil, err
 	}
-
 	return &latestRelease, nil
 }
 
