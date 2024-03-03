@@ -367,11 +367,6 @@ func System() *IOStreams {
 	stderrIsTTY := isTerminal(os.Stderr)
 
 	assumeTrueColor := false
-	if stdoutIsTTY {
-		if err := enableVirtualTerminalProcessing(os.Stdout); err == nil {
-			assumeTrueColor = true
-		}
-	}
 
 	io := &IOStreams{
 		In:           os.Stdin,

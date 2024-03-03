@@ -66,8 +66,8 @@ func runStop(opts *StopOptions) error {
 		return nil
 	}
 
-	projDirPath := filepath.Join(LocalInstancePath, "core")
-	if err := isProjectDeployed(opts.Exec, "core"); err == nil {
+	projDirPath := filepath.Join(LocalInstancePath, "instill-core")
+	if err := isDeployed(opts.Exec); err == nil {
 		if opts.OS != nil {
 			err = opts.OS.Chdir(projDirPath)
 		} else {

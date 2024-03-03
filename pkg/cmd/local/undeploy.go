@@ -61,7 +61,7 @@ func NewUndeployCmd(f *cmdutil.Factory, runF func(*UndeployOptions) error) *cobr
 
 func runUndeploy(opts *UndeployOptions) error {
 	var err error
-	projDirPath := filepath.Join(LocalInstancePath, "core")
+	projDirPath := filepath.Join(LocalInstancePath, "instill-core")
 	_, err = os.Stat(projDirPath)
 	if !os.IsNotExist(err) {
 		if opts.OS != nil {

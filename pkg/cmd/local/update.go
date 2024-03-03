@@ -2,7 +2,6 @@ package local
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +40,7 @@ func checkForUpdate(execDep ExecDep, stateFilePath, repo, currentVersion string)
 
 func getLatestPreReleaseInfo(execDep ExecDep, repo string) (*releaseInfo, error) {
 	var latestPreRelease releaseInfo
-	if output, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("curl https://api.github.com/repos/%s/releases | jq -r 'map(select(.prerelease)) | first'", repo)); err == nil {
+	if output, err := execCmd(execDep, "bash", "-c", "curl -s https://api.github.com/repos/%s/releases | jq -r 'map(select(.prerelease)) | first'", repo); err == nil {
 		if len(output) > 0 && output[0] == '{' {
 			if err := json.Unmarshal([]byte(output), &latestPreRelease); err != nil {
 				return nil, err

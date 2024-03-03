@@ -77,13 +77,13 @@ func runStatus(opts *StatusOptions) error {
 	deployed := "NO"
 	started := "NO"
 	healthy := "NO"
-	if err := isProjectDeployed(opts.Exec, "core"); err == nil {
+	if err := isDeployed(opts.Exec); err == nil {
 		deployed = "YES"
 	}
-	if err := isProjectStarted(opts.Exec, "core"); err == nil {
+	if err := isStarted(opts.Exec); err == nil {
 		started = "YES"
 	}
-	if err := isProjectHealthy(opts.Exec, "core"); err == nil {
+	if err := isHealthy(opts.Exec); err == nil {
 		healthy = "YES"
 	}
 	fmt.Printf("Instill Core - Deployed: %s | Started: %s | Healthy: %s\n", deployed, started, healthy)
@@ -91,38 +91,26 @@ func runStatus(opts *StatusOptions) error {
 	return nil
 }
 
-func isProjectDeployed(execDep ExecDep, proj string) error {
-	if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a | grep instill-%s", proj)); err != nil {
+func isDeployed(execDep ExecDep) error {
+	if _, err := execCmd(execDep, "bash", "-c", "docker compose ls -a | grep instill-core"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func isProjectStarted(execDep ExecDep, proj string) error {
-	if _, err := execCmd(execDep, "bash", "-c", fmt.Sprintf("docker compose ls -a --format json --filter name=instill-%s | grep running", proj)); err != nil {
+func isStarted(execDep ExecDep) error {
+	if _, err := execCmd(execDep, "bash", "-c", "docker compose ls -a --format json --filter name=instill-core | grep running"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func isProjectHealthy(execDep ExecDep, proj string) error {
+func isHealthy(execDep ExecDep) error {
 
-	var urls []string
-
-	switch proj {
-	case "core":
-		urls = []string{
-			"localhost:8080/core/v1alpha/health/mgmt",
-		}
-	case "vdp":
-		urls = []string{
-			"localhost:8080/vdp/v1alpha/health/pipeline",
-			"localhost:8080/vdp/v1alpha/health/connector",
-		}
-	case "model":
-		urls = []string{
-			"localhost:8080/model/v1alpha/health/model",
-		}
+	urls := []string{
+		"localhost:8080/core/v1beta/health/mgmt",
+		"localhost:8080/vdp/v1alpha/health/pipeline",
+		"localhost:8080/model/v1alpha/health/model",
 	}
 
 	for _, url := range urls {

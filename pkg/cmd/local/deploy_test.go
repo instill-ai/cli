@@ -94,7 +94,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ExecDep, string) error {
+				isDeployed: func(ExecDep) error {
 					return nil
 				},
 			},
@@ -108,7 +108,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ExecDep, string) error {
+				isDeployed: func(ExecDep) error {
 					return fmt.Errorf("")
 				},
 			},
@@ -122,7 +122,7 @@ func TestLocalDeployCmdRun(t *testing.T) {
 				OS:             osMock,
 				Config:         config.ConfigStub{},
 				checkForUpdate: checkForUpdateMock,
-				isDeployed: func(ExecDep, string) error {
+				isDeployed: func(ExecDep) error {
 					return nil
 				},
 			},

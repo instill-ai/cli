@@ -188,7 +188,7 @@ type localLoginRequest struct {
 
 // loginLocal handles dedicated auth flow for Instill Core.
 func loginLocal(transport http.RoundTripper, hostname, password string) (string, error) {
-	url := instance.GetProtocol(hostname) + "core/v1alpha/auth/login"
+	url := instance.GetProtocol(hostname) + "core/v1beta/auth/login"
 	data := &localLoginRequest{
 		Name: local.DefUsername,
 		Pass: password,

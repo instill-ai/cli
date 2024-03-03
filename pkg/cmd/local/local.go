@@ -62,7 +62,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 
 			// check for update
 			if cmd.Flags().Lookup("upgrade") == nil || (cmd.Flags().Lookup("upgrade") != nil && !cmd.Flags().Lookup("upgrade").Changed) {
-				projDirPath := filepath.Join(LocalInstancePath, "core")
+				projDirPath := filepath.Join(LocalInstancePath, "instill-core")
 				_, err = os.Stat(projDirPath)
 				if !os.IsNotExist(err) {
 					if err = os.Chdir(projDirPath); err != nil {
@@ -71,7 +71,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 					if currentVersion, err := execCmd(nil, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
 						currentVersion = strings.Trim(currentVersion, "\n")
 						if currentVersion != "undefined" {
-							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), "core.yml"), "instill-ai/core", currentVersion); err != nil {
+							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), "instill-core.yml"), "instill-ai/instill-core", currentVersion); err != nil {
 								return fmt.Errorf("ERROR: cannot check for the update Instill Core, %w:\n%s", err, currentVersion)
 							} else if newRelease != nil {
 								cmdFactory := factory.New(build.Version)
@@ -110,7 +110,7 @@ func execCmd(execDep ExecDep, cmd string, params ...string) (string, error) {
 	} else {
 		c = exec.Command(cmd, params...)
 	}
-	out, err := c.Output()
+	out, err := c.CombinedOutput()
 	outStr := strings.Trim(string(out[:]), " ")
 	return outStr, err
 }

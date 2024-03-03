@@ -103,12 +103,9 @@ func TestCheckForUpdate(t *testing.T) {
 			}
 			if rel == nil {
 				t.Fatal("expected to report new release")
-			}
-
-			if rel.Version != s.LatestVersion {
+			} else if rel.Version != s.LatestVersion {
 				t.Errorf("Version: %q", rel.Version)
-			}
-			if rel.URL != s.LatestURL {
+			} else if rel.URL != s.LatestURL {
 				t.Errorf("URL: %q", rel.URL)
 			}
 		})
