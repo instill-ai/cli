@@ -109,7 +109,7 @@ func isHealthy(execDep ExecDep) error {
 
 	urls := []string{
 		"localhost:8080/core/v1beta/health/mgmt",
-		"localhost:8080/vdp/v1alpha/health/pipeline",
+		"localhost:8080/vdp/v1beta/health/pipeline",
 		"localhost:8080/model/v1alpha/health/model",
 	}
 
