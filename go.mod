@@ -1,6 +1,7 @@
 module github.com/instill-ai/cli
 
 go 1.21
+toolchain go1.22.2
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -27,7 +28,7 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/graceful v0.1.3
-	github.com/ory/x v0.0.626
+	github.com/ory/x v0.0.631
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
@@ -39,6 +40,7 @@ require (
 
 require (
 	code.dny.dev/ssrf v0.2.0 // indirect
+	github.com/urfave/negroni v1.0.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 )
 
