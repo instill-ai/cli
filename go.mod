@@ -12,7 +12,7 @@ require (
 	github.com/cli/browser v1.1.0
 	github.com/cli/safeexec v1.0.1
 	github.com/coreos/go-oidc/v3 v3.6.0
-	github.com/creack/pty v1.1.21
+	github.com/creack/pty v1.1.23
 	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/go-playground/validator/v10 v10.15.5
 	github.com/google/go-cmp v0.6.0
