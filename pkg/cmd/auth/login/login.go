@@ -155,7 +155,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
 				--client-secret CLIENT_SECRET`, host.APIHostname, host.APIHostname)
-		return fmt.Errorf(e)
+		return fmt.Errorf("%s", e)
 	}
 
 	if host.RefreshToken != "" && opts.Interactive {
