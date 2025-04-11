@@ -180,7 +180,7 @@ func apiRun(opts *APIOptions) error {
 		}
 	}
 	if host == nil {
-		return fmt.Errorf(heredoc.Docf(
+		return fmt.Errorf("%s", heredoc.Docf(
 			`ERROR: instance '%s' does not exist
 
 			You can add it with:
