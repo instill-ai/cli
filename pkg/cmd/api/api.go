@@ -27,7 +27,7 @@ import (
 	"github.com/instill-ai/cli/pkg/jsoncolor"
 )
 
-type ApiOptions struct {
+type APIOptions struct {
 	IO *iostreams.IOStreams
 
 	Hostname            string
@@ -49,8 +49,8 @@ type ApiOptions struct {
 }
 
 // NewCmdAPI creates a new command
-func NewCmdAPI(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command {
-	opts := ApiOptions{
+func NewCmdAPI(f *cmdutil.Factory, runF func(*APIOptions) error) *cobra.Command {
+	opts := APIOptions{
 		IO:         f.IOStreams,
 		Config:     f.Config,
 		HTTPClient: f.HTTPClient,
@@ -150,7 +150,7 @@ func NewCmdAPI(f *cmdutil.Factory, runF func(*ApiOptions) error) *cobra.Command 
 	return cmd
 }
 
-func apiRun(opts *ApiOptions) error {
+func apiRun(opts *APIOptions) error {
 	params, err := parseFields(opts)
 	if err != nil {
 		return err
@@ -242,7 +242,7 @@ func apiRun(opts *ApiOptions) error {
 	return template.End()
 }
 
-func processResponse(resp *http.Response, opts *ApiOptions, headersOutputStream io.Writer, template *export.Template) (err error) {
+func processResponse(resp *http.Response, opts *APIOptions, headersOutputStream io.Writer, template *export.Template) (err error) {
 	if opts.ShowResponseHeaders {
 		fmt.Fprintln(headersOutputStream, resp.Proto, resp.Status)
 		printHeaders(headersOutputStream, resp.Header, opts.IO.ColorEnabled())
@@ -324,7 +324,7 @@ func printHeaders(w io.Writer, headers http.Header, colorize bool) {
 	}
 }
 
-func parseFields(opts *ApiOptions) (map[string]interface{}, error) {
+func parseFields(opts *APIOptions) (map[string]interface{}, error) {
 	params := make(map[string]interface{})
 	for _, f := range opts.RawFields {
 		key, value, err := parseField(f)
@@ -355,7 +355,7 @@ func parseField(f string) (string, string, error) {
 	return f[0:idx], f[idx+1:], nil
 }
 
-func magicFieldValue(v string, opts *ApiOptions) (interface{}, error) {
+func magicFieldValue(v string, opts *APIOptions) (interface{}, error) {
 	if strings.HasPrefix(v, "@") {
 		return opts.IO.ReadUserFile(v[1:])
 	}
