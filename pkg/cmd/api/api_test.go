@@ -30,13 +30,13 @@ func Test_NewCmdApi(t *testing.T) {
 	tests := []struct {
 		name     string
 		cli      string
-		wants    ApiOptions
+		wants    APIOptions
 		wantsErr bool
 	}{
 		{
 			name: "override method",
 			cli:  "pipelines -XDELETE",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "DELETE",
 				RequestMethodPassed: true,
@@ -56,7 +56,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with headers",
 			cli:  "user -H 'accept: text/plain' -i",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -76,7 +76,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with silenced output",
 			cli:  "models --silent",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -96,7 +96,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with request body from file",
 			cli:  "user --input myfile",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -121,7 +121,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with cache",
 			cli:  "user --cache 5m",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -141,7 +141,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with template",
 			cli:  "user -t 'hello {{.name}}'",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -161,7 +161,7 @@ func Test_NewCmdApi(t *testing.T) {
 		{
 			name: "with jq filter",
 			cli:  "user -q .name",
-			wants: ApiOptions{
+			wants: APIOptions{
 				Hostname:            "api.instill.tech",
 				RequestMethod:       "GET",
 				RequestMethodPassed: false,
@@ -196,8 +196,8 @@ func Test_NewCmdApi(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var opts *ApiOptions
-			cmd := NewCmdAPI(f, func(o *ApiOptions) error {
+			var opts *APIOptions
+			cmd := NewCmdAPI(f, func(o *APIOptions) error {
 				opts = o
 				return nil
 			})
@@ -235,7 +235,7 @@ func Test_NewCmdApi(t *testing.T) {
 func Test_apiRun(t *testing.T) {
 	tests := []struct {
 		name         string
-		options      ApiOptions
+		options      APIOptions
 		httpResponse *http.Response
 		err          error
 		stdout       string
@@ -253,7 +253,7 @@ func Test_apiRun(t *testing.T) {
 		},
 		{
 			name: "show response headers",
-			options: ApiOptions{
+			options: APIOptions{
 				ShowResponseHeaders: true,
 			},
 			httpResponse: &http.Response{
@@ -311,7 +311,7 @@ func Test_apiRun(t *testing.T) {
 		},
 		{
 			name: "silent",
-			options: ApiOptions{
+			options: APIOptions{
 				Silent: true,
 			},
 			httpResponse: &http.Response{
@@ -324,7 +324,7 @@ func Test_apiRun(t *testing.T) {
 		},
 		{
 			name: "show response headers even when silent",
-			options: ApiOptions{
+			options: APIOptions{
 				ShowResponseHeaders: true,
 				Silent:              true,
 			},
@@ -341,7 +341,7 @@ func Test_apiRun(t *testing.T) {
 		},
 		{
 			name: "output template",
-			options: ApiOptions{
+			options: APIOptions{
 				Template: `{{.status}}`,
 			},
 			httpResponse: &http.Response{
@@ -355,7 +355,7 @@ func Test_apiRun(t *testing.T) {
 		},
 		{
 			name: "jq filter",
-			options: ApiOptions{
+			options: APIOptions{
 				FilterOutput: `.[].name`,
 			},
 			httpResponse: &http.Response{
@@ -443,7 +443,7 @@ func Test_apiRun_inputFile(t *testing.T) {
 			}
 
 			var bodyBytes []byte
-			options := ApiOptions{
+			options := APIOptions{
 				RequestPath:      "/vdp/v1alpha/hello",
 				RequestInputFile: inputFile,
 				RawFields:        []string{"a=b", "c=d"},
@@ -481,7 +481,7 @@ func Test_apiRun_cache(t *testing.T) {
 	stream, _, stdout, stderr := iostreams.Test()
 
 	requestCount := 0
-	options := ApiOptions{
+	options := APIOptions{
 		IO: stream,
 		HTTPClient: func() (*http.Client, error) {
 			var tr roundTripper = func(req *http.Request) (*http.Response, error) {
@@ -518,7 +518,7 @@ func Test_parseFields(t *testing.T) {
 	stream, stdin, _, _ := iostreams.Test()
 	fmt.Fprint(stdin, "pasted contents")
 
-	opts := ApiOptions{
+	opts := APIOptions{
 		IO: stream,
 		RawFields: []string{
 			"robot=Hubot",
@@ -563,7 +563,7 @@ func Test_magicFieldValue(t *testing.T) {
 
 	type args struct {
 		v    string
-		opts *ApiOptions
+		opts *APIOptions
 	}
 	tests := []struct {
 		name    string
@@ -599,7 +599,7 @@ func Test_magicFieldValue(t *testing.T) {
 			name: "file",
 			args: args{
 				v:    "@" + f.Name(),
-				opts: &ApiOptions{IO: stream},
+				opts: &APIOptions{IO: stream},
 			},
 			want:    []byte("file contents"),
 			wantErr: false,
@@ -608,7 +608,7 @@ func Test_magicFieldValue(t *testing.T) {
 			name: "file error",
 			args: args{
 				v:    "@",
-				opts: &ApiOptions{IO: stream},
+				opts: &APIOptions{IO: stream},
 			},
 			want:    nil,
 			wantErr: true,
@@ -676,7 +676,7 @@ func Test_processResponse_template(t *testing.T) {
 		]`)),
 	}
 
-	opts := ApiOptions{
+	opts := APIOptions{
 		IO:       stream,
 		Template: `{{range .}}{{.title}} ({{.labels | pluck "name" | join ", " }}){{"\n"}}{{end}}`,
 	}
