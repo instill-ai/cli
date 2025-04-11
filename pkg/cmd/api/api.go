@@ -297,7 +297,7 @@ func processResponse(resp *http.Response, opts *APIOptions, headersOutputStream 
 
 	if serverError != "" {
 		fmt.Fprintf(opts.IO.ErrOut, "inst: %s\n", serverError)
-		err = cmdutil.SilentError
+		err = cmdutil.ErrSilent
 		return
 	}
 
