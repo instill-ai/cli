@@ -422,14 +422,16 @@ func parseErrorResponse(r io.Reader, statusCode int) (io.Reader, string, error) 
 		if len(rawErr) == 0 {
 			continue
 		}
-		if rawErr[0] == '{' {
+
+		switch rawErr[0] {
+		case '{':
 			var objectError errorMessage
 			err := json.Unmarshal(rawErr, &objectError)
 			if err != nil {
 				return r, "", err
 			}
 			errors = append(errors, objectError.Message)
-		} else if rawErr[0] == '"' {
+		case '"':
 			var stringError string
 			err := json.Unmarshal(rawErr, &stringError)
 			if err != nil {
