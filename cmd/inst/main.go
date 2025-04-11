@@ -123,7 +123,7 @@ func mainRun() exitCode {
 	rootCmd.SetArgs(expandedArgs)
 
 	if cmd, err := rootCmd.ExecuteC(); err != nil {
-		if err == cmdutil.SilentError {
+		if err == cmdutil.ErrSilent {
 			return exitError
 		} else if cmdutil.IsUserCancellation(err) {
 			if errors.Is(err, terminal.InterruptErr) {
