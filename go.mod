@@ -1,8 +1,8 @@
 module github.com/instill-ai/cli
 
-go 1.22
+go 1.24
 
-toolchain go1.22.2
+toolchain go1.24.1
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7

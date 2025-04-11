@@ -29,32 +29,32 @@ type cmdWithStderr struct {
 
 func (c cmdWithStderr) Output() ([]byte, error) {
 	if os.Getenv("DEBUG") != "" {
-		_ = printArgs(os.Stderr, c.Cmd.Args)
+		_ = printArgs(os.Stderr, c.Args)
 	}
-	if c.Cmd.Stderr != nil {
-		return c.Cmd.Output()
+	if c.Stderr != nil {
+		return c.Output()
 	}
 	errStream := &bytes.Buffer{}
-	c.Cmd.Stderr = errStream
-	out, err := c.Cmd.Output()
+	c.Stderr = errStream
+	out, err := c.Output()
 	if err != nil {
-		err = &CmdError{errStream, c.Cmd.Args, err}
+		err = &CmdError{errStream, c.Args, err}
 	}
 	return out, err
 }
 
 func (c cmdWithStderr) Run() error {
 	if os.Getenv("DEBUG") != "" {
-		_ = printArgs(os.Stderr, c.Cmd.Args)
+		_ = printArgs(os.Stderr, c.Args)
 	}
-	if c.Cmd.Stderr != nil {
-		return c.Cmd.Run()
+	if c.Stderr != nil {
+		return c.Run()
 	}
 	errStream := &bytes.Buffer{}
-	c.Cmd.Stderr = errStream
-	err := c.Cmd.Run()
+	c.Stderr = errStream
+	err := c.Run()
 	if err != nil {
-		err = &CmdError{errStream, c.Cmd.Args, err}
+		err = &CmdError{errStream, c.Args, err}
 	}
 	return err
 }

@@ -251,8 +251,8 @@ func Test_ConfigDir(t *testing.T) {
 func Test_configFile_Write_toDisk(t *testing.T) {
 	configDir := filepath.Join(t.TempDir(), ".config", "instill")
 	_ = os.MkdirAll(configDir, 0755)
-	os.Setenv(INSTILL_CONFIG_DIR, configDir)
-	defer os.Unsetenv(INSTILL_CONFIG_DIR)
+	os.Setenv(InstillConfigDir, configDir)
+	defer os.Unsetenv(InstillConfigDir)
 
 	cfg := NewFromString(`pager: less`)
 	err := cfg.Write()
