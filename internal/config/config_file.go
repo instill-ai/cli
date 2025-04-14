@@ -180,20 +180,27 @@ var ReadConfigFile = func(filename string) ([]byte, error) {
 	return data, nil
 }
 
-var WriteConfigFile = func(filename string, data []byte) error {
-	err := os.MkdirAll(filepath.Dir(filename), 0771)
+var WriteConfigFile = func(filename string, data []byte) (err error) {
+	err = os.MkdirAll(filepath.Dir(filename), 0771)
 	if err != nil {
-		return pathError(err)
+		err = pathError(err)
+		return
 	}
 
-	cfgFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // cargo coded from setup
+	var cfgFile *os.File
+	cfgFile, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // cargo coded from setup
 	if err != nil {
-		return err
+		return
 	}
-	defer cfgFile.Close()
+	defer func() {
+		if cleanupErr := cfgFile.Close(); cleanupErr != nil {
+			err = errors.Join(err, cleanupErr)
+		}
+	}()
 
 	_, err = cfgFile.Write(data)
-	return err
+
+	return
 }
 
 var BackupConfigFile = func(filename string) error {
