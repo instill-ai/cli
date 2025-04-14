@@ -84,7 +84,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 
 	// in case there's no hosts.yml config, create one with the default instance
 	fs, err := os.Stat(config.HostsConfigFile())
-	if !(err == nil && !fs.IsDir()) {
+	if err != nil || fs.IsDir() {
 		// get the (hardcoded) default cloud instance
 		host = oauth2.HostConfigInstillCloud()
 		err = cfg.SaveTyped(host)
@@ -155,7 +155,7 @@ func loginRun(f *cmdutil.Factory, opts *LoginOptions) error {
 				--oauth2 HOSTNAME \
 				--client-id CLIENT_ID \
 				--client-secret CLIENT_SECRET`, host.APIHostname, host.APIHostname)
-		return fmt.Errorf(e)
+		return fmt.Errorf("%s", e)
 	}
 
 	if host.RefreshToken != "" && opts.Interactive {

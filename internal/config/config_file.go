@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	INSTILL_CONFIG_DIR = "INSTILL_CONFIG_DIR"
-	XDG_CONFIG_HOME    = "XDG_CONFIG_HOME"
-	XDG_STATE_HOME     = "XDG_STATE_HOME"
-	XDG_DATA_HOME      = "XDG_DATA_HOME"
-	APP_DATA           = "AppData"
-	LOCAL_APP_DATA     = "LocalAppData"
+	InstillConfigDir = "INSTILL_CONFIG_DIR"
+	xdgConfigHome    = "XDG_CONFIG_HOME"
+	xdgStateHome     = "XDG_STATE_HOME"
+	xdgDataHome      = "XDG_DATA_HOME"
+	appData          = "AppData"
+	localAppData     = "LocalAppData"
 )
 
 // ConfigDir returns config dirpath with precedence:
@@ -28,11 +28,11 @@ const (
 // 4. HOME
 func ConfigDir() string {
 	var path string
-	if a := os.Getenv(INSTILL_CONFIG_DIR); a != "" {
+	if a := os.Getenv(InstillConfigDir); a != "" {
 		path = a
-	} else if b := os.Getenv(XDG_CONFIG_HOME); b != "" {
+	} else if b := os.Getenv(xdgConfigHome); b != "" {
 		path = filepath.Join(b, "instill")
-	} else if c := os.Getenv(APP_DATA); runtime.GOOS == "windows" && c != "" {
+	} else if c := os.Getenv(appData); runtime.GOOS == "windows" && c != "" {
 		path = filepath.Join(c, "Instill CLI")
 	} else {
 		d, _ := os.UserHomeDir()
@@ -41,7 +41,7 @@ func ConfigDir() string {
 
 	// If the path does not exist and the INSTILL_CONFIG_DIR flag is not set try
 	// migrating config from default paths.
-	if !dirExists(path) && os.Getenv(INSTILL_CONFIG_DIR) == "" {
+	if !dirExists(path) && os.Getenv(InstillConfigDir) == "" {
 		_ = autoMigrateConfigDir(path)
 	}
 
@@ -54,9 +54,9 @@ func ConfigDir() string {
 // 3. HOME
 func StateDir() string {
 	var path string
-	if a := os.Getenv(XDG_STATE_HOME); a != "" {
+	if a := os.Getenv(xdgStateHome); a != "" {
 		path = filepath.Join(a, "instill")
-	} else if b := os.Getenv(LOCAL_APP_DATA); runtime.GOOS == "windows" && b != "" {
+	} else if b := os.Getenv(localAppData); runtime.GOOS == "windows" && b != "" {
 		path = filepath.Join(b, "Instill CLI")
 	} else {
 		c, _ := os.UserHomeDir()
@@ -77,9 +77,9 @@ func StateDir() string {
 // 3. HOME
 func DataDir() string {
 	var path string
-	if a := os.Getenv(XDG_DATA_HOME); a != "" {
+	if a := os.Getenv(xdgDataHome); a != "" {
 		path = filepath.Join(a, "instill")
-	} else if b := os.Getenv(LOCAL_APP_DATA); runtime.GOOS == "windows" && b != "" {
+	} else if b := os.Getenv(localAppData); runtime.GOOS == "windows" && b != "" {
 		path = filepath.Join(b, "Instill CLI")
 	} else {
 		c, _ := os.UserHomeDir()
@@ -180,20 +180,27 @@ var ReadConfigFile = func(filename string) ([]byte, error) {
 	return data, nil
 }
 
-var WriteConfigFile = func(filename string, data []byte) error {
-	err := os.MkdirAll(filepath.Dir(filename), 0771)
+var WriteConfigFile = func(filename string, data []byte) (err error) {
+	err = os.MkdirAll(filepath.Dir(filename), 0771)
 	if err != nil {
-		return pathError(err)
+		err = pathError(err)
+		return
 	}
 
-	cfgFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // cargo coded from setup
+	var cfgFile *os.File
+	cfgFile, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600) // cargo coded from setup
 	if err != nil {
-		return err
+		return
 	}
-	defer cfgFile.Close()
+	defer func() {
+		if cleanupErr := cfgFile.Close(); cleanupErr != nil {
+			err = errors.Join(err, cleanupErr)
+		}
+	}()
 
 	_, err = cfgFile.Write(data)
-	return err
+
+	return
 }
 
 var BackupConfigFile = func(filename string) error {

@@ -144,22 +144,26 @@ func (fs *fileStorage) read(key string) (*http.Response, error) {
 	return res, err
 }
 
-func (fs *fileStorage) store(key string, res *http.Response) error {
+func (fs *fileStorage) store(key string, res *http.Response) (err error) {
 	cacheFile := fs.filePath(key)
 
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
 
-	err := os.MkdirAll(filepath.Dir(cacheFile), 0755)
-	if err != nil {
-		return err
+	if err = os.MkdirAll(filepath.Dir(cacheFile), 0755); err != nil {
+		return
 	}
 
-	f, err := os.OpenFile(cacheFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	var f *os.File
+	f, err = os.OpenFile(cacheFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		return err
+		return
 	}
-	defer f.Close()
+	defer func() {
+		if cleanupErr := f.Close(); cleanupErr != nil {
+			err = errors.Join(err, cleanupErr)
+		}
+	}()
 
 	var origBody io.ReadCloser
 	if res.Body != nil {
@@ -170,5 +174,6 @@ func (fs *fileStorage) store(key string, res *http.Response) error {
 	if origBody != nil {
 		res.Body = origBody
 	}
-	return err
+
+	return
 }

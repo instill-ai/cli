@@ -67,7 +67,7 @@ func statusRun(opts *StatusOptions) error {
 	if len(hostnames) == 0 {
 		fmt.Fprintf(stderr,
 			"You are not logged into any Instill Core/Cloud instance. Run %s to authenticate.\n", cs.Bold("inst auth login"))
-		return cmdutil.SilentError
+		return cmdutil.ErrSilent
 	}
 
 	var failed bool
@@ -95,7 +95,7 @@ func statusRun(opts *StatusOptions) error {
 	if !isHostnameFound {
 		fmt.Fprintf(stderr,
 			"Hostname %q not found among authenticated Instill Core/Cloud hosts\n", opts.Hostname)
-		return cmdutil.SilentError
+		return cmdutil.ErrSilent
 	}
 
 	for _, hostname := range hostnames {
@@ -110,7 +110,7 @@ func statusRun(opts *StatusOptions) error {
 	}
 
 	if failed {
-		return cmdutil.SilentError
+		return cmdutil.ErrSilent
 	}
 
 	return nil
