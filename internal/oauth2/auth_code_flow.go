@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"os"
@@ -227,7 +228,9 @@ func handleCallback(auth *Authenticator, serverHost string, serverPort int, stat
 		code := r.URL.Query().Get("code")
 
 		if verbose := os.Getenv("DEBUG"); strings.Contains(verbose, "oauth") {
-			fmt.Printf("[DEBUG] Exchange code:\n\t%s\n", code)
+			sanitizedCode := strings.ReplaceAll(html.EscapeString(code), "\n", "")
+			sanitizedCode = strings.ReplaceAll(sanitizedCode, "\r", "")
+			fmt.Printf("[DEBUG] Exchange code:\n\t%s\n", sanitizedCode)
 		}
 
 		// Exchange an authorization code for a token.
