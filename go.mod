@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/glamour v0.6.1-0.20230822193950-b8953ce4af51
 	github.com/cli/browser v1.1.0
 	github.com/cli/safeexec v1.0.1
-	github.com/coreos/go-oidc/v3 v3.14.0
+	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/creack/pty v1.1.24
 	github.com/dotenv-org/godotenvvault v0.6.0
 	github.com/go-playground/validator/v10 v10.15.5
