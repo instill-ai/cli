@@ -65,8 +65,8 @@ github.com/go-playground/universal-translator v0.18.1 h1:Bcnm0ZwsGyWbCzImXv+pAJn
 github.com/go-playground/universal-translator v0.18.1/go.mod h1:xekY+UJKNuX9WP91TpwSH2VMlDf28Uj24BCp08ZFTUY=
 github.com/go-playground/validator/v10 v10.15.5 h1:LEBecTWb/1j5TNY1YYG2RcOUN3R7NLylN+x8TTueE24=
 github.com/go-playground/validator/v10 v10.15.5/go.mod h1:9iXMNT7sEkjXb0I+enO7QXmzG6QCsPWY4zveKFVRSyU=
-github.com/go-viper/mapstructure/v2 v2.2.1 h1:ZAaOCxANMuZx5RCeg0mBdEZk7DZasvvZIxtHqx8aGss=
-github.com/go-viper/mapstructure/v2 v2.2.1/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
+github.com/go-viper/mapstructure/v2 v2.3.0 h1:27XbWsHIqhbdR5TIC911OfYvgSaW93HM+dX7970Q7jk=
+github.com/go-viper/mapstructure/v2 v2.3.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
 github.com/gobuffalo/httptest v1.5.2 h1:GpGy520SfY1QEmyPvaqmznTpG4gEQqQ82HtHqyNEreM=
 github.com/gobuffalo/httptest v1.5.2/go.mod h1:FA23yjsWLGj92mVV74Qtc8eqluc11VqcWr8/C1vxt4g=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=
@@ -162,8 +162,8 @@ github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e h1:4tUrC7x4YWR
 github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e/go.mod h1:XWLxVK4un/iuIcrw+6lCeanbF3NZwO5k6RdLeu/loQk=
 github.com/ory/pop/v6 v6.3.0 h1:joFHw2Z3X0MVmbW+HXDcIafkaSjmqAUwNonwcTf63Gw=
 github.com/ory/pop/v6 v6.3.0/go.mod h1:geBTmKYA8PM9GAYzUNbAqeEToPwyTafEW2JVSmntJdQ=
-github.com/ory/x v0.0.723 h1:jM1FjFuwsju4SBLo1TEN9nBDhZnSnkqA+rZ6rFMH+Yw=
-github.com/ory/x v0.0.723/go.mod h1:f0J8wsdw6FE150MevhZ4dl5YCoFSiBDiE8I5bzESyQA=
+github.com/ory/x v0.0.725 h1:s4tGq1wx8ppcGMU3uME8IKdrwmvj1p5VenmUNRo3wT8=
+github.com/ory/x v0.0.725/go.mod h1:qdUK3Sp4K4nRbYJG0sEnFO1tDLN/Ct53G+ymre0JhCU=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
