@@ -15,6 +15,7 @@ import (
 	"github.com/instill-ai/cli/internal/config"
 	"github.com/instill-ai/cli/pkg/cmd/factory"
 	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/iostreams"
 )
 
 // ExecDep is an interface for executing commands
@@ -71,7 +72,7 @@ func New(f *cmdutil.Factory) *cobra.Command {
 					if currentVersion, err := execCmd(nil, "bash", "-c", "git name-rev --tags --name-only $(git rev-parse HEAD)"); err == nil {
 						currentVersion = strings.Trim(currentVersion, "\n")
 						if currentVersion != "undefined" {
-							if newRelease, err := checkForUpdate(nil, filepath.Join(config.StateDir(), "instill-core.yml"), "instill-ai/instill-core", currentVersion); err != nil {
+							if newRelease, err := checkForUpdate(filepath.Join(config.StateDir(), "instill-core.yml"), "instill-ai/instill-core", currentVersion); err != nil {
 								return fmt.Errorf("ERROR: cannot check for the update Instill Core, %w:\n%s", err, currentVersion)
 							} else if newRelease != nil {
 								cmdFactory := factory.New(build.Version)
@@ -113,4 +114,16 @@ func execCmd(execDep ExecDep, cmd string, params ...string) (string, error) {
 	out, err := c.CombinedOutput()
 	outStr := strings.Trim(string(out[:]), " ")
 	return outStr, err
+}
+
+func execCmdStream(execDep ExecDep, ioStreams *iostreams.IOStreams, cmd string, params ...string) error {
+	var c *exec.Cmd
+	if execDep != nil {
+		c = execDep.Command(cmd, params...)
+	} else {
+		c = exec.Command(cmd, params...)
+	}
+	c.Stdout = ioStreams.Out
+	c.Stderr = ioStreams.ErrOut
+	return c.Run()
 }

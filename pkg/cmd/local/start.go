@@ -74,18 +74,18 @@ func runStart(opts *StartOptions) error {
 		if err != nil {
 			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
 		}
+		p(opts.IO, "")
 		p(opts.IO, "Starting Instill Core...")
-		out, err := execCmd(opts.Exec, "make", "start")
+		p(opts.IO, "")
+		err := execCmdStream(opts.Exec, opts.IO, "make", "start")
 		if err != nil {
 			return fmt.Errorf("ERROR: when starting, %w", err)
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: when starting Instill Core, %w\n%s", err, out)
 		}
 	} else {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
+	p(opts.IO, "")
 	p(opts.IO, "Instill Core started")
 
 	return nil

@@ -1,13 +1,10 @@
-# Instill CLI
+# CLI for Instill Core
 
 [![Tests](https://github.com/instill-ai/cli/actions/workflows/go.yml/badge.svg?branch=main&event=push)](https://github.com/instill-ai/cli/actions/workflows/go.yml)
 [![GitHub commits since latest release (by SemVer including pre-releases)](https://img.shields.io/github/release/instill-ai/cli.svg?include_prereleases&label=Release&color=lightblue)](https://github.com/instill-ai/cli/releases/latest)
 [![License](https://img.shields.io/github/license/instill-ai/cli.svg?color=lightblue&label=License)](./License.md)
 
-
-📺 `inst` is a command line tool for **[Instill Core](https://github.com/instill-ai/community#instill-core)/[Cloud](https://github.com/instill-ai/community#instill-cloud)**.
-
-☁️ **Instill Cloud** offers fully managed **Instill Core**. Please [sign up](https://console.instill.tech) to try out for free.
+`inst` is a command line tool for **[Instill Core](https://github.com/instill-ai/instill-core).
 
 ## Prerequisites
 
@@ -16,41 +13,43 @@
 
 ## Installation
 
-`inst` is available via [Homebrew](https://brew.sh) and as a downloadable binary from the [releases page][].
+`inst` is available via [Homebrew](https://brew.sh) and as a downloadable binary from the [releases page](https://github.com/instill-ai/cli/releases).
 
 To install:
-```
-$ brew install instill-ai/tap/inst
+
+```shell
+brew install instill-ai/tap/inst
 ```
 
 To uninstall:
-```
-$ brew uninstall inst
+
+```shell
+brew uninstall inst
 ```
 
 To upgrade:
-```
-$ brew upgrade inst
+
+```shell
+brew upgrade inst
 ```
 
 ## Usage examples
 
-```bash
-
+```shell
 # Check all available commands
-$ inst help
+inst help
 
 # Deploy a local Instill Core
-$ inst local deploy
+inst local deploy
 
 # Undeploy a local Instill Core
-$ inst local undeploy
+inst local undeploy
 
-# Authorisation for an instance (default to Instill Cloud https://api.instill.tech)
-$ inst auth login
+# Authorization for an instance (default to managed Instill Core https://api.instill-ai.com)
+inst auth login
 
 # REST API request
-$ inst api vdp/alpha1/pipelines
+inst api vdp/alpha1/pipelines
 ```
 
 ## Documentation
