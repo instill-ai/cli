@@ -72,11 +72,14 @@ func runUndeploy(opts *UndeployOptions) error {
 		if err != nil {
 			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
 		}
+		p(opts.IO, "")
 		p(opts.IO, "Tearing down Instill Core...")
+		p(opts.IO, "")
 		_, err = os.Stat(filepath.Join(projDirPath, "Makefile"))
 		if !os.IsNotExist(err) {
-			if out, err := execCmd(opts.Exec, "bash", "-c", "make down"); err != nil {
-				fmt.Println(fmt.Errorf("ERROR: when tearing down Instill Core, %w\n%s, continue to tear down", err, out))
+			err := execCmdStream(opts.Exec, opts.IO, "bash", "-c", "make down")
+			if err != nil {
+				return fmt.Errorf("ERROR: when tearing down Instill Core, %w", err)
 			}
 		}
 	}

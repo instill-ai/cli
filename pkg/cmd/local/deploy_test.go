@@ -72,7 +72,7 @@ func TestLocalDeployCmd(t *testing.T) {
 	}
 }
 
-func checkForUpdateMock(ExecDep, string, string, string) (*releaseInfo, error) {
+func checkForUpdateMock(string, string, string) (*releaseInfo, error) {
 	return &releaseInfo{}, nil
 }
 

@@ -76,18 +76,18 @@ func runStop(opts *StopOptions) error {
 		if err != nil {
 			return fmt.Errorf("ERROR: cannot open the directory: %w", err)
 		}
+		p(opts.IO, "")
 		p(opts.IO, "Stopping Instill Core...")
-		out, err := execCmd(opts.Exec, "make", "stop")
+		p(opts.IO, "")
+		err := execCmdStream(opts.Exec, opts.IO, "make", "stop")
 		if err != nil {
 			return fmt.Errorf("ERROR: when stopping, %w", err)
-		}
-		if err != nil {
-			return fmt.Errorf("ERROR: when stopping Instill Core, %w\n%s", err, out)
 		}
 	} else {
 		return fmt.Errorf("ERROR: %w", err)
 	}
 
+	p(opts.IO, "")
 	p(opts.IO, "Instill Core stopped")
 
 	return nil
