@@ -29,7 +29,7 @@ require (
 	github.com/ory/graceful v0.1.3
 	github.com/ory/x v0.0.729
 	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.6
+	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/sys v0.31.0
