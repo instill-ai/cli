@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/instill-ai/cli/pkg/cmdutil"
+	"github.com/instill-ai/cli/pkg/markdown"
 	"github.com/instill-ai/cli/pkg/text"
 )
 
@@ -43,6 +44,11 @@ func rootFlagErrorFunc(cmd *cobra.Command, err error) error {
 }
 
 var hasFailed bool
+
+type helpEntry struct {
+	Title string
+	Body  string
+}
 
 // HasFailed signals that the main process should exit with non-zero status
 func HasFailed() bool {
@@ -81,7 +87,7 @@ func isRootCmd(command *cobra.Command) bool {
 }
 
 func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
-	cs := f.IOStreams.ColorScheme()
+	io := f.IOStreams
 
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
@@ -130,57 +136,103 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 			"\n\nFor more information about output formatting flags, see `inst help formatting`."
 	}
 
-	helpEntries := []helpEntry{}
+	entries := []helpEntry{}
 	if longText != "" {
-		helpEntries = append(helpEntries, helpEntry{"", longText})
+		entries = append(entries, helpEntry{"", longText})
 	}
-	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
+	entries = append(entries, helpEntry{"USAGE", command.UseLine()})
 	if len(coreCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"CORE COMMANDS", strings.Join(coreCommands, "\n")})
+		entries = append(entries, helpEntry{"CORE COMMANDS", strings.Join(coreCommands, "\n")})
 	}
 	if len(actionsCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"ACTIONS COMMANDS", strings.Join(actionsCommands, "\n")})
+		entries = append(entries, helpEntry{"ACTIONS COMMANDS", strings.Join(actionsCommands, "\n")})
 	}
 	if len(additionalCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"ADDITIONAL COMMANDS", strings.Join(additionalCommands, "\n")})
+		entries = append(entries, helpEntry{"ADDITIONAL COMMANDS", strings.Join(additionalCommands, "\n")})
 	}
 
 	flagUsages := command.LocalFlags().FlagUsages()
 	if flagUsages != "" {
-		helpEntries = append(helpEntries, helpEntry{"FLAGS", dedent(flagUsages)})
+		entries = append(entries, helpEntry{"FLAGS", dedent(flagUsages)})
 	}
 	inheritedFlagUsages := command.InheritedFlags().FlagUsages()
 	if inheritedFlagUsages != "" {
-		helpEntries = append(helpEntries, helpEntry{"INHERITED FLAGS", dedent(inheritedFlagUsages)})
+		entries = append(entries, helpEntry{"INHERITED FLAGS", dedent(inheritedFlagUsages)})
 	}
 	if _, ok := command.Annotations["help:arguments"]; ok {
-		helpEntries = append(helpEntries, helpEntry{"ARGUMENTS", command.Annotations["help:arguments"]})
+		entries = append(entries, helpEntry{"ARGUMENTS", command.Annotations["help:arguments"]})
 	}
 	if command.Example != "" {
-		helpEntries = append(helpEntries, helpEntry{"EXAMPLES", command.Example})
+		entries = append(entries, helpEntry{"EXAMPLES", command.Example})
 	}
 	if _, ok := command.Annotations["help:environment"]; ok {
-		helpEntries = append(helpEntries, helpEntry{"ENVIRONMENT VARIABLES", command.Annotations["help:environment"]})
+		entries = append(entries, helpEntry{"ENVIRONMENT VARIABLES", command.Annotations["help:environment"]})
 	}
-	helpEntries = append(helpEntries, helpEntry{"LEARN MORE", `
+	entries = append(entries, helpEntry{"LEARN MORE", `
 Use 'inst <command> <subcommand> --help' for more information about a command.
 Read the manual at https://www.instill.tech/docs`})
 	if _, ok := command.Annotations["help:feedback"]; ok {
-		helpEntries = append(helpEntries, helpEntry{"FEEDBACK", command.Annotations["help:feedback"]})
+		entries = append(entries, helpEntry{"FEEDBACK", command.Annotations["help:feedback"]})
 	}
 
+	// Build markdown for rendering
+	md := buildHelpMarkdown(entries)
+
+	// Render with glamour when output is TTY for better readability
+	if io.IsStdoutTTY() {
+		wrapWidth := io.TerminalWidth()
+		style := markdown.GetStyle(io.DetectTerminalTheme())
+		rendered, err := markdown.RenderWithWrap(md, style, wrapWidth)
+		if err == nil {
+			_ = io.StartPager()
+			defer io.StopPager()
+			fmt.Fprint(io.Out, rendered)
+			return
+		}
+		// Fall back to plain output on render error
+	}
+
+	// Plain output when not TTY or on render error
 	out := command.OutOrStdout()
-	for _, e := range helpEntries {
+	cs := io.ColorScheme()
+	for _, e := range entries {
 		if e.Title != "" {
-			// If there is a title, add indentation to each line in the body
 			fmt.Fprintln(out, cs.Bold(e.Title))
 			fmt.Fprintln(out, text.Indent(strings.Trim(e.Body, "\r\n"), "  "))
 		} else {
-			// If there is no title print the body as is
 			fmt.Fprintln(out, e.Body)
 		}
 		fmt.Fprintln(out)
 	}
+}
+
+// buildHelpMarkdown converts help entries to markdown format for glamour rendering.
+func buildHelpMarkdown(entries []helpEntry) string {
+	codeBlockSections := map[string]bool{
+		"USAGE": true, "FLAGS": true, "INHERITED FLAGS": true,
+		"EXAMPLES": true, "ARGUMENTS": true,
+		"ENVIRONMENT VARIABLES": true, "LEARN MORE": true, "FEEDBACK": true,
+	}
+	var buf strings.Builder
+	for _, e := range entries {
+		if e.Title != "" {
+			buf.WriteString("## ")
+			buf.WriteString(e.Title)
+			buf.WriteString("\n\n")
+			if codeBlockSections[e.Title] {
+				buf.WriteString("```\n")
+			}
+			buf.WriteString(strings.Trim(e.Body, "\r\n"))
+			if codeBlockSections[e.Title] {
+				buf.WriteString("\n```")
+			}
+			buf.WriteString("\n\n")
+		} else {
+			buf.WriteString(e.Body)
+			buf.WriteString("\n\n")
+		}
+	}
+	return buf.String()
 }
 
 // rpad adds padding to the right of a string.
